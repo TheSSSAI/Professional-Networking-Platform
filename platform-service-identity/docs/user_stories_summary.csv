@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"12","84","8","3","0","[""API Gateway Foundation"",""Authentication & Authorization"",""Core Data Resolvers"",""Performance & Scalability"",""Developer Operations"",""Real-time Communication""]","4","[""AWS Account & IAM Roles"",""Backend gRPC microservice contracts (Protobufs)"",""Configured Redis and PostgreSQL infrastructure""]"

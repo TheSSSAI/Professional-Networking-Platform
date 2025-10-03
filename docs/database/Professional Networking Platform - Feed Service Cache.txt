@@ -1,0 +1,31 @@
+# --- UserFeed Entity ---
+# Description: Stores a capped, sorted list of post IDs for a user's feed (fan-out-on-write).
+# Key format: feed:{userId}
+# Type: Sorted Set (ZSET)
+# Member: postId, Score: timestamp
+
+# Example: Add a new post (ID 9001) to user 123's feed with a Unix timestamp as the score.
+# This command is executed for each follower of the post's author.
+ZADD feed:123 1678886400 9001
+
+# Example: After adding, trim the feed to keep only the latest ~1000 posts.
+# This removes the oldest entries (those with the lowest scores) if the set size exceeds 1000.
+ZREMRANGEBYRANK feed:123 0 -1001
+
+# Example: Retrieve the latest 50 post IDs for user 123's feed.
+# ZREVRANGE gets a range from the set, ordered from highest score (newest) to lowest (oldest).
+ZREVRANGE feed:123 0 49
+
+
+# --- PostCache Entity ---
+# Description: Read-aside cache for denormalized post objects.
+# Key format: post:{postId}
+# Type: String (JSON)
+
+# Example: Cache a post object (ID 9001) with a 24-hour TTL (86400 seconds).
+# This is done on-demand when a post is needed for a feed and is not already in the cache.
+SET post:9001 "{\"postId\":9001,\"authorId\":456,\"authorName\":\"Jane Doe\",\"content\":\"Excited to share our new product launch! #innovation\",\"timestamp\":1678886400}" EX 86400
+
+# Example: Retrieve the cached post object for post 9001.
+# The application layer will parse this JSON string.
+GET post:9001

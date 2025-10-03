@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor "Client Application (SPA)" as ClientApplicationSPA
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityAccessService
+
+    activate APIGateway
+    ClientApplicationSPA->>APIGateway: 1. Executes GraphQL 'login' mutation with user credentials.
+    APIGateway-->>ClientApplicationSPA: Returns GraphQL response with JWT tokens or an error.
+    activate IdentityAccessService
+    APIGateway->>IdentityAccessService: 2. Invokes 'login' method via gRPC.
+    IdentityAccessService-->>APIGateway: Returns LoginResponseDto with tokens or a gRPC error status.
+    IdentityAccessService->>IdentityAccessService: 2.1. 1. Fetches user record from PostgreSQL by email.
+    IdentityAccessService-->>IdentityAccessService: Returns user entity or null.
+    IdentityAccessService->>IdentityAccessService: 2.2. 2. Verifies user status is 'ACTIVE' and 'VERIFIED'.
+    IdentityAccessService->>IdentityAccessService: 2.3. 3. Compares provided password with stored hash using bcrypt.
+    IdentityAccessService-->>IdentityAccessService: Returns boolean (match or mismatch).
+    IdentityAccessService->>IdentityAccessService: 2.4. 4. Generates signed JWT access and refresh tokens.
+    IdentityAccessService-->>IdentityAccessService: Returns accessToken and refreshToken strings.
+    IdentityAccessService->>IdentityAccessService: 2.5. 5. Logs successful login event for security audit trail.
+    ClientApplicationSPA->>ClientApplicationSPA: 3. Securely stores tokens for session management.
+
+    note over IdentityAccessService: Password validation is performed using bcrypt.compare() to mitigate timing attacks. Failed login ...
+    note over ClientApplicationSPA: Client must not store JWT tokens in client-side storage like localStorage. The server should set ...
+
+    deactivate IdentityAccessService
+    deactivate APIGateway

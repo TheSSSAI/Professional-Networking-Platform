@@ -1,0 +1,3 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Identity & Access Management Service","Critical","High","Medium","[""Unit"",""Integration"",""Security"",""Performance"",""E2E""]","95","98","100","95","8","80","75","0.98","High","Medium","Excellent","Good"
+"User Profile Service","High","Medium","High","[""Unit"",""Integration"",""E2E"",""Security"",""Accessibility""]","90","90","85","90","16","60","60","0.9","High","Medium","Excellent","Good"

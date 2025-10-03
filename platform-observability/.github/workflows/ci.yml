@@ -1,0 +1,62 @@
+# Continuous Integration Workflow
+#
+# Triggered on: Pull requests to the `main` branch.
+#
+# Purpose: To validate the quality and correctness of observability configurations before they are merged.
+# This workflow acts as a critical quality gate.
+#
+# Jobs:
+#   validate:
+#     1. Checks out the code.
+#     2. Sets up Node.js for running prettier.
+#     3. Installs development dependencies.
+#     4. Checks code formatting for YAML and JSON files.
+#     5. Installs Prometheus `promtool` and `amtool` for validation.
+#     6. Executes the validation script to check Prometheus and Alertmanager configurations.
+
+name: CI - Validate Observability Configs
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.yml'
+      - '**.json'
+      - '**.sh'
+
+jobs:
+  validate:
+    name: Validate Configurations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check code formatting
+        run: npm run format:check
+
+      - name: Download Prometheus tools
+        run: |
+          PROMETHEUS_VERSION="2.47.2"
+          wget https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
+          tar xvfz prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz
+          sudo mv prometheus-${PROMETHEUS_VERSION}.linux-amd64/promtool /usr/local/bin/
+          sudo mv prometheus-${PROMETHEUS_VERSION}.linux-amd64/amtool /usr/local/bin/
+          rm -rf prometheus-${PROMETHEUS_VERSION}.linux-amd64*
+          
+      - name: Make validation script executable
+        run: chmod +x ./scripts/validate-configs.sh
+
+      - name: Run configuration validation script
+        run: ./scripts/validate-configs.sh

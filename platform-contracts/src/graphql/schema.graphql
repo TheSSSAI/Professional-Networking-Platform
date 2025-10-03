@@ -1,0 +1,243 @@
+"""
+This is the root schema file for the Platform's client-facing GraphQL API.
+It defines the entry points for all queries, mutations, and subscriptions, and
+imports all other types from their respective domain-specific files.
+
+This schema is designed following GraphQL best practices:
+1.  Mutations accept a single, non-null `input` object for forward compatibility.
+2.  Mutations return a payload object, which can include the updated entity and any related data or errors.
+3.  A custom directive `@auth` is defined to declaratively mark fields that require authentication. The API Gateway is responsible for enforcing this.
+"""
+
+# Import all types, inputs, and common definitions from lower-level files.
+# The `#import` syntax is a convention used by tools like `graphql-tools` to stitch the schema.
+# import * from "./types/user.graphql"
+# import * from "./types/post.graphql"
+# import * from "./types/comment.graphql"
+# import * from "./types/message.graphql"
+# import * from "./inputs/userInput.graphql"
+# import * from "./inputs/postInput.graphql"
+# import * from "./common.graphql"
+
+"""
+Custom directive to specify that a field or mutation requires an authenticated user session.
+The API Gateway's authentication layer will enforce this.
+"""
+directive @auth on FIELD_DEFINITION
+
+"""
+Defines all the read operations (queries) available on the platform.
+"""
+type Query {
+  "Fetches the profile of the currently authenticated user."
+  me: UserProfile! @auth
+
+  """
+  Fetches a user's profile by their unique ID or custom URL slug.
+  Respects the user's privacy settings.
+  """
+  userProfile(id: ID, customUrl: String): UserProfile @auth
+
+  "Fetches the currently authenticated user's list of first-degree connections with pagination and sorting."
+  myConnections(
+    pagination: PaginationInput
+    sort: ConnectionSortInput
+  ): ConnectionPayload! @auth
+
+  "Fetches the currently authenticated user's list of pending incoming connection requests with pagination."
+  pendingConnectionRequests(pagination: PaginationInput): PendingRequestPayload! @auth
+
+  "Fetches the personalized news feed for the currently authenticated user."
+  getFeed(pagination: PaginationInput): FeedPayload! @auth
+
+  "Fetches a single post by its ID."
+  getPost(id: ID!): Post @auth
+
+  "Searches for users based on a query string and optional filters."
+  searchUsers(
+    query: String!
+    filters: SearchFiltersInput
+    pagination: PaginationInput
+  ): UserSearchPayload! @auth
+
+  "Fetches the list of conversations for the currently authenticated user."
+  myConversations(pagination: PaginationInput): ConversationPayload! @auth
+
+  "Fetches the message history for a specific conversation."
+  getConversationMessages(
+    conversationId: ID!
+    pagination: PaginationInput
+  ): MessagePayload! @auth
+
+  "Fetches notifications for the currently authenticated user."
+  myNotifications(pagination: PaginationInput): NotificationPayload! @auth
+}
+
+"""
+Defines all the write operations (mutations) available on the platform.
+"""
+type Mutation {
+  # --- Authentication & Account Management ---
+
+  "Registers a new user account."
+  register(input: RegisterInput!): RegisterPayload!
+
+  "Verifies a user's email address using a token from the verification email."
+  verifyEmail(token: String!): SuccessPayload!
+
+  "Resends the verification email to an unverified user's address."
+  resendVerificationEmail(email: String!): SuccessPayload!
+
+  "Logs in a registered and verified user, returning session tokens."
+  login(input: LoginInput!): AuthPayload!
+
+  "Logs out the current user and invalidates their session."
+  logout: SuccessPayload! @auth
+
+  "Refreshes the access token using a valid refresh token."
+  refreshToken(refreshToken: String!): RefreshTokenPayload!
+
+  "Initiates the password reset process for a given email address."
+  requestPasswordReset(email: String!): SuccessPayload!
+
+  "Resets a user's password using a valid token and a new password."
+  resetPassword(input: ResetPasswordInput!): SuccessPayload!
+
+  "Enables Multi-Factor Authentication (MFA) for the current user's account."
+  enableMfa(input: EnableMfaInput!): MfaSetupPayload! @auth
+
+  "Verifies the MFA code during login for an MFA-enabled user."
+  verifyMfa(input: VerifyMfaInput!): AuthPayload!
+
+  "Deactivates the current user's account, making it temporarily invisible."
+  deactivateAccount: SuccessPayload! @auth
+
+  "Initiates the permanent deletion process for the current user's account."
+  requestAccountDeletion(password: String!): AccountDeletionPayload! @auth
+
+  "Cancels a pending account deletion request."
+  cancelAccountDeletion: SuccessPayload! @auth
+
+  # --- Profile Management ---
+
+  "Updates the basic information (name, headline, location) of the current user's profile."
+  updateBasicInfo(input: UpdateBasicInfoInput!): UserProfile! @auth
+
+  "Adds a new work experience entry to the current user's profile."
+  addWorkExperience(input: AddWorkExperienceInput!): WorkExperience! @auth
+
+  "Updates an existing work experience entry."
+  updateWorkExperience(
+    id: ID!
+    input: UpdateWorkExperienceInput!
+  ): WorkExperience! @auth
+
+  "Removes a work experience entry from the current user's profile."
+  removeWorkExperience(id: ID!): SuccessPayload! @auth
+
+  "Adds a new education entry to the current user's profile."
+  addEducation(input: AddEducationInput!): Education! @auth
+
+  "Updates an existing education entry."
+  updateEducation(id: ID!, input: UpdateEducationInput!): Education! @auth
+
+  "Removes an education entry from the current user's profile."
+  removeEducation(id: ID!): SuccessPayload! @auth
+
+  "Adds a new skill to the current user's profile."
+  addSkill(name: String!): Skill! @auth
+
+  "Removes a skill from the current user's profile."
+  removeSkill(id: ID!): SuccessPayload! @auth
+
+  "Updates the current user's profile picture. Requires a file upload."
+  updateProfilePicture(file: Upload!): UserProfile! @auth
+
+  "Removes the current user's profile picture."
+  removeProfilePicture: UserProfile! @auth
+
+  "Updates the current user's profile banner image. Requires a file upload."
+  updateBannerImage(file: Upload!): UserProfile! @auth
+
+  "Removes the current user's profile banner image."
+  removeBannerImage: UserProfile! @auth
+
+  "Sets or updates the custom public URL slug for the current user."
+  setCustomUrl(slug: String!): UserProfile! @auth
+
+  "Updates the visibility of the current user's profile."
+  updateProfileVisibility(visibility: ProfileVisibility!): UserProfile! @auth
+
+  # --- Connection Management ---
+
+  "Sends a connection request to another user."
+  sendConnectionRequest(
+    recipientId: ID!
+    message: String
+  ): ConnectionRequest! @auth
+
+  "Accepts a pending incoming connection request."
+  acceptConnectionRequest(requestId: ID!): Connection! @auth
+
+  "Declines a pending incoming connection request."
+  declineConnectionRequest(requestId: ID!): SuccessPayload! @auth
+
+  "Removes an existing first-degree connection."
+  removeConnection(userId: ID!): SuccessPayload! @auth
+
+  "Endorses a skill for a first-degree connection."
+  endorseSkill(profileId: ID!, skillId: ID!): SkillEndorsement! @auth
+
+  "Retracts a previously given skill endorsement."
+  retractEndorsement(endorsementId: ID!): SuccessPayload! @auth
+
+  # --- Post & Feed Management ---
+
+  "Creates a new post with text and optional media."
+  createPost(input: CreatePostInput!): Post! @auth
+
+  "Edits an existing post owned by the current user."
+  editPost(id: ID!, input: EditPostInput!): Post! @auth
+
+  "Deletes a post owned by the current user."
+  deletePost(id: ID!): SuccessPayload! @auth
+
+  "Adds a reaction to a post."
+  addReaction(postId: ID!, reactionType: ReactionType!): Reaction! @auth
+
+  "Removes the current user's reaction from a post."
+  removeReaction(postId: ID!): SuccessPayload! @auth
+
+  "Adds a comment to a post."
+  addComment(input: AddCommentInput!): Comment! @auth
+
+  "Edits a comment owned by the current user."
+  editComment(id: ID!, content: String!): Comment! @auth
+
+  "Deletes a comment owned by the current user."
+  deleteComment(id: ID!): SuccessPayload! @auth
+
+  "Reports a post for violating community standards."
+  reportPost(input: ReportPostInput!): SuccessPayload! @auth
+
+  # --- Messaging ---
+
+  "Sends a text message to a connection within a conversation."
+  sendMessage(input: SendMessageInput!): Message! @auth
+
+  # --- Notifications ---
+
+  "Marks all of the user's notifications as read."
+  markNotificationsAsRead: SuccessPayload! @auth
+}
+
+"""
+Defines all the real-time subscription operations available on the platform.
+"""
+type Subscription {
+  "Subscribes to new messages in a specific conversation."
+  onMessageReceived(conversationId: ID!): Message! @auth
+
+  "Subscribes to new notifications for the current user."
+  onNotificationReceived: Notification! @auth
+}

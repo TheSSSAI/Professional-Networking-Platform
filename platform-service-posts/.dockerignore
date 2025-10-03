@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist
+.cache
+
+# Environment
+.env
+.env.*.local
+
+# IDEs and editors
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Jest
+coverage
+
+# Misc
+.DS_Store

@@ -1,0 +1,65 @@
+sequenceDiagram
+    actor Client as "Client (SPA)"
+    participant APIGateway as "API Gateway"
+    participant IdentityService as "Identity Service"
+    participant DB as "PostgreSQL DB"
+    participant EventBus as "Event Bus"
+    participant NotificationsService as "Notifications Service"
+
+    rect rgb(227, 242, 253)
+        note over Client, IdentityService: Phase 1: Registration Submission
+        Client->>APIGateway: 1. POST /graphql (mutation: registerUser)
+        APIGateway->>IdentityService: 2. [gRPC] register(email, password)
+
+        alt Server-side Validation Fails (e.g., email exists)
+            IdentityService-->>APIGateway: 3a. [gRPC Error] STATUS_CONFLICT
+            APIGateway-->>Client: 4a. [409 Conflict] "Email already exists"
+        else Validation Succeeds
+            IdentityService->>DB: 3b. BEGIN TRANSACTION
+            IdentityService->>IdentityService: 4b. Hash password (bcrypt)
+            IdentityService->>DB: 5. INSERT INTO Users (email, hash, status='inactive')
+            IdentityService->>IdentityService: 6. Generate secure verification token
+            IdentityService->>DB: 7. INSERT INTO UserTokens (userId, token, expires_at)
+            DB-->>IdentityService: 8. Commit transaction
+            IdentityService->>EventBus: 9. PUBLISH "UserRegistered" event
+            IdentityService-->>APIGateway: 10. [gRPC OK] { success: true }
+            APIGateway-->>Client: 11. [200 OK] { success: true }
+            Client->>Client: 12. Display "Registration successful. Please check your email."
+        end
+    end
+
+    rect rgb(232, 245, 233)
+        note over EventBus, NotificationsService: Phase 2: Asynchronous Email Dispatch
+        EventBus->>NotificationsService: 13. DELIVER "UserRegistered" event
+        NotificationsService->>DB: 14. Fetch user email and token
+        NotificationsService->>NotificationsService: 15. Construct verification email with link
+        note right of NotificationsService: Email sent via AWS SES
+        NotificationsService-->>EventBus: 16. Acknowledge message
+    end
+
+    actor User as "User"
+    participant EmailClient as "User's Email Client"
+
+    User->>EmailClient: 17. Opens verification email
+    EmailClient->>Client: 18. Clicks verification link (e.g., /verify?token=...)
+
+    rect rgb(255, 243, 224)
+        note over Client, IdentityService: Phase 3: Account Verification
+        Client->>APIGateway: 19. GET /auth/verify?token=...
+        APIGateway->>IdentityService: 20. [gRPC] verify(token)
+
+        alt Token is Invalid/Expired/Used
+            IdentityService->>DB: 21a. SELECT * FROM UserTokens WHERE token=...
+            DB-->>IdentityService: 22a. No valid record found
+            IdentityService-->>APIGateway: 23a. [gRPC Error] STATUS_NOT_FOUND
+            APIGateway-->>Client: 24a. [404 Not Found]
+            Client->>Client: 25a. Display "Verification link is invalid or has expired."
+        else Token is Valid
+            IdentityService->>DB: 21b. Find valid token for user
+            IdentityService->>DB: 22b. UPDATE Users SET status='active' WHERE id=...
+            IdentityService->>DB: 23b. DELETE FROM UserTokens WHERE token=...
+            IdentityService-->>APIGateway: 24b. [gRPC OK] { success: true }
+            APIGateway-->>Client: 25b. [200 OK] Redirect to /login?verified=true
+            Client->>Client: 26b. Display "Account verified successfully. You can now log in."
+        end
+    end

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoginForm Organism</title>
+  <style>
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-error-500: #D32F2F;
+      --color-error-600: #C62828;
+      --color-error-bg: #FFEBEE;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-white: #FFFFFF;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Typography */
+      --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-size-h3: 28px;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-semibold: 600;
+      --font-weight-medium: 500;
+
+      /* Borders & Shadows */
+      --border-radius-lg: 12px;
+      --border-radius-md: 8px;
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+      --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Base and Layout Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-700);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .showcase {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--spacing-lg);
+    }
+    
+    .showcase__title {
+        text-align: center;
+        color: var(--color-neutral-900);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .showcase__grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+        width: 100%;
+        max-width: 1200px;
+    }
+    
+    @media (min-width: 1024px) {
+        .showcase__grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .state-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .state-container h3 {
+        color: var(--color-neutral-500);
+        font-weight: var(--font-weight-medium);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* DEPENDENCIES: Atomic & Molecular Component Styles */
+
+    /* Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--font-weight-semibold);
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: var(--border-radius-md);
+      padding: 10px 22px;
+      min-height: 44px;
+      width: 100%;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-white);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-800, #1565C0);
+    }
+    .btn:disabled {
+      background-color: var(--color-neutral-200);
+      color: var(--color-neutral-500);
+      cursor: not-allowed;
+    }
+    .btn--loading {
+        position: relative;
+        color: transparent !important;
+        cursor: wait;
+    }
+    .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top-color: var(--color-white);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* FormGroup & Inputs */
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+    .form-group__label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-700);
+    }
+    .form-group__input {
+      width: 100%;
+      border: 1px solid var(--color-neutral-300);
+      border-radius: var(--border-radius-md);
+      padding: 12px 16px;
+      font-size: var(--font-size-body);
+      min-height: 44px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group__input:focus-visible {
+      outline: none;
+      border-color: var(--color-primary-700);
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+    .form-group__input--error {
+        border-color: var(--color-error-500);
+    }
+    .form-group__input--error:focus-visible {
+        border-color: var(--color-error-500);
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+    }
+    .form-group__input:disabled {
+        background-color: var(--color-neutral-100);
+        cursor: not-allowed;
+    }
+
+    /* Alert */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    .alert__icon {
+      flex-shrink: 0;
+      margin-right: var(--spacing-sm);
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+    }
+    .alert__message {
+        font-size: var(--font-size-caption);
+        font-weight: var(--font-weight-medium);
+    }
+    .alert--error {
+      background-color: var(--color-error-bg);
+      color: var(--color-error-600);
+    }
+
+
+    /* ORGANISM: LoginForm */
+    .login-form {
+      width: 100%;
+      max-width: 400px;
+      background-color: var(--color-white);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+    
+    .login-form__header {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .login-form__title {
+      font-size: var(--font-size-h3);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      margin: 0;
+    }
+
+    .login-form__subtitle {
+      color: var(--color-neutral-500);
+      margin-top: var(--spacing-sm);
+    }
+
+    .login-form__footer {
+      margin-top: var(--spacing-md);
+      text-align: center;
+      font-size: var(--font-size-caption);
+    }
+
+    .login-form__link {
+      color: var(--color-primary-700);
+      font-weight: var(--font-weight-medium);
+      text-decoration: none;
+    }
+    
+    .login-form__link:hover {
+      text-decoration: underline;
+    }
+
+    /* Submitting State */
+    .login-form--submitting .btn {
+        cursor: wait;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="showcase">
+    <h1 class="showcase__title">LoginForm Organism</h1>
+    <div class="showcase__grid">
+        
+        <!-- Default State -->
+        <div class="state-container">
+            <h3>Default State</h3>
+            <form class="login-form" onsubmit="event.preventDefault();">
+                <header class="login-form__header">
+                    <h2 class="login-form__title">Sign In</h2>
+                    <p class="login-form__subtitle">Access your professional network</p>
+                </header>
+                <div class="login-form__body">
+                    <div class="form-group">
+                        <label for="email-default" class="form-group__label">Email Address</label>
+                        <input type="email" id="email-default" class="form-group__input" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-default" class="form-group__label">Password</label>
+                        <input type="password" id="password-default" class="form-group__input" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary">Sign In</button>
+                </div>
+                <footer class="login-form__footer">
+                    <a href="#" class="login-form__link">Forgot Password?</a>
+                </footer>
+            </form>
+        </div>
+
+        <!-- Submitting State -->
+        <div class="state-container">
+            <h3>Submitting State</h3>
+            <form class="login-form login-form--submitting" onsubmit="event.preventDefault();">
+                <header class="login-form__header">
+                    <h2 class="login-form__title">Sign In</h2>
+                    <p class="login-form__subtitle">Access your professional network</p>
+                </header>
+                <div class="login-form__body">
+                    <div class="form-group">
+                        <label for="email-submitting" class="form-group__label">Email Address</label>
+                        <input type="email" id="email-submitting" class="form-group__input" value="user@example.com" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-submitting" class="form-group__label">Password</label>
+                        <input type="password" id="password-submitting" class="form-group__input" value="********" disabled>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--loading" disabled>
+                        <div class="spinner"></div>
+                        Sign In
+                    </button>
+                </div>
+                <footer class="login-form__footer">
+                    <a href="#" class="login-form__link">Forgot Password?</a>
+                </footer>
+            </form>
+        </div>
+
+        <!-- Error State -->
+        <div class="state-container">
+            <h3>Error State</h3>
+            <form class="login-form" onsubmit="event.preventDefault();">
+                <header class="login-form__header">
+                    <h2 class="login-form__title">Sign In</h2>
+                    <p class="login-form__subtitle">Access your professional network</p>
+                </header>
+                <div class="login-form__body">
+                    <div class="alert alert--error" role="alert">
+                        <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                        <span class="alert__message">Invalid email or password. Please try again.</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email-error" class="form-group__label">Email Address</label>
+                        <input type="email" id="email-error" class="form-group__input form-group__input--error" value="user@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-error" class="form-group__label">Password</label>
+                        <input type="password" id="password-error" class="form-group__input form-group__input--error" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary">Sign In</button>
+                </div>
+                <footer class="login-form__footer">
+                    <a href="#" class="login-form__link">Forgot Password?</a>
+                </footer>
+            </form>
+        </div>
+    </div>
+</div>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>		<normal> The standard login form for user authentication. </normal>		
+        <form class="login-form" onsubmit="event.preventDefault();">
+            <header class="login-form__header">
+                <h2 class="login-form__title">Sign In</h2>
+                <p class="login-form__subtitle">Access your professional network</p>
+            </header>
+            <div class="login-form__body">
+                <div class="form-group">
+                    <label for="email-default" class="form-group__label">Email Address</label>
+                    <input type="email" id="email-default" class="form-group__input" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password-default" class="form-group__label">Password</label>
+                    <input type="password" id="password-default" class="form-group__input" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn--primary">Sign In</button>
+            </div>
+            <footer class="login-form__footer">
+                <a href="#" class="login-form__link">Forgot Password?</a>
+            </footer>
+        </form>
+     		
+      <div>
+	 </div>
+</body>
+</html>

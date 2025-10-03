@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor "User (Browser)" as UserBrowser
+    participant "platform-web" as platformweb
+
+    activate platformweb
+    UserBrowser->>platformweb: 1. 1. Clicks 'Help' link in application footer.
+    platformweb->>platformweb: 2. 2. Intercepts navigation event and invokes router.
+    platformweb->>platformweb: 3. 3. Loads and renders the HelpCenterPage component.
+    platformweb->>platformweb: 3.1. 3.1. Renders layout with categories and accordion items (e.g., using MUI Accordion).
+    platformweb->>UserBrowser: 4. 4. Displays the fully rendered Help Center page.
+    UserBrowser->>platformweb: 5. 5. Clicks on a specific question (accordion header).
+    platformweb->>platformweb: 6. 6. Handles click event and updates component state to toggle answer visibility.
+    platformweb->>platformweb: 7. 7. Re-renders the accordion component with the answer now visible.
+    platformweb->>UserBrowser: 8. 8. Displays updated page with the expanded answer.
+
+    note over platformweb: Accessibility (AC-007): The accordion component must be fully keyboard-navigable. Use the 'Tab' k...
+    note over platformweb: Responsiveness (AC-006): The layout must adapt to mobile, tablet, and desktop viewports without h...
+    note over platformweb: Content Management: For this initial implementation, the FAQ content can be managed in a simple J...
+
+    deactivate platformweb

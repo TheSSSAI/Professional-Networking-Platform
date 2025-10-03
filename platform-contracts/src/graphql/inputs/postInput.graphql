@@ -1,0 +1,52 @@
+# Defines the input structure for creating a new post.
+# Corresponds to REQ-1-019, REQ-1-022.
+input CreatePostInput {
+  # The main text content of the post, with a maximum of 3000 characters.
+  content: String!
+
+  # An array of object keys corresponding to images previously uploaded to S3. Max 4.
+  imageObjectKeys: [String!]
+
+  # A URL to generate a link preview for.
+  linkUrl: String
+}
+
+# Defines the input structure for updating an existing post.
+# Corresponds to REQ-1-024.
+input UpdatePostInput {
+  # The ID of the post to update.
+  postId: ID!
+
+  # The new text content of the post.
+  content: String!
+}
+
+# Defines the input structure for adding a comment to a post.
+# Corresponds to REQ-1-022.
+input AddCommentInput {
+  # The ID of the post to which the comment is being added.
+  postId: ID!
+
+  # The text content of the comment, with a maximum of 1500 characters.
+  content: String!
+}
+
+# Defines the input structure for updating an existing comment.
+# Corresponds to REQ-1-025.
+input UpdateCommentInput {
+  # The ID of the comment to update.
+  commentId: ID!
+
+  # The new text content of the comment.
+  content: String!
+}
+
+# Defines the input structure for adding a reaction to a post.
+# Corresponds to REQ-1-021.
+input AddReactionInput {
+  # The ID of the post to react to.
+  postId: ID!
+
+  # The type of reaction (e.g., "LIKE", "CELEBRATE").
+  reactionType: String!
+}

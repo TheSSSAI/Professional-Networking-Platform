@@ -1,0 +1,86 @@
+graph TD
+    subgraph "User & Edge"
+        User[Client Application <br> (Next.js SPA)] --> Cloudflare[Cloudflare <br> (CDN & WAF)]
+    end
+
+    Cloudflare --> APIGateway[AWS API Gateway]
+
+    subgraph "Synchronous Backend Services (AWS EKS)"
+        direction LR
+        APIGateway -- "GraphQL API" --> GraphQLServices
+        subgraph GraphQLServices["Synchronous Services (NestJS)"]
+            direction TB
+            IdentityService[Identity Service]
+            ProfileService[Profile Service]
+            PostsService[Posts & Engagement]
+            SearchService[Search Service]
+            ConnectionsService[Connections Service]
+        end
+    end
+
+    subgraph "Real-time & Asynchronous Backend (AWS EKS)"
+        direction LR
+        APIGateway -- "WebSocket API" --> RealtimeServices
+        subgraph RealtimeServices["Real-time Services (NestJS)"]
+            direction TB
+            MessagingService[Messaging Service]
+            NotificationsService[Notifications Service]
+        end
+
+        EventBus[Event Bus <br> (AWS SNS/SQS)]
+
+        subgraph WorkerServices["Asynchronous Worker Services"]
+            direction TB
+            FeedWorker[Feed Generation Worker]
+            SearchIndexer[Search Indexing Worker]
+        end
+    end
+
+    subgraph "Data Tier (AWS Managed Services)"
+        PostgreSQL[PostgreSQL <br> (AWS RDS)]
+        Redis[Redis <br> (AWS ElastiCache)]
+        OpenSearch[OpenSearch]
+        S3[Object Storage <br> (AWS S3)]
+    end
+
+    subgraph "Third-Party & Observability"
+        SES[AWS SES]
+        Observability[Observability Stack <br> (Prometheus, Loki, Jaeger)]
+    end
+
+    %% --- Connections ---
+
+    %% Service to Data Store
+    GraphQLServices --> PostgreSQL
+    RealtimeServices --> PostgreSQL
+    GraphQLServices --> Redis
+    GraphQLServices -.-> S3
+    GraphQLServices -.-> OpenSearch
+    WorkerServices --> PostgreSQL
+    WorkerServices --> Redis
+    WorkerServices --> OpenSearch
+
+    %% Inter-service & Event Bus
+    GraphQLServices -- "Publish Events" --> EventBus
+    EventBus --> WorkerServices
+    GraphQLServices -- "gRPC Calls" --> GraphQLServices
+    RealtimeServices -- "gRPC Calls" --> GraphQLServices
+
+    %% External & Observability
+    NotificationsService --> SES
+    GraphQLServices -- "Export Telemetry" --> Observability
+    RealtimeServices -- "Export Telemetry" --> Observability
+    WorkerServices -- "Export Telemetry" --> Observability
+
+    %% Style Definitions
+    classDef gateway fill:#fff3e0,stroke:#ed6c02,color:#000
+    classDef service fill:#e3f2fd,stroke:#1e88e5,color:#000
+    classDef datastore fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef async fill:#f3e5f5,stroke:#8e24aa,color:#000
+    classDef external fill:#ede7f6,stroke:#5e35b1,color:#000
+
+    class APIGateway,Cloudflare gateway;
+    class GraphQLServices,RealtimeServices,WorkerServices service;
+    class PostgreSQL,Redis,OpenSearch,S3 datastore;
+    class EventBus async;
+    class SES,Observability external;

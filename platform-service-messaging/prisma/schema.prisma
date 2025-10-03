@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum for message status, fulfilling REQ-1-027
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+// A placeholder for the User model, which is owned by the Identity service.
+// This is used to establish relations but is not managed by this service's schema.
+// In a real federated schema setup, this might be handled differently,
+// but for Prisma, a lightweight model is needed for relations.
+model User {
+  id String @id @unique
+
+  // Relations managed by this service
+  participations Participant[]
+}
+
+// Represents a conversation between participants. Fulfills REQ-1-026, REQ-1-028.
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants Participant[]
+  messages     Message[]
+}
+
+// Join table to manage the many-to-many relationship between Users and Conversations.
+// This is essential for one-on-one and future group chats.
+model Participant {
+  id             String @id @default(uuid())
+  userId         String
+  conversationId String
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, conversationId])
+  @@index([userId])
+  @@index([conversationId])
+}
+
+// Represents a single message within a conversation. Fulfills REQ-1-027, REQ-1-028.
+model Message {
+  id             String        @id @default(uuid())
+  content        String
+  status         MessageStatus @default(SENT)
+  authorId       String
+  conversationId String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  // Index for performant message history fetching, as per REQ-1-028 analysis.
+  @@index([conversationId, createdAt])
+  @@index([authorId])
+}

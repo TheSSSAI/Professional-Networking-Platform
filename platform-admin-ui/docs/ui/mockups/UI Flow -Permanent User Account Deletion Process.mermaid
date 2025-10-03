@@ -1,0 +1,71 @@
+sequenceDiagram
+    actor Client
+    participant APIGateway as "API Gateway"
+    participant IdentitySvc as "Identity Service"
+    participant EventBus as "Event Bus"
+    participant ProfileSvc as "Profile Service"
+    participant PostsSvc as "Posts Service"
+    participant ConnectionsSvc as "Connections Service"
+    participant SearchSvc as "Search Service"
+
+    autonumber
+
+    box "Phase 1: Deletion Request & Scheduling"
+        Client->>APIGateway: Request account deletion
+        activate APIGateway
+        APIGateway->>IdentitySvc: Forward deletion request
+        activate IdentitySvc
+        IdentitySvc->>IdentitySvc: Create deletion record (14-day grace period)
+        IdentitySvc-->>APIGateway: Return success acknowledgment
+        deactivate IdentitySvc
+        APIGateway-->>Client: Acknowledge request
+        deactivate APIGateway
+    end
+
+    box "Phase 2: Automated Pre-Purge Notification (at day 13)"
+        Note over IdentitySvc: [Scheduled Job]
+        activate IdentitySvc
+        IdentitySvc->>IdentitySvc: Find accounts expiring in 24 hours
+        IdentitySvc->>EventBus: Publish 'PrePurgeWarning' event
+        deactivate IdentitySvc
+    end
+
+    box "Phase 3: Automated Final Purge (after 14 days)"
+        Note over IdentitySvc: [Scheduled Job]
+        activate IdentitySvc
+        IdentitySvc->>IdentitySvc: Find expired deletion requests
+        IdentitySvc->>EventBus: Publish 'AccountPurgeInitiated' SAGA event
+        deactivate IdentitySvc
+
+        par Purge Profile Data
+            activate ProfileSvc
+            EventBus->>ProfileSvc: Consume 'AccountPurgeInitiated'
+            ProfileSvc->>ProfileSvc: Delete profile, media, etc.
+            deactivate ProfileSvc
+        and Purge Posts Data
+            activate PostsSvc
+            EventBus->>PostsSvc: Consume 'AccountPurgeInitiated'
+            PostsSvc->>PostsSvc: Delete posts, comments, reactions
+            deactivate PostsSvc
+        and Purge Connections Data
+            activate ConnectionsSvc
+            EventBus->>ConnectionsSvc: Consume 'AccountPurgeInitiated'
+            ConnectionsSvc->>ConnectionsSvc: Delete connection records
+            deactivate ConnectionsSvc
+        and Purge Search Data
+            activate SearchSvc
+            EventBus->>SearchSvc: Consume 'AccountPurgeInitiated'
+            SearchSvc->>SearchSvc: Delete user from search index
+            deactivate SearchSvc
+        end
+
+        Note over EventBus: All consumers must be idempotent.
+
+    end
+
+    box "Phase 4: Finalize Deletion"
+        activate IdentitySvc
+        EventBus->>IdentitySvc: Consume 'AccountPurgeInitiated' (final step)
+        IdentitySvc->>IdentitySvc: Delete core user record & finalize audit log
+        deactivate IdentitySvc
+    end

@@ -1,0 +1,12 @@
+# buf.yaml defines a module, its dependencies, and its linting and breaking change detection rules.
+# See https://buf.build/docs/configuration/v1/buf-yaml
+version: v1
+name: buf.build/platform/contracts
+deps:
+  - buf.build/googleapis/googleapis
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

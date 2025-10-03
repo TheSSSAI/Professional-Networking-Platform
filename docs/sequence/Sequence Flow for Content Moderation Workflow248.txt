@@ -1,0 +1,1054 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-BP-001
+
+## 1.2 Name
+
+Content Moderation Workflow
+
+## 1.3 Description
+
+A user reports a piece of content, triggering an event that places the report in a moderation queue. An administrator reviews the report in the Admin Dashboard and takes an appropriate action, which is logged for auditing.
+
+## 1.4 Type
+
+🔹 BusinessProcess
+
+## 1.5 Purpose
+
+To provide a robust, asynchronous mechanism for maintaining community standards and handling inappropriate content, as per SRS-001-F4 (1.4.5) and SRS-001-F8.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-APP-ADMIN
+- REPO-GW-API
+- REPO-SVC-POSTS
+- REPO-SVC-ADMIN
+- REPO-EVENT-BUS
+
+## 1.10 Key Interactions
+
+- User A reports a post via the client SPA.
+- A request is sent to the Posts Service, which flags the content and publishes a 'ContentReported' event with relevant details.
+- The Admin Service consumes the event and creates a new record in the moderation queue table.
+- An Admin user logs into the Admin Dashboard and views the moderation queue, which is fetched from the Admin Service.
+- Admin takes an action (e.g., 'Remove Content', 'Ban User').
+- The Admin Dashboard sends a secure request to the Admin Service, which executes the action by calling other services (e.g., Posts Service to delete content) and logs the decision in the admin audit trail.
+
+## 1.11 Triggers
+
+- A user submits a content report from the UI.
+
+## 1.12 Outcomes
+
+- Reported content is reviewed and actioned by an administrator.
+- A log of the moderation action is created for auditing purposes.
+
+## 1.13 Business Rules
+
+- Only users with administrative privileges can access the Admin Dashboard and take moderation actions (1.8.1).
+- All administrative actions MUST be logged in an immutable audit trail (1.8.5).
+
+## 1.14 Error Scenarios
+
+- The 'ContentReported' event fails to be processed, and the report never appears in the queue (handled by DLQ).
+- The Admin Service fails to call a downstream service to enact the moderation decision.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-BP-001
+
+## 2.2 Name
+
+Implementation-Ready Content Moderation Workflow
+
+## 2.3 Description
+
+A comprehensive sequence detailing the business process for content moderation. The process is initiated by a user report, which asynchronously creates a task in a moderation queue. An administrator then reviews and actions the report via a secure dashboard, with all decisions recorded in an immutable audit log for compliance.
+
+## 2.4 Participants
+
+### 2.4.1 Client Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+User Client
+
+#### 2.4.1.3 Type
+
+🔹 Client Application
+
+#### 2.4.1.4 Technology
+
+Next.js 14, React 18, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | SPA |
+
+### 2.4.2.0 Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF8C00 |
+| Stereotype | GraphQL |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-POSTS
+
+#### 2.4.3.2 Display Name
+
+Posts Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS 10, gRPC, PostgreSQL
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #2E8B57 |
+| Stereotype | gRPC Server |
+
+### 2.4.4.0 Messaging
+
+#### 2.4.4.1 Repository Id
+
+REPO-EVENT-BUS
+
+#### 2.4.4.2 Display Name
+
+Event Bus
+
+#### 2.4.4.3 Type
+
+🔹 Messaging
+
+#### 2.4.4.4 Technology
+
+AWS SNS/SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #9932CC |
+| Stereotype | Pub/Sub |
+
+### 2.4.5.0 Microservice
+
+#### 2.4.5.1 Repository Id
+
+REPO-SVC-ADMIN
+
+#### 2.4.5.2 Display Name
+
+Admin Service
+
+#### 2.4.5.3 Type
+
+🔹 Microservice
+
+#### 2.4.5.4 Technology
+
+NestJS 10, gRPC, PostgreSQL
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #B22222 |
+| Stereotype | gRPC Server |
+
+### 2.4.6.0 Client Application
+
+#### 2.4.6.1 Repository Id
+
+REPO-APP-ADMIN
+
+#### 2.4.6.2 Display Name
+
+Admin Dashboard
+
+#### 2.4.6.3 Type
+
+🔹 Client Application
+
+#### 2.4.6.4 Technology
+
+Next.js 14, React 18, Apollo Client
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4682B4 |
+| Stereotype | SPA |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+1. Submit Content Report
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+8. Return Success Confirmation
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+GraphQL (HTTPS)
+
+##### 2.5.1.10.2 Method
+
+mutation reportPost($postId: ID!, $reason: String!, $reportType: ReportType!)
+
+##### 2.5.1.10.3 Parameters
+
+postId, reason, reportType in GraphQL variables
+
+##### 2.5.1.10.4 Authentication
+
+Required: Bearer token (JWT) in Authorization header. Validated by Gateway.
+
+##### 2.5.1.10.5 Error Handling
+
+Client handles 4xx/5xx responses; displays user-friendly error.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+p95 < 500ms
+
+### 2.5.2.0.0.0 gRPC Call
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-SVC-POSTS
+
+#### 2.5.2.3.0.0 Message
+
+2. Forward ReportPost request
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 gRPC Call
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+7. Return ReportPostResponse
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.2.10.2.0 Method
+
+PostsService.ReportPost(ReportPostRequest)
+
+##### 2.5.2.10.3.0 Parameters
+
+ReportPostRequest protobuf message containing postId, reportingUserId, reason.
+
+##### 2.5.2.10.4.0 Authentication
+
+Propagated user context (userId) from validated JWT.
+
+##### 2.5.2.10.5.0 Error Handling
+
+Standard gRPC status codes. Retry on UNAVAILABLE.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+p95 < 100ms
+
+### 2.5.3.0.0.0 Database Operation
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-SVC-POSTS
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-SVC-POSTS
+
+#### 2.5.3.3.0.0 Message
+
+3. [Self] Flag content as reported in DB
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Database Operation
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+SQL
+
+##### 2.5.3.10.2.0 Method
+
+```sql
+UPDATE posts SET status = 'reported' WHERE id = :postId
+```
+
+##### 2.5.3.10.3.0 Parameters
+
+postId
+
+##### 2.5.3.10.4.0 Authentication
+
+N/A (Internal DB connection)
+
+##### 2.5.3.10.5.0 Error Handling
+
+Rollback transaction on failure.
+
+##### 2.5.3.10.6.0 Performance
+
+*No data available*
+
+### 2.5.4.0.0.0 Event Publish
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-SVC-POSTS
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.4.3.0.0 Message
+
+4. Publish ContentReported event
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Event Publish
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+AWS SDK for SNS
+
+##### 2.5.4.10.2.0 Method
+
+sns.publish()
+
+##### 2.5.4.10.3.0 Parameters
+
+TopicArn: 'post-events-topic', Message: JSON payload { eventType: 'ContentReported', postId, reportingUserId, postAuthorId, reason, timestamp }
+
+##### 2.5.4.10.4.0 Authentication
+
+Service IAM Role with sns:Publish permission.
+
+##### 2.5.4.10.5.0 Error Handling
+
+Log error if publish fails. Does not block user response.
+
+##### 2.5.4.10.6.0 Performance
+
+*No data available*
+
+### 2.5.5.0.0.0 Event Consume
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.5.3.0.0 Message
+
+5. Deliver ContentReported event
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 Event Consume
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.5.10.2.0 Method
+
+SQS long-polling consumption
+
+##### 2.5.5.10.3.0 Parameters
+
+Event payload from SQS message body.
+
+##### 2.5.5.10.4.0 Authentication
+
+Service IAM Role with sqs:ReceiveMessage permission.
+
+##### 2.5.5.10.5.0 Error Handling
+
+On failure, message visibility timeout allows for retries. After max retries, message is moved to a Dead Letter Queue (DLQ).
+
+##### 2.5.5.10.6.0 Performance
+
+###### 2.5.5.10.6.1 Throughput
+
+Configured SQS concurrency
+
+### 2.5.6.0.0.0 Database Operation
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.6.3.0.0 Message
+
+6. [Self] Create moderation record in DB
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Database Operation
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+SQL
+
+##### 2.5.6.10.2.0 Method
+
+```sql
+INSERT INTO content_reports (post_id, reporting_user_id, status, ...) VALUES (...)
+```
+
+##### 2.5.6.10.3.0 Parameters
+
+Data from event payload.
+
+##### 2.5.6.10.4.0 Authentication
+
+N/A
+
+##### 2.5.6.10.5.0 Error Handling
+
+Acknowledge SQS message only on successful DB insert. Idempotency check on (post_id, reporting_user_id).
+
+##### 2.5.6.10.6.0 Performance
+
+*No data available*
+
+### 2.5.7.0.0.0 Request
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-APP-ADMIN
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-GW-API
+
+#### 2.5.7.3.0.0 Message
+
+9. Fetch Moderation Queue
+
+#### 2.5.7.4.0.0 Sequence Number
+
+9
+
+#### 2.5.7.5.0.0 Type
+
+🔹 Request
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7.0.0 Return Message
+
+12. Return Moderation Queue Data
+
+#### 2.5.7.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.7.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10.0.0 Technical Details
+
+##### 2.5.7.10.1.0 Protocol
+
+GraphQL (HTTPS)
+
+##### 2.5.7.10.2.0 Method
+
+query getModerationQueue($filter: FilterInput, $pagination: PaginationInput)
+
+##### 2.5.7.10.3.0 Parameters
+
+filter, pagination variables
+
+##### 2.5.7.10.4.0 Authentication
+
+Required: Bearer token (JWT) with 'ADMIN' role in claims. Validated by Gateway.
+
+##### 2.5.7.10.5.0 Error Handling
+
+Client handles 401/403 for auth errors, 5xx for server errors.
+
+##### 2.5.7.10.6.0 Performance
+
+###### 2.5.7.10.6.1 Latency
+
+p95 < 1000ms
+
+### 2.5.8.0.0.0 gRPC Call
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.8.2.0.0 Target Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.8.3.0.0 Message
+
+10. Forward GetModerationQueue request
+
+#### 2.5.8.4.0.0 Sequence Number
+
+10
+
+#### 2.5.8.5.0.0 Type
+
+🔹 gRPC Call
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7.0.0 Return Message
+
+11. Return GetModerationQueueResponse
+
+#### 2.5.8.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.8.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.8.10.0.0 Technical Details
+
+##### 2.5.8.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.8.10.2.0 Method
+
+AdminService.GetModerationQueue(GetModerationQueueRequest)
+
+##### 2.5.8.10.3.0 Parameters
+
+Protobuf message with filters and pagination.
+
+##### 2.5.8.10.4.0 Authentication
+
+Propagated admin context from validated JWT.
+
+##### 2.5.8.10.5.0 Error Handling
+
+Standard gRPC status codes.
+
+##### 2.5.8.10.6.0 Performance
+
+*No data available*
+
+### 2.5.9.0.0.0 Request
+
+#### 2.5.9.1.0.0 Source Id
+
+REPO-APP-ADMIN
+
+#### 2.5.9.2.0.0 Target Id
+
+REPO-GW-API
+
+#### 2.5.9.3.0.0 Message
+
+13. Submit Moderation Action
+
+#### 2.5.9.4.0.0 Sequence Number
+
+13
+
+#### 2.5.9.5.0.0 Type
+
+🔹 Request
+
+#### 2.5.9.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7.0.0 Return Message
+
+18. Return Action Success Confirmation
+
+#### 2.5.9.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.9.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.9.10.0.0 Technical Details
+
+##### 2.5.9.10.1.0 Protocol
+
+GraphQL (HTTPS)
+
+##### 2.5.9.10.2.0 Method
+
+mutation takeModerationAction($reportId: ID!, $action: ModerationAction!, $notes: String)
+
+##### 2.5.9.10.3.0 Parameters
+
+reportId, action, notes in GraphQL variables
+
+##### 2.5.9.10.4.0 Authentication
+
+Required: Bearer token (JWT) with 'ADMIN' role. CSRF token also checked.
+
+##### 2.5.9.10.5.0 Error Handling
+
+Client handles errors and provides feedback to the admin.
+
+##### 2.5.9.10.6.0 Performance
+
+###### 2.5.9.10.6.1 Latency
+
+p95 < 800ms
+
+### 2.5.10.0.0.0 gRPC Call
+
+#### 2.5.10.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.10.2.0.0 Target Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.10.3.0.0 Message
+
+14. Forward TakeModerationAction request
+
+#### 2.5.10.4.0.0 Sequence Number
+
+14
+
+#### 2.5.10.5.0.0 Type
+
+🔹 gRPC Call
+
+#### 2.5.10.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.10.7.0.0 Return Message
+
+17. Return TakeModerationActionResponse
+
+#### 2.5.10.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.10.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.10.10.0.0 Technical Details
+
+##### 2.5.10.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.10.10.2.0 Method
+
+AdminService.TakeModerationAction(TakeModerationActionRequest)
+
+##### 2.5.10.10.3.0 Parameters
+
+Protobuf message with reportId, action, adminId, and notes.
+
+##### 2.5.10.10.4.0 Authentication
+
+Propagated admin context.
+
+##### 2.5.10.10.5.0 Error Handling
+
+Returns PERMISSION_DENIED if not an admin. Returns FAILED_PRECONDITION if report is not in a valid state.
+
+##### 2.5.10.10.6.0 Performance
+
+*No data available*
+
+#### 2.5.10.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-ADMIN', 'targetId': 'REPO-SVC-POSTS', 'message': '15a. Request Content Deletion', 'sequenceNumber': 15, 'type': 'gRPC Call', 'isSynchronous': True, 'returnMessage': '15b. Confirm Deletion', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'gRPC', 'method': 'PostsService.DeletePostAsAdmin(DeletePostRequest)', 'parameters': 'Protobuf message with postId and adminId for audit purposes.', 'authentication': 'Internal service-to-service auth (e.g., mTLS or token).', 'errorHandling': 'Returns NOT_FOUND if post already deleted. This call is part of a larger transaction/SAGA in AdminService.', 'performance': {'latency': 'p95 < 150ms'}}}
+
+### 2.5.11.0.0.0 Database Operation
+
+#### 2.5.11.1.0.0 Source Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.11.2.0.0 Target Id
+
+REPO-SVC-ADMIN
+
+#### 2.5.11.3.0.0 Message
+
+16. [Self] Update report status and create immutable audit log
+
+#### 2.5.11.4.0.0 Sequence Number
+
+16
+
+#### 2.5.11.5.0.0 Type
+
+🔹 Database Operation
+
+#### 2.5.11.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.11.7.0.0 Return Message
+
+
+
+#### 2.5.11.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.11.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.11.10.0.0 Technical Details
+
+##### 2.5.11.10.1.0 Protocol
+
+SQL
+
+##### 2.5.11.10.2.0 Method
+
+BEGIN; UPDATE content_reports SET status='resolved', ...; INSERT INTO admin_audit_log (admin_id, action, ...); COMMIT;
+
+##### 2.5.11.10.3.0 Parameters
+
+admin_id, action, target_entity_id, timestamp, etc.
+
+##### 2.5.11.10.4.0 Authentication
+
+N/A
+
+##### 2.5.11.10.5.0 Error Handling
+
+Entire operation is within a database transaction to ensure atomicity. Rollback on any failure.
+
+##### 2.5.11.10.6.0 Performance
+
+*No data available*
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+
+
+```
+Business Process Decoupling:
+The process is split into two phases. The initial user report (1-8) is synchronous to provide immediate feedback. The subsequent processing (5-6) is asynchronous, making the system resilient to failures in the Admin service and improving user-perceived performance.
+```
+
+#### 2.6.1.2.0.0 Position
+
+top
+
+#### 2.6.1.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0.0 Sequence Number
+
+4
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+
+
+```
+Immutable Audit Trail (REQ-1.8.5):
+Step 16 is critical for compliance. The `admin_audit_log` table must be append-only, with no update or delete permissions for the application's runtime database user, ensuring an immutable record of all moderation actions.
+```
+
+#### 2.6.2.2.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-SVC-ADMIN
+
+#### 2.6.2.4.0.0 Sequence Number
+
+16
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Strict Role-Based Access Control (RBAC) must be en... |
+| Performance Targets | The asynchronous nature of the report processing m... |
+| Error Handling Strategy | For the asynchronous workflow, a Dead Letter Queue... |
+| Testing Considerations | End-to-end testing is critical. A test must cover ... |
+| Monitoring Requirements | Key metrics to monitor: SQS queue depth (`Approxim... |
+| Deployment Considerations | Database schemas for `content_reports` and `admin_... |
+

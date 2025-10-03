@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"8","30","7","1","0","[""Identity & Access Management Service"",""User Profile Management"",""Social Graph & Connection Management""]","2","[""EPIC-001: Core Infrastructure & DevOps Foundation""]"

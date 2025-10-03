@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, picture, video, canvas, svg {
+      display: block;
+      max-width: 100%;
+    }
+    input, button, textarea, select {
+      font: inherit;
+    }
+    p, h1, h2, h3, h4, h5, h6 {
+      overflow-wrap: break-word;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-h3: 28px;
+      --font-weight-h3: 600;
+      --font-size-body: 16px;
+      --font-weight-body: 400;
+      --font-size-caption: 14px;
+      --font-weight-button: 600;
+
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-primary-900: #0D47A1;
+      --color-primary-focus-outline: #64B5F6;
+      --color-primary-focus-shadow: rgba(25, 118, 210, 0.1);
+      
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-700: #495057;
+      --color-neutral-900: #212529;
+
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Screen Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-50);
+      color: var(--color-neutral-900);
+    }
+
+    .screen-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--spacing-md);
+    }
+    
+    .screen-branding {
+      margin-bottom: var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      color: var(--color-primary-700);
+    }
+    
+    .screen-branding .logo {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .screen-branding h1 {
+        font-size: var(--font-size-h3);
+        font-weight: var(--font-weight-h3);
+    }
+
+    .login-card {
+      background-color: var(--color-neutral-white);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-card__header {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .login-card__title {
+      font-size: var(--font-size-h3);
+      font-weight: var(--font-weight-h3);
+      color: var(--color-neutral-900);
+    }
+
+    /* Component Styles */
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .form-group label {
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      color: var(--color-neutral-700);
+    }
+
+    .form-group .text-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--color-neutral-400);
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-neutral-white);
+      font-size: var(--font-size-body);
+      transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+    }
+    
+    .form-group .text-input:focus {
+      outline: none;
+      border: 2px solid var(--color-primary-700);
+      box-shadow: 0 0 0 3px var(--color-primary-focus-shadow);
+      padding: 11px 15px; /* Adjust padding to keep size consistent */
+    }
+    
+    .has-error .form-group .text-input {
+        border: 2px solid var(--color-semantic-error);
+        padding: 11px 15px;
+    }
+    .has-error .form-group .text-input:focus {
+        border: 2px solid var(--color-semantic-error);
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 22px;
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-button);
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 150ms ease-in-out, transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
+      font-size: var(--font-size-body);
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-neutral-white);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn--primary:active {
+      background-color: var(--color-primary-900);
+      transform: scale(0.98);
+    }
+    .btn--primary:focus-visible {
+      outline: 2px solid var(--color-primary-focus-outline);
+      outline-offset: 2px;
+    }
+    .btn:disabled {
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-500);
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-caption);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .alert--error {
+      background-color: var(--color-semantic-error-bg);
+      color: var(--color-semantic-error);
+      border: 1px solid var(--color-semantic-error);
+    }
+
+    .alert__icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+    }
+
+    .spinner {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--color-neutral-white);
+        width: 16px;
+        height: 16px;
+        animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* State management classes */
+    .is-submitting .btn__text {
+      visibility: hidden;
+    }
+    .is-submitting .btn {
+      position: relative;
+    }
+    .is-submitting .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -8px;
+      margin-left: -8px;
+    }
+
+    /* Variations section for demonstration */
+    .screen-variations {
+        margin-top: var(--spacing-xl);
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        justify-content: center;
+    }
+    .variation-group {
+        border: 1px dashed var(--color-neutral-400);
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius-lg);
+    }
+    .variation-group h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        text-align: center;
+    }
+    .variation-group p.description {
+        font-size: var(--font-size-caption);
+        color: var(--color-neutral-700);
+        margin-bottom: var(--spacing-md);
+        text-align: center;
+    }
+  </style>
+</head>
+<body>
+  
+  <main class="screen-container">
+    <div class="screen-branding">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v4h-2zm0 6h2v2h-2z"/></svg>
+        <h1>Admin Dashboard</h1>
+    </div>
+    
+    <section class="login-card">
+        <header class="login-card__header">
+            <h2 class="login-card__title">Log In</h2>
+        </header>
+        <form id="login-form-main">
+            <!-- This form is controlled by JS for demo purposes -->
+            <div id="alert-container"></div>
+            <div class="form-group">
+                <label for="email-main">Email Address</label>
+                <input type="email" id="email-main" name="email" class="text-input" placeholder="admin@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password-main">Password</label>
+                <input type="password" id="password-main" name="password" class="text-input" required>
+            </div>
+            <button type="submit" class="btn btn--primary" id="submit-button-main">
+                <span class="btn__text">Log In</span>
+            </button>
+        </form>
+    </section>
+
+  </main>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    
+    <div class="variation-group">
+      <h3>Variant: "Default State"</h3>
+      <p class="description">Standard appearance, ready for user input.</p>
+      <div class="login-card" style="margin: 0 auto;">
+        <header class="login-card__header">
+          <h2 class="login-card__title">Log In</h2>
+        </header>
+        <form>
+          <div class="form-group">
+            <label for="email-default">Email Address</label>
+            <input type="email" id="email-default" name="email" class="text-input" placeholder="admin@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="password-default">Password</label>
+            <input type="password" id="password-default" name="password" class="text-input" required>
+          </div>
+          <button type="submit" class="btn btn--primary">
+            <span class="btn__text">Log In</span>
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant: "Submitting State"</h3>
+      <p class="description">Shows a loading spinner after the user submits the form.</p>
+      <div class="login-card is-submitting" style="margin: 0 auto;">
+        <header class="login-card__header">
+          <h2 class="login-card__title">Log In</h2>
+        </header>
+        <form>
+          <div class="form-group">
+            <label for="email-loading">Email Address</label>
+            <input type="email" id="email-loading" name="email" class="text-input" value="admin@example.com" disabled>
+          </div>
+          <div class="form-group">
+            <label for="password-loading">Password</label>
+            <input type="password" id="password-loading" name="password" class="text-input" value="••••••••" disabled>
+          </div>
+          <button type="submit" class="btn btn--primary" disabled>
+            <span class="btn__text">Log In</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="variation-group">
+      <h3>Variant: "Error State"</h3>
+      <p class="description">Displays an error message after a failed login attempt.</p>
+      <div class="login-card has-error" style="margin: 0 auto;">
+        <header class="login-card__header">
+          <h2 class="login-card__title">Log In</h2>
+        </header>
+        <form>
+          <div class="alert alert--error" role="alert">
+            <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span>Invalid email or password. Please try again.</span>
+          </div>
+          <div class="form-group">
+            <label for="email-error">Email Address</label>
+            <input type="email" id="email-error" name="email" class="text-input" value="admin@example.com" required aria-describedby="login-error">
+          </div>
+          <div class="form-group">
+            <label for="password-error">Password</label>
+            <input type="password" id="password-error" name="password" class="text-input" required aria-describedby="login-error">
+          </div>
+          <button type="submit" class="btn btn--primary">
+            <span class="btn__text">Log In</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Simple script to demonstrate states on the main form for interactivity
+    const mainForm = document.getElementById('login-form-main');
+    const mainSubmitButton = document.getElementById('submit-button-main');
+    const alertContainer = document.getElementById('alert-container');
+
+    mainForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Clear previous states
+        mainForm.classList.remove('has-error');
+        alertContainer.innerHTML = '';
+
+        // 1. Enter Submitting state
+        mainForm.classList.add('is-submitting');
+        mainSubmitButton.disabled = true;
+
+        // Simulate network request
+        setTimeout(() => {
+            // 2. Exit Submitting state
+            mainForm.classList.remove('is-submitting');
+            mainSubmitButton.disabled = false;
+
+            const emailInput = document.getElementById('email-main');
+            const passwordInput = document.getElementById('password-main');
+            
+            // 3. Simulate failure
+            if (passwordInput.value !== 'password') {
+                mainForm.classList.add('has-error');
+                alertContainer.innerHTML = `
+                    <div class="alert alert--error" role="alert">
+                        <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span>Invalid email or password. Please try again. (Hint: use 'password')</span>
+                    </div>
+                `;
+                passwordInput.value = ''; // Clear password field on error
+            } else {
+                // 4. Simulate success
+                alertContainer.innerHTML = `
+                    <div class="alert" style="background-color: #E8F5E9; color: #2E7D32; border: 1px solid #2E7D32;" role="alert">
+                        <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <span>Success! Redirecting to dashboard...</span>
+                    </div>
+                `;
+                setTimeout(() => { 
+                    alertContainer.innerHTML = '';
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                }, 2000);
+            }
+        }, 1500);
+    });
+  </script>
+</body>
+</html>

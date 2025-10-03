@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package platform.contracts.notifications.v1;
+
+import "google/protobuf/timestamp.proto";
+import "grpc/v1/common/pagination.proto";
+
+// NotificationsService handles the creation, retrieval, and management of user notifications.
+service NotificationsService {
+  // Retrieves a user's notifications.
+  rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsResponse);
+  
+  // Marks notifications as read.
+  rpc MarkNotificationsAsRead(MarkNotificationsAsReadRequest) returns (MarkNotificationsAsReadResponse);
+
+  // Gets the count of unread notifications for a user.
+  rpc GetUnreadNotificationCount(GetUnreadNotificationCountRequest) returns (GetUnreadNotificationCountResponse);
+
+  // Updates a user's notification preferences.
+  rpc UpdateNotificationPreferences(UpdateNotificationPreferencesRequest) returns (UpdateNotificationPreferencesResponse);
+
+  // Retrieves a user's notification preferences.
+  rpc GetNotificationPreferences(GetNotificationPreferencesRequest) returns (GetNotificationPreferencesResponse);
+}
+
+enum NotificationType {
+  NOTIFICATION_TYPE_UNSPECIFIED = 0;
+  NEW_CONNECTION_REQUEST = 1;
+  CONNECTION_REQUEST_ACCEPTED = 2;
+  POST_REACTION = 3;
+  POST_COMMENT = 4;
+}
+
+message Notification {
+  string notification_id = 1;
+  string user_id = 2; // The recipient of the notification
+  NotificationType type = 3;
+  string actor_id = 4; // The user who triggered the notification
+  string entity_id = 5; // The ID of the subject (e.g., post_id, connection_request_id)
+  bool is_read = 6;
+  google.protobuf.Timestamp created_at = 7;
+  string content_preview = 8; // e.g., "John Doe liked your post."
+}
+
+message NotificationPreferences {
+  string user_id = 1;
+  bool new_connection_request_email = 2;
+  bool connection_request_accepted_email = 3;
+  bool post_reaction_email = 4;
+  bool post_comment_email = 5;
+  bool new_connection_request_in_app = 6;
+  bool connection_request_accepted_in_app = 7;
+  bool post_reaction_in_app = 8;
+  bool post_comment_in_app = 9;
+}
+
+// RPC: GetNotifications
+message GetNotificationsRequest {
+  string user_id = 1;
+  platform.contracts.common.v1.PaginationRequest pagination = 2;
+}
+
+message GetNotificationsResponse {
+  repeated Notification notifications = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}
+
+// RPC: MarkNotificationsAsRead
+message MarkNotificationsAsReadRequest {
+  string user_id = 1;
+  repeated string notification_ids = 2; // If empty, mark all as read.
+}
+
+message MarkNotificationsAsReadResponse {
+  bool success = 1;
+}
+
+// RPC: GetUnreadNotificationCount
+message GetUnreadNotificationCountRequest {
+  string user_id = 1;
+}
+
+message GetUnreadNotificationCountResponse {
+  int32 count = 1;
+}
+
+// RPC: UpdateNotificationPreferences
+message UpdateNotificationPreferencesRequest {
+  NotificationPreferences preferences = 1;
+}
+
+message UpdateNotificationPreferencesResponse {
+  NotificationPreferences preferences = 1;
+}
+
+// RPC: GetNotificationPreferences
+message GetNotificationPreferencesRequest {
+  string user_id = 1;
+}

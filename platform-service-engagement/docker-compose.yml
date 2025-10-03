@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  engagement-db:
+    image: postgres:15
+    container_name: engagement-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: engagementdb
+    ports:
+      - "5433:5432" # Use a different host port to avoid conflicts
+    volumes:
+      - engagement-db-data:/var/lib/postgresql/data
+
+  engagement-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: engagement-service
+    restart: always
+    ports:
+      - "50053:50053"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://user:password@engagement-db:5432/engagementdb?schema=public
+      # Add other necessary env vars for dependent services here
+      - CONNECTIONS_SERVICE_URL=host.docker.internal:50054 # Assuming other services run on host
+      - POSTS_SERVICE_URL=host.docker.internal:50052
+      - PROFILE_SERVICE_URL=host.docker.internal:50051
+    depends_on:
+      - engagement-db
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules # Anonymous volume to prevent local node_modules from overwriting container's
+
+volumes:
+  engagement-db-data:

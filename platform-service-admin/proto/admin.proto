@@ -1,0 +1,164 @@
+// This proto file defines the gRPC contract for the Admin Service.
+// It includes all RPC methods and messages required to fulfill the administrative
+// functionalities specified in requirements REQ-1-041 to REQ-1-045.
+
+syntax = "proto3";
+
+package admin;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// The main service contract for all administrative operations.
+service AdminService {
+  // Moderation RPCs (REQ-1-041, REQ-1-042)
+  rpc GetModerationQueue(GetModerationQueueRequest) returns (GetModerationQueueResponse);
+  rpc TakeModerationAction(TakeModerationActionRequest) returns (TakeModerationActionResponse);
+
+  // User Management RPCs (REQ-1-043)
+  rpc SearchUsersAdmin(SearchUsersAdminRequest) returns (SearchUsersAdminResponse);
+  rpc TriggerPasswordReset(TriggerPasswordResetRequest) returns (StatusResponse);
+
+  // Auditing RPCs (REQ-1-044)
+  rpc GetAuditLogs(GetAuditLogsRequest) returns (GetAuditLogsResponse);
+
+  // Configuration RPCs (REQ-1-045)
+  rpc GetFeatureFlags(google.protobuf.Empty) returns (GetFeatureFlagsResponse);
+  rpc UpdateFeatureFlag(UpdateFeatureFlagRequest) returns (FeatureFlag);
+}
+
+// ---------- Enums ----------
+
+enum ReportStatus {
+  PENDING = 0;
+  DISMISSED = 1;
+  ACTION_TAKEN = 2;
+}
+
+enum AdminActionType {
+  DISMISS_REPORT = 0;
+  REMOVE_CONTENT = 1;
+  ISSUE_WARNING = 2;
+  SUSPEND_USER = 3;
+  BAN_USER = 4;
+  TRIGGER_PASSWORD_RESET = 5;
+  UPDATE_FEATURE_FLAG = 6;
+}
+
+// ---------- General Purpose Messages ----------
+
+message StatusResponse {
+  bool success = 1;
+  optional string message = 2;
+}
+
+// ---------- Moderation Messages ----------
+
+message ContentReport {
+  string id = 1;
+  string contentId = 2;
+  string contentType = 3;
+  string reporterId = 4;
+  string authorId = 5;
+  string reason = 6;
+  ReportStatus status = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+  optional google.protobuf.Timestamp resolvedAt = 10;
+  optional string resolvedById = 11;
+}
+
+message GetModerationQueueRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string sortBy = 3;
+  optional string sortOrder = 4; // "asc" or "desc"
+}
+
+message GetModerationQueueResponse {
+  repeated ContentReport reports = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message TakeModerationActionRequest {
+  string reportId = 1;
+  string adminId = 2;
+  AdminActionType action = 3;
+  optional string reason = 4;
+}
+
+message TakeModerationActionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ---------- User Management Messages ----------
+
+message AdminUserView {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string status = 4;
+  google.protobuf.Timestamp createdAt = 5;
+}
+
+message SearchUsersAdminRequest {
+  optional string query = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message SearchUsersAdminResponse {
+  repeated AdminUserView users = 1;
+  int32 total = 2;
+}
+
+message TriggerPasswordResetRequest {
+  string userId = 1;
+  string adminId = 2;
+}
+
+// ---------- Auditing Messages ----------
+
+message AdminAuditLog {
+  string id = 1;
+  string adminId = 2;
+  AdminActionType actionType = 3;
+  optional string targetId = 4;
+  optional string targetType = 5;
+  optional string reason = 6;
+  optional string detailsJson = 7; // JSON string for flexible data
+  google.protobuf.Timestamp timestamp = 8;
+}
+
+message GetAuditLogsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message GetAuditLogsResponse {
+  repeated AdminAuditLog logs = 1;
+  int32 total = 2;
+}
+
+// ---------- Configuration Messages ----------
+
+message FeatureFlag {
+  string key = 1;
+  optional string description = 2;
+  bool isEnabled = 3;
+  google.protobuf.Timestamp createdAt = 4;
+  google.protobuf.Timestamp updatedAt = 5;
+}
+
+message GetFeatureFlagsResponse {
+  repeated FeatureFlag flags = 1;
+}
+
+message UpdateFeatureFlagRequest {
+  string key = 1;
+  bool isEnabled = 2;
+  string adminId = 3; // For auditing purposes
+}

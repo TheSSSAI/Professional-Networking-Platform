@@ -1,0 +1,59 @@
+sequenceDiagram
+    actor "Client" as Client
+    participant "API Gateway" as Gateway
+    participant "Identity Service" as Identity
+    participant "Event Bus" as Events
+    participant "Profile Service" as Profile
+    participant "Posts Service" as Posts
+    participant "Connections Service" as Connections
+    participant "Search Service" as Search
+
+    Client->>Gateway: 1. User confirms permanent account deletion
+    activate Gateway
+    Gateway->>Identity: 2. Forward deletion request
+    activate Identity
+    Identity->>Identity: 3. Create 'DeletionRequest' (14-day grace period)
+    Identity-->>Gateway: 4. Acknowledge request
+    deactivate Identity
+    Gateway-->>Client: 5. Display confirmation and log user out
+    deactivate Gateway
+
+    note over Identity: [Time Passes] A scheduled job checks for requests expiring in ~24 hours.
+    activate Identity
+    Identity->>Events: 6. Publish 'PrePurgeWarning' email event
+    deactivate Identity
+
+    note over Identity: [14-Day Grace Period Expires] A scheduled job finds expired requests.
+    activate Identity
+    activate Events
+    Identity->>Events: 7. Publish 'AccountPurgeInitiated' event (SAGA Trigger)
+    
+    par Purge Profile Data
+        Events->>Profile: 8a. Consume event
+        activate Profile
+        Profile->>Profile: 8b. Purge profile, experience, education, media (S3)
+        deactivate Profile
+    and Purge Content Data
+        Events->>Posts: 9a. Consume event
+        activate Posts
+        Posts->>Posts: 9b. Purge posts, anonymize comments & reactions
+        deactivate Posts
+    and Purge Connection Data
+        Events->>Connections: 10a. Consume event
+        activate Connections
+        Connections->>Connections: 10b. Purge all connection records
+        deactivate Connections
+    and Purge Search Index
+        Events->>Search: 11a. Consume event
+        activate Search
+        Search->>Search: 11b. Delete user document from OpenSearch
+        deactivate Search
+    end
+
+    note over Identity: SAGA completes via coordinating service or final event consumption.
+
+    Events->>Identity: 12. Final Step: Consume 'AccountPurgeInitiated' event
+    Identity->>Identity: 13. Purge core user record & create final audit log entry
+    
+    deactivate Events
+    deactivate Identity

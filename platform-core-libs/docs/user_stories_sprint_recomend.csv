@@ -1,0 +1,3 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""US-001"",""US-002"",""US-003"",""US-006"",""US-007""]","21","Establish the core user lifecycle: a user can register, verify their account, log in, and log out securely.","true"
+"2","[""US-012"",""US-021"",""US-022"",""US-039"",""US-042""]","17","Enable account recovery and establish foundational profile and networking capabilities.","true"

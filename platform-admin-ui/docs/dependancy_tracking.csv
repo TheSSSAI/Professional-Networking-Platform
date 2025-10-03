@@ -1,0 +1,7 @@
+"dependency_id","from_task","to_task","dependency_type","description","critical_path","lead_time_days","responsible_team","coordination_required","risk_level","mitigation_plan","status","resolution_date","impact_if_delayed","escalation_required"
+"DEP-001","TASK-001","TASK-002","Technical","Form validation depends on form UI being built.","true","","Frontend Team","","Low","None required, standard sequential work.","Active","","TASK-002 is blocked.",""
+"DEP-002","TASK-002","TASK-003","Technical","API integration depends on the validated form being complete.","true","","Frontend Team","","Low","None required.","Active","","TASK-003 is blocked.",""
+"DEP-003","TASK-003","TASK-004","Validation","E2E tests can only be written and executed once the feature is fully implemented.","","","QA Team","true","Low","QA can start writing test stubs in parallel with development.","Active","","Release is blocked until tests pass.",""
+"DEP-004","TASK-009","TASK-012","Technical","Logout functionality requires a logged-in session to be established first.","true","","Frontend Team","","Low","None required.","Active","","Logout feature is blocked.",""
+"DEP-005","TASK-024","TASK-025","Technical","Infinite scroll enhances the base feed component.","true","","Frontend Team","","Low","None required.","Active","","Feed pagination is blocked.",""
+"DEP-006","TASK-027","TASK-028","Technical","The admin route guard middleware protects the admin layout and its child routes.","true","","Frontend Team","","Low","None required.","Active","","Admin security feature is blocked.",""

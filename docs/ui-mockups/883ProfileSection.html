@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: ProfileSection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-300: #64B5F6;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-danger-500: #D32F2F;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-600: #6C757D;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-h4: 1.25rem;
+      --font-size-body: 1rem;
+      --font-size-caption: 0.875rem;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+      --space-5: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- Base & Showcase Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-100);
+      padding: var(--space-5);
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .showcase-title {
+      text-align: center;
+      margin-bottom: var(--space-4);
+    }
+
+    .showcase-title h1 {
+        font-size: 2.5rem;
+        color: var(--color-neutrals-gray-900);
+    }
+    .showcase-title p {
+        color: var(--color-neutrals-gray-600);
+        margin-top: var(--space-2);
+    }
+
+
+    /* --- Atomic Dependencies --- */
+    .card {
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-lg);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: 10px;
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-semibold);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      min-height: 44px;
+      min-width: 44px;
+      background-color: transparent;
+      color: var(--color-neutrals-gray-700);
+    }
+
+    .btn:hover {
+      background-color: var(--color-neutrals-gray-100);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: 2px;
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-neutrals-white);
+      padding: 10px 22px;
+      min-width: auto;
+    }
+    
+    .btn--primary:hover {
+       background-color: var(--color-primary-800);
+    }
+
+    .icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      stroke-width: 2.5;
+      vertical-align: middle;
+      fill: none;
+      stroke: currentColor;
+    }
+
+    /* --- Organism: ProfileSection CSS --- */
+    .profile-section {
+      /* Uses .card atomic style */
+      width: 100%;
+    }
+
+    .profile-section__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space-3);
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+
+    .profile-section__title {
+      font-size: var(--font-size-h4);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutrals-gray-900);
+    }
+
+    .profile-section__actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .profile-section__content {}
+
+    .profile-section__list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .profile-section__list-item {
+      display: flex;
+      gap: var(--space-3);
+      position: relative;
+      /* Add padding to prevent content overlap with edit buttons */
+      padding-right: 50px; 
+    }
+
+    .profile-section__list-item:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .profile-section__item-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-neutrals-gray-100);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      color: var(--color-primary-700);
+    }
+
+    .profile-section__item-details {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-section__item-title {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutrals-gray-900);
+    }
+
+    .profile-section__item-subtitle {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-600);
+    }
+
+    .profile-section__item-meta {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-600);
+      margin-top: var(--space-1);
+    }
+
+    .profile-section__item-description {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-700);
+      margin-top: var(--space-2);
+      white-space: pre-wrap;
+    }
+    
+    .profile-section__item-actions {
+      display: none; /* Hidden by default */
+      position: absolute;
+      top: -8px;
+      right: -8px;
+    }
+
+    .profile-section__skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .skill-item {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--color-primary-50);
+      color: var(--color-primary-800);
+      padding: var(--space-1) var(--space-3);
+      border-radius: 50px;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-caption);
+      position: relative;
+    }
+    
+    .skill-item__actions {
+        display: none;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+    }
+    
+    .skill-item__actions .btn {
+        background-color: var(--color-neutrals-white);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+        font-size: 1.2em;
+        padding: 0;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .skill-item__actions .btn:hover {
+        color: var(--color-danger-500);
+    }
+
+    .skill-item__endorsements {
+      font-weight: var(--font-weight-regular);
+      margin-left: var(--space-2);
+      color: var(--color-neutrals-gray-600);
+    }
+
+    .profile-section__empty-state {
+      text-align: center;
+      padding: var(--space-4) 0;
+    }
+
+    .profile-section__empty-state p {
+      color: var(--color-neutrals-gray-600);
+      margin-bottom: var(--space-3);
+    }
+
+    /* State Management */
+    .profile-section[data-state='edit'] .profile-section__item-actions,
+    .profile-section[data-state='edit'] .skill-item__actions {
+      display: flex;
+    }
+
+    .profile-section[data-state='view'] .profile-section__actions .btn--add {
+      display: none;
+    }
+
+    .profile-section[data-state='edit'] .profile-section__actions .btn--edit {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- SVG Icon Definitions -->
+  <svg width="0" height="0" style="position: absolute; overflow: hidden;">
+    <symbol id="icon-plus" viewBox="0 0 24 24">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24">
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    </symbol>
+    <symbol id="icon-briefcase" viewBox="0 0 24 24">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+    </symbol>
+    <symbol id="icon-award" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+    </symbol>
+  </svg>
+
+  <main>
+    <div class="showcase-title">
+        <h1>Profile Section Organism</h1>
+        <p>A versatile card-based component for displaying sections of a user profile.</p>
+    </div>
+
+    <!-- WORK EXPERIENCE -->
+    <section class="profile-section card" data-state="view" aria-labelledby="experience-title">
+      <div class="profile-section__header">
+        <h2 id="experience-title" class="profile-section__title">Work Experience</h2>
+        <div class="profile-section__actions">
+          <button class="btn btn--add" type="button" aria-label="Add new work experience">
+            <svg class="icon"><use href="#icon-plus" /></svg>
+          </button>
+          <button class="btn btn--edit" type="button" aria-label="Edit work experience section">
+            <svg class="icon"><use href="#icon-edit" /></svg>
+          </button>
+        </div>
+      </div>
+      <div class="profile-section__content">
+        <ul class="profile-section__list">
+          <li class="profile-section__list-item">
+            <div class="profile-section__item-icon">
+                <svg class="icon"><use href="#icon-briefcase" /></svg>
+            </div>
+            <div class="profile-section__item-details">
+              <span class="profile-section__item-title">Senior Frontend Developer</span>
+              <span class="profile-section__item-subtitle">Innovate Corp</span>
+              <span class="profile-section__item-meta">Jan 2022 - Present · 2 yrs 7 mos</span>
+              <p class="profile-section__item-description">Led the development of the new design system and component library.</p>
+            </div>
+            <div class="profile-section__item-actions">
+                <button class="btn" aria-label="Edit Senior Frontend Developer experience"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                <button class="btn" aria-label="Remove Senior Frontend Developer experience"><svg class="icon"><use href="#icon-trash" /></svg></button>
+            </div>
+          </li>
+          <li class="profile-section__list-item">
+            <div class="profile-section__item-icon">
+                <svg class="icon"><use href="#icon-briefcase" /></svg>
+            </div>
+            <div class="profile-section__item-details">
+              <span class="profile-section__item-title">Software Engineer</span>
+              <span class="profile-section__item-subtitle">Tech Solutions Inc.</span>
+              <span class="profile-section__item-meta">Jun 2019 - Dec 2021 · 2 yrs 7 mos</span>
+            </div>
+            <div class="profile-section__item-actions">
+                <button class="btn" aria-label="Edit Software Engineer experience"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                <button class="btn" aria-label="Remove Software Engineer experience"><svg class="icon"><use href="#icon-trash" /></svg></button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- EDUCATION (EDIT STATE) -->
+    <section class="profile-section card" data-state="edit" aria-labelledby="education-title">
+        <div class="profile-section__header">
+          <h2 id="education-title" class="profile-section__title">Education</h2>
+          <div class="profile-section__actions">
+            <button class="btn btn--add" type="button" aria-label="Add new education entry">
+              <svg class="icon"><use href="#icon-plus" /></svg>
+            </button>
+            <button class="btn btn--edit" type="button" aria-label="Done editing education section">
+              <svg class="icon"><use href="#icon-edit" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="profile-section__content">
+          <ul class="profile-section__list">
+            <li class="profile-section__list-item">
+              <div class="profile-section__item-icon">
+                <svg class="icon"><use href="#icon-award" /></svg>
+              </div>
+              <div class="profile-section__item-details">
+                <span class="profile-section__item-title">State University</span>
+                <span class="profile-section__item-subtitle">Master of Science - MS, Computer Science</span>
+                <span class="profile-section__item-meta">2017 - 2019</span>
+              </div>
+              <div class="profile-section__item-actions">
+                  <button class="btn" aria-label="Edit State University entry"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                  <button class="btn" aria-label="Remove State University entry"><svg class="icon"><use href="#icon-trash" /></svg></button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+    <!-- SKILLS (EMPTY STATE) -->
+    <section class="profile-section card" data-state="edit" aria-labelledby="skills-title">
+        <div class="profile-section__header">
+          <h2 id="skills-title" class="profile-section__title">Skills</h2>
+          <div class="profile-section__actions">
+            <button class="btn btn--add" type="button" aria-label="Add new skill">
+              <svg class="icon"><use href="#icon-plus" /></svg>
+            </button>
+            <button class="btn btn--edit" type="button" aria-label="Done editing skills section">
+              <svg class="icon"><use href="#icon-edit" /></svg>
+            </button>
+          </div>
+        </div>
+        <div class="profile-section__content">
+            <div class="profile-section__empty-state">
+                <p>Showcase your expertise. Add your skills to get endorsed.</p>
+                <button class="btn btn--primary">Add Skill</button>
+            </div>
+        </div>
+      </section>
+
+    <!-- SKILLS (VIEW STATE WITH CONTENT) -->
+    <section class="profile-section card" data-state="view" aria-labelledby="skills-title-view">
+        <div class="profile-section__header">
+            <h2 id="skills-title-view" class="profile-section__title">Skills</h2>
+            <div class="profile-section__actions">
+                <button class="btn btn--add" type="button" aria-label="Add new skill">
+                    <svg class="icon"><use href="#icon-plus" /></svg>
+                </button>
+                <button class="btn btn--edit" type="button" aria-label="Edit skills section">
+                    <svg class="icon"><use href="#icon-edit" /></svg>
+                </button>
+            </div>
+        </div>
+        <div class="profile-section__content">
+            <div class="profile-section__skills-list">
+                <div class="skill-item">
+                    <span>React.js</span> <span class="skill-item__endorsements">(12)</span>
+                    <div class="skill-item__actions">
+                        <button class="btn" aria-label="Remove React.js skill"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <span>Node.js</span> <span class="skill-item__endorsements">(8)</span>
+                     <div class="skill-item__actions">
+                        <button class="btn" aria-label="Remove Node.js skill"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <span>TypeScript</span> <span class="skill-item__endorsements">(5)</span>
+                     <div class="skill-item__actions">
+                        <button class="btn" aria-label="Remove TypeScript skill"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+  </main>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "experience"<h3>
+		<normal> Displays a list of work experience items. </normal>
+		<section class="profile-section card" data-state="view" aria-labelledby="experience-title-variant">
+            <div class="profile-section__header">
+                <h2 id="experience-title-variant" class="profile-section__title">Work Experience</h2>
+                <div class="profile-section__actions">
+                    <button class="btn btn--add" type="button" aria-label="Add new work experience"><svg class="icon"><use href="#icon-plus" /></svg></button>
+                    <button class="btn btn--edit" type="button" aria-label="Edit work experience section"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                </div>
+            </div>
+            <div class="profile-section__content">
+                <ul class="profile-section__list">
+                    <li class="profile-section__list-item">
+                        <div class="profile-section__item-icon"><svg class="icon"><use href="#icon-briefcase" /></svg></div>
+                        <div class="profile-section__item-details">
+                            <span class="profile-section__item-title">Senior Frontend Developer</span>
+                            <span class="profile-section__item-subtitle">Innovate Corp</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>     
+		
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : "education"<h3>
+		<normal> Displays a list of education items. </normal>
+		<section class="profile-section card" data-state="view" aria-labelledby="education-title-variant">
+            <div class="profile-section__header">
+                <h2 id="education-title-variant" class="profile-section__title">Education</h2>
+                <div class="profile-section__actions">
+                    <button class="btn btn--add" type="button" aria-label="Add new education entry"><svg class="icon"><use href="#icon-plus" /></svg></button>
+                    <button class="btn btn--edit" type="button" aria-label="Edit education section"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                </div>
+            </div>
+            <div class="profile-section__content">
+                <ul class="profile-section__list">
+                    <li class="profile-section__list-item">
+                        <div class="profile-section__item-icon"><svg class="icon"><use href="#icon-award" /></svg></div>
+                        <div class="profile-section__item-details">
+                            <span class="profile-section__item-title">State University</span>
+                            <span class="profile-section__item-subtitle">Master of Science - MS, Computer Science</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>     
+		
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : "skills"<h3>
+		<normal> Displays a list of skill tags/pills. </normal>
+		<section class="profile-section card" data-state="view" aria-labelledby="skills-title-variant">
+            <div class="profile-section__header">
+                <h2 id="skills-title-variant" class="profile-section__title">Skills</h2>
+                <div class="profile-section__actions">
+                    <button class="btn btn--add" type="button" aria-label="Add new skill"><svg class="icon"><use href="#icon-plus" /></svg></button>
+                    <button class="btn btn--edit" type="button" aria-label="Edit skills section"><svg class="icon"><use href="#icon-edit" /></svg></button>
+                </div>
+            </div>
+            <div class="profile-section__content">
+                <div class="profile-section__skills-list">
+                    <div class="skill-item"><span>React.js</span></div>
+                    <div class="skill-item"><span>TypeScript</span></div>
+                </div>
+            </div>
+        </section>     
+		
+      </div>
+	 </div>    
+	
+	</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Table Screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset & Design System Tokens */
+        :root {
+            /* Colors */
+            --color-background: #0F172A; /* slate-900 */
+            --color-surface-1: #1E293B; /* slate-800 */
+            --color-surface-2: #334155; /* slate-700 */
+            --color-border: #475569; /* slate-600 */
+            --color-text-primary: #F8FAFC; /* slate-50 */
+            --color-text-secondary: #94A3B8; /* slate-400 */
+            --color-text-tertiary: #64748B; /* slate-500 */
+            --color-primary: #38BDF8; /* sky-400 */
+            --color-primary-hover: #7DD3FC; /* sky-300 */
+            --color-danger: #F87171; /* red-400 */
+            --color-danger-hover: #FCA5A5; /* red-300 */
+            --color-warning: #FBBF24; /* amber-400 */
+            --color-success: #4ADE80; /* green-400 */
+            --color-skeleton: #334155;
+
+            /* Typography */
+            --font-family-sans: 'Inter', sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-12: 3rem;
+
+            /* Radii */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-full: 9999px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+        }
+
+        /* Screen Layout */
+        .screen-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: var(--space-8);
+        }
+
+        .screen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+            gap: var(--space-4);
+        }
+
+        .screen-header h1 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+        }
+
+        .screen-content {
+            flex-grow: 1;
+        }
+        
+        .screen-footer {
+            margin-top: var(--space-6);
+        }
+        
+        .screen-variations {
+            margin-top: var(--space-12);
+            border-top: 1px solid var(--color-border);
+            padding-top: var(--space-8);
+        }
+        .screen-variations h2 {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-6);
+        }
+        .variation-group {
+            margin-bottom: var(--space-8);
+        }
+        .variation-group h3 {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--space-4);
+            color: var(--color-primary);
+        }
+        .variation-group normal {
+          color: var(--color-text-secondary);
+          font-style: italic;
+          display: block;
+          margin-bottom: var(--space-4);
+        }
+
+        /* Generic Component Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        .btn--primary {
+            background-color: var(--color-primary);
+            color: var(--color-background);
+        }
+        .btn--primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        .btn--secondary {
+            background-color: var(--color-surface-2);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+        .btn--secondary:hover {
+            background-color: var(--color-surface-2);
+            border-color: var(--color-text-secondary);
+        }
+        
+        .btn--danger {
+            background-color: transparent;
+            color: var(--color-danger);
+        }
+        .btn--danger:hover {
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+
+        .avatar {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .avatar__image {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            border: 2px solid var(--color-border);
+        }
+
+        .avatar__name {
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        .avatar__subtext {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-2);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+        }
+
+        .badge--danger { background-color: rgba(248, 113, 113, 0.2); color: var(--color-danger); }
+        .badge--warning { background-color: rgba(251, 191, 36, 0.2); color: var(--color-warning); }
+        .badge--info { background-color: rgba(56, 189, 248, 0.2); color: var(--color-primary); }
+
+        /* Data Table Specific Styles */
+        .data-table-container {
+            background-color: var(--color-surface-1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .data-table-wrapper {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table th, .data-table td {
+            padding: var(--space-3) var(--space-4);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .data-table thead {
+            background-color: var(--color-surface-2);
+        }
+
+        .data-table th {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .data-table th .sort-icon {
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+        .data-table th:hover .sort-icon {
+            opacity: 1;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid var(--color-border);
+            transition: background-color 0.15s ease;
+        }
+
+        .data-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: var(--color-surface-2);
+        }
+
+        .data-table td {
+            font-size: var(--font-size-sm);
+        }
+        
+        .data-table .post-content {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-text-secondary);
+        }
+
+        .data-table .action-cell {
+            text-align: right;
+        }
+        .data-table .action-cell .btn {
+            font-size: var(--font-size-xs);
+            padding: var(--space-1) var(--space-2);
+        }
+
+        /* Pagination Controls */
+        .pagination-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3) var(--space-4);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .pagination-controls__info {
+            flex-shrink: 0;
+        }
+
+        .pagination-controls__nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .pagination-controls .btn {
+            padding: var(--space-2) var(--space-3);
+        }
+        
+        .pagination-controls .page-number {
+             padding: var(--space-2) var(--space-3);
+             border-radius: var(--radius-md);
+             min-width: 36px;
+             text-align: center;
+        }
+        .page-number.active {
+            background-color: var(--color-primary);
+            color: var(--color-background);
+            font-weight: 700;
+        }
+
+        /* State Styles */
+        .state-overlay {
+            display: none;
+            padding: var(--space-12) var(--space-8);
+            text-align: center;
+            min-height: 400px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+        
+        .state-overlay h4 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+        }
+        
+        .state-overlay p {
+            color: var(--color-text-secondary);
+            max-width: 400px;
+        }
+        
+        .data-table-container--loading .data-table,
+        .data-table-container--loading .pagination-controls,
+        .data-table-container--loading .empty-state,
+        .data-table-container--loading .error-state {
+            display: none;
+        }
+
+        .data-table-container--loading .skeleton-loader {
+            display: block;
+        }
+        
+        .data-table-container--empty .data-table,
+        .data-table-container--empty .skeleton-loader,
+        .data-table-container--empty .error-state {
+            display: none;
+        }
+        .data-table-container--empty .empty-state {
+            display: flex;
+        }
+        .data-table-container--empty .pagination-controls {
+            visibility: hidden;
+        }
+
+        .data-table-container--error .data-table,
+        .data-table-container--error .skeleton-loader,
+        .data-table-container--error .empty-state {
+            display: none;
+        }
+        .data-table-container--error .error-state {
+            display: flex;
+        }
+         .data-table-container--error .pagination-controls {
+            visibility: hidden;
+        }
+        
+        .empty-state, .error-state { display: none; }
+        
+        /* Skeleton Loader */
+        .skeleton-loader {
+            padding: var(--space-4);
+        }
+        .skeleton-row {
+            display: flex;
+            gap: var(--space-4);
+            padding: var(--space-3) 0;
+        }
+        .skeleton-item {
+            background-color: var(--color-skeleton);
+            border-radius: var(--radius-sm);
+            animation: shimmer 1.5s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-color: var(--color-skeleton); }
+            50% { background-color: var(--color-surface-2); }
+            100% { background-color: var(--color-skeleton); }
+        }
+        .skeleton-item--avatar { width: 32px; height: 32px; border-radius: 50%; }
+        .skeleton-item--text-sm { height: 16px; }
+        .skeleton-item--text-lg { height: 20px; }
+
+
+    </style>
+</head>
+<body>
+<div class="screen-container">
+    <header class="screen-header">
+        <h1>Content Moderation Queue</h1>
+        <button class="btn btn--secondary" type="button" aria-label="Refresh queue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+            </svg>
+            Refresh
+        </button>
+    </header>
+
+    <main class="screen-content">
+        <div class="data-table-container">
+            <div class="data-table-wrapper">
+                <table class="data-table" aria-label="Content Moderation Queue">
+                    <thead>
+                        <tr>
+                            <th scope="col">Reported Content</th>
+                            <th scope="col">Author</th>
+                            <th scope="col">Reporter</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="action-cell">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="post-content" title="This new project launch is going to be a game-changer for the industry. Excited to share more soon!">This new project launch is going to be a game-changer...</div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=author1" alt="">
+                                    <div>
+                                        <div class="avatar__name">Jane Doe</div>
+                                        <div class="avatar__subtext">Product Manager</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=reporter1" alt="">
+                                    <div class="avatar__name">Mark Johnson</div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge--danger">Hate Speech</span></td>
+                            <td><span class="avatar__subtext">2025-01-18 14:30 UTC</span></td>
+                            <td class="action-cell">
+                                <button class="btn btn--secondary" type="button" aria-label="Dismiss report for post by Jane Doe">Dismiss</button>
+                                <button class="btn btn--danger" type="button" aria-label="Remove content from post by Jane Doe">Remove Content</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="post-content" title="Looking to hire a senior frontend developer with React experience. DM for details. #hiring #react">Looking to hire a senior frontend developer...</div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=author2" alt="">
+                                    <div>
+                                        <div class="avatar__name">Peter Jones</div>
+                                        <div class="avatar__subtext">Tech Recruiter</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=reporter2" alt="">
+                                    <div class="avatar__name">Samantha Bee</div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge--warning">Spam</span></td>
+                            <td><span class="avatar__subtext">2025-01-18 11:15 UTC</span></td>
+                            <td class="action-cell">
+                                <button class="btn btn--secondary" type="button" aria-label="Dismiss report for post by Peter Jones">Dismiss</button>
+                                <button class="btn btn--danger" type="button" aria-label="Remove content from post by Peter Jones">Remove Content</button>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td>
+                                <div class="post-content" title="Check out my new portfolio site! Built with Next.js and deployed on Vercel.">Check out my new portfolio site! Built with...</div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=author3" alt="">
+                                    <div>
+                                        <div class="avatar__name">Alice Williams</div>
+                                        <div class="avatar__subtext">Web Developer</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="avatar">
+                                    <img class="avatar__image" src="https://i.pravatar.cc/40?u=reporter3" alt="">
+                                    <div class="avatar__name">Chris Green</div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge--info">Misinformation</span></td>
+                            <td><span class="avatar__subtext">2025-01-17 21:05 UTC</span></td>
+                            <td class="action-cell">
+                                <button class="btn btn--secondary" type="button" aria-label="Dismiss report for post by Alice Williams">Dismiss</button>
+                                <button class="btn btn--danger" type="button" aria-label="Remove content from post by Alice Williams">Remove Content</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <footer class="pagination-controls">
+                <div class="pagination-controls__info">Showing <strong>1-3</strong> of <strong>27</strong> results</div>
+                <div class="pagination-controls__nav">
+                    <button class="btn btn--secondary" type="button" aria-label="Go to previous page" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+                    </button>
+                    <span class="page-number active">1</span>
+                    <span class="page-number">2</span>
+                    <span class="page-number">3</span>
+                    <span class="page-number">...</span>
+                     <span class="page-number">9</span>
+                    <button class="btn btn--secondary" type="button" aria-label="Go to next page">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </main>
+
+    <div class="screen-variations">
+        
+        <!-- Variants -->
+        <div class="variation-group">
+            <h3>Variant Name: "User List"</h3>
+            <normal>Displays a list of platform users with management actions.</normal>
+            <div class="data-table-container">
+                <div class="data-table-wrapper">
+                    <table class="data-table" aria-label="User List">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Joined Date</th>
+                                <th scope="col" class="action-cell">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="avatar">
+                                        <img class="avatar__image" src="https://i.pravatar.cc/40?u=user1" alt="">
+                                        <div>
+                                            <div class="avatar__name">John Smith</div>
+                                            <div class="avatar__subtext">john.smith@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>john.smith@example.com</td>
+                                <td><span class="badge badge--success" style="background-color: rgba(74, 222, 128, 0.2); color: var(--color-success);">Active</span></td>
+                                <td><span class="avatar__subtext">2024-12-01</span></td>
+                                <td class="action-cell">
+                                    <button class="btn btn--secondary" type="button">View Profile</button>
+                                    <button class="btn btn--danger" type="button">Ban User</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="avatar">
+                                        <img class="avatar__image" src="https://i.pravatar.cc/40?u=user2" alt="">
+                                        <div>
+                                            <div class="avatar__name">Emily White</div>
+                                            <div class="avatar__subtext">emily.w@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>emily.w@example.com</td>
+                                <td><span class="badge badge--warning">Deactivated</span></td>
+                                <td><span class="avatar__subtext">2024-11-15</span></td>
+                                <td class="action-cell">
+                                    <button class="btn btn--secondary" type="button">View Profile</button>
+                                    <button class="btn btn--danger" type="button">Ban User</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="variation-group">
+            <h3>Variant Name: "Audit Log"</h3>
+            <normal>Displays a log of administrative actions for security and compliance review.</normal>
+            <div class="data-table-container">
+                 <div class="data-table-wrapper">
+                    <table class="data-table" aria-label="Audit Log">
+                        <thead>
+                            <tr>
+                                <th scope="col">Timestamp</th>
+                                <th scope="col">Administrator</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Target</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="avatar__subtext">2025-01-18 14:32:01 UTC</span></td>
+                                <td>
+                                    <div class="avatar">
+                                        <img class="avatar__image" src="https://i.pravatar.cc/40?u=admin1" alt="">
+                                        <div class="avatar__name">Admin User</div>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge--danger">CONTENT_REMOVED</span></td>
+                                <td><span class="avatar__subtext">Post ID: 1a2b3c-4d5e</span></td>
+                            </tr>
+                             <tr>
+                                <td><span class="avatar__subtext">2025-01-18 11:16:45 UTC</span></td>
+                                <td>
+                                    <div class="avatar">
+                                        <img class="avatar__image" src="https://i.pravatar.cc/40?u=admin1" alt="">
+                                        <div class="avatar__name">Admin User</div>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge--info">REPORT_DISMISSED</span></td>
+                                <td><span class="avatar__subtext">Report ID: 9f8e7d-6c5b</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- States -->
+        <div class="variation-group">
+            <h3>State: "Loading"</h3>
+            <normal>Shows a skeleton loader while data is being fetched from the server.</normal>
+            <div class="data-table-container data-table-container--loading">
+                <div class="skeleton-loader">
+                    <div class="skeleton-row" style="padding: 20px 16px; background-color: var(--color-surface-2);">
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 2;"></div>
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 2;"></div>
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 2;"></div>
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-sm" style="flex: 1;"></div>
+                    </div>
+                    <div class="skeleton-row" style="padding: 12px 16px;">
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 2;"></div>
+                        <div style="flex: 2; display: flex; align-items: center; gap: 12px;">
+                           <div class="skeleton-item skeleton-item--avatar"></div>
+                           <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        </div>
+                        <div style="flex: 2; display: flex; align-items: center; gap: 12px;">
+                           <div class="skeleton-item skeleton-item--avatar"></div>
+                           <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        </div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                    </div>
+                    <div class="skeleton-row" style="padding: 12px 16px; border-top: 1px solid var(--color-border)">
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 2;"></div>
+                        <div style="flex: 2; display: flex; align-items: center; gap: 12px;">
+                           <div class="skeleton-item skeleton-item--avatar"></div>
+                           <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        </div>
+                        <div style="flex: 2; display: flex; align-items: center; gap: 12px;">
+                           <div class="skeleton-item skeleton-item--avatar"></div>
+                           <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        </div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                        <div class="skeleton-item skeleton-item--text-lg" style="flex: 1;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="variation-group">
+            <h3>State: "Empty"</h3>
+            <normal>Shown when the data source returns no items.</normal>
+            <div class="data-table-container data-table-container--empty">
+                 <div class="data-table-wrapper">
+                    <table class="data-table"><thead><tr><th scope="col">Column 1</th><th scope="col">Column 2</th></tr></thead></table>
+                 </div>
+                <div class="empty-state state-overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-inbox" viewBox="0 0 16 16" style="color: var(--color-text-tertiary);">
+                        <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4zM3.81.563A1.5 1.5 0 0 1 4.98 0h6.04a1.5 1.5 0 0 1 1.17.563l3.7 4.625a.5.5 0 0 1-.78.624L11.47 1.5H4.53L1.11 5.75A.5.5 0 0 1 .33 5.125z"/>
+                        <path d="M0 11.5A1.5 1.5 0 0 1 1.5 10h13A1.5 1.5 0 0 1 16 11.5v2A1.5 1.5 0 0 1 14.5 15h-13A1.5 1.5 0 0 1 0 13.5zM1.5 11a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5z"/>
+                    </svg>
+                    <h4>No Items Found</h4>
+                    <p>There are currently no items to display in this view. Try adjusting your filters or check back later.</p>
+                </div>
+                <footer class="pagination-controls"></footer>
+            </div>
+        </div>
+
+        <div class="variation-group">
+            <h3>State: "Error"</h3>
+            <normal>Shown when the API fails to fetch data.</normal>
+            <div class="data-table-container data-table-container--error">
+                <div class="data-table-wrapper">
+                    <table class="data-table"><thead><tr><th scope="col">Column 1</th><th scope="col">Column 2</th></tr></thead></table>
+                </div>
+                <div class="error-state state-overlay">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16" style="color: var(--color-danger);">
+                      <path d="M7.938 2.026A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.026l6.856 11.667c.036.06.035.128.002.183a.19.19 0 0 1-.163.091H1.243a.19.19 0 0 1-.163-.091c-.033-.055-.034-.123.002-.183zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+                    <h4>Failed to Load Data</h4>
+                    <p>An unexpected error occurred while trying to fetch the data. Please try again.</p>
+                    <button class="btn btn--secondary" type="button">Retry</button>
+                </div>
+                <footer class="pagination-controls"></footer>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

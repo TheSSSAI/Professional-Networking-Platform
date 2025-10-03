@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/esm",
+    "declaration": true,
+    "declarationDir": "./dist/esm/types"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/*.test.tsx",
+    "src/**/*.stories.tsx",
+    "src/setupTests.ts",
+    ".storybook",
+    "jest.config.js",
+    "rollup.config.js"
+  ]
+}

@@ -1,0 +1,348 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "Button",
+        "category": "form_controls",
+        "variants": ["primary", "secondary", "danger", "text"],
+        "states": ["default", "hover", "active", "focus", "disabled", "loading"],
+        "responsive_needs": "Ensure touch target size is adequate (min 44px).",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "TextInput",
+        "category": "form_controls",
+        "variants": ["default", "password", "search"],
+        "states": ["default", "focus", "error", "disabled"],
+        "responsive_needs": "Full width on mobile layouts.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "ToggleSwitch",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["on", "off", "disabled"],
+        "responsive_needs": "Standard sizing, ensure adequate touch target.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3-4 hours"
+      },
+      {
+        "component_name": "Badge",
+        "category": "data_display",
+        "variants": ["info", "success", "warning", "error", "neutral"],
+        "states": ["default"],
+        "responsive_needs": "No specific needs, font size may scale with root.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "Alert",
+        "category": "feedback",
+        "variants": ["success", "error", "warning", "info"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Full width on mobile, max-width on desktop.",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3-4 hours"
+      },
+      {
+        "component_name": "LoadingSpinner",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["spinning"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "1-2 hours"
+      },
+      {
+        "component_name": "SkeletonLoader",
+        "category": "feedback",
+        "variants": ["text", "circle", "rectangle"],
+        "states": ["loading"],
+        "responsive_needs": "Must adapt to the layout of the component it is replacing.",
+        "dependencies": [],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "PaginationControls",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["default", "disabled"],
+        "responsive_needs": "Compact view on mobile (e.g., showing fewer page numbers).",
+        "dependencies": ["Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4-5 hours"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "FormGroup",
+        "category": "form_controls",
+        "variants": ["standard", "password_with_mfa"],
+        "states": ["default", "error"],
+        "responsive_needs": "Vertical stacking on mobile.",
+        "dependencies": ["TextInput", "Label", "ErrorMessage"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2-3 hours"
+      },
+      {
+        "component_name": "SearchBar",
+        "category": "navigation",
+        "variants": ["default", "with_filters"],
+        "states": ["default", "focused", "loading"],
+        "responsive_needs": "May collapse to an icon on small screens.",
+        "dependencies": ["TextInput", "Button", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "PageHeader",
+        "category": "layout",
+        "variants": ["with_actions", "simple"],
+        "states": ["default"],
+        "responsive_needs": "Action buttons may stack or move to a menu on mobile.",
+        "dependencies": ["Typography", "Button"],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "2-4 hours"
+      },
+      {
+        "component_name": "UserMenu",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["open", "closed"],
+        "responsive_needs": "None",
+        "dependencies": ["Avatar", "DropdownMenu", "Link"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4-5 hours"
+      },
+      {
+        "component_name": "ModerationActionMenu",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["open", "closed"],
+        "responsive_needs": "None",
+        "dependencies": ["Button", "DropdownMenu"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "3-4 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "AdminLayout",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["default", "mobile_nav_open"],
+        "responsive_needs": "Collapsible sidebar for mobile.",
+        "dependencies": ["AdminHeader", "SidebarNav", "ContentArea"],
+        "complexity_level": "high",
+        "implementation_priority": 3,
+        "estimated_effort": "12-16 hours"
+      },
+      {
+        "component_name": "DataTable",
+        "category": "data_display",
+        "variants": ["moderation_queue", "user_list", "audit_log"],
+        "states": ["loading", "loaded", "error", "empty"],
+        "responsive_needs": "Horizontal scrolling on smaller screens.",
+        "dependencies": ["Table", "TableRow", "TableCell", "PaginationControls", "SkeletonLoader"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "16-20 hours"
+      },
+      {
+        "component_name": "ConfirmationModal",
+        "category": "feedback",
+        "variants": ["destructive_action", "standard"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Full-screen or full-width on mobile.",
+        "dependencies": ["Modal", "Typography", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "6-8 hours"
+      },
+      {
+        "component_name": "ReportedContentViewer",
+        "category": "data_display",
+        "variants": ["post", "comment"],
+        "states": ["loading", "loaded", "error"],
+        "responsive_needs": "Content should be scrollable if it overflows.",
+        "dependencies": ["Card", "Avatar", "Typography"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "8-10 hours"
+      },
+      {
+        "component_name": "LoginForm",
+        "category": "forms",
+        "variants": ["default"],
+        "states": ["default", "submitting", "error"],
+        "responsive_needs": "Adapts to screen size, typically centered.",
+        "dependencies": ["FormGroup", "TextInput", "Button", "Alert"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "4-6 hours"
+      },
+      {
+        "component_name": "MfaForm",
+        "category": "forms",
+        "variants": ["default"],
+        "states": ["default", "submitting", "error"],
+        "responsive_needs": "Adapts to screen size, typically centered.",
+        "dependencies": ["FormGroup", "TextInput", "Button", "Alert"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "3-5 hours"
+      }
+    ]
+  },
+  "screen_inventory": [
+    {
+      "screen_name": "Admin Login Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "error"],
+      "required_components": ["LoginForm", "PageLayout"],
+      "platform_optimizations": "Centered layout, keyboard-friendly.",
+      "implementation_priority": 1,
+      "estimated_effort": "4-8 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "MFA Verification Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "error"],
+      "required_components": ["MfaForm", "PageLayout"],
+      "platform_optimizations": "Centered layout, input auto-focus.",
+      "implementation_priority": 2,
+      "estimated_effort": "4-6 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Content Moderation Queue Screen",
+      "screen_type": "dashboard_page",
+      "variants": ["desktop", "tablet"],
+      "states": ["loading", "loaded", "error", "empty"],
+      "required_components": ["AdminLayout", "PageHeader", "DataTable", "ConfirmationModal", "ReportedContentViewer"],
+      "platform_optimizations": "Desktop-first, as moderation is a power-user task. Table will scroll on smaller screens.",
+      "implementation_priority": 4,
+      "estimated_effort": "12-16 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "User Management Screen",
+      "screen_type": "dashboard_page",
+      "variants": ["desktop", "tablet"],
+      "states": ["loading", "loaded", "error", "empty", "searching"],
+      "required_components": ["AdminLayout", "PageHeader", "SearchBar", "DataTable"],
+      "platform_optimizations": "Optimized for quick searching and scanning of user data.",
+      "implementation_priority": 5,
+      "estimated_effort": "8-12 hours",
+      "user_flow_criticality": "medium"
+    },
+    {
+      "screen_name": "User Detail Screen",
+      "screen_type": "detail_page",
+      "variants": ["desktop", "tablet"],
+      "states": ["loading", "loaded", "error"],
+      "required_components": ["AdminLayout", "PageHeader", "UserInfoCard", "ConfirmationModal"],
+      "platform_optimizations": "Displays all relevant user data in a clear, sectioned layout.",
+      "implementation_priority": 6,
+      "estimated_effort": "8-12 hours",
+      "user_flow_criticality": "medium"
+    },
+    {
+      "screen_name": "Audit Log Screen",
+      "screen_type": "dashboard_page",
+      "variants": ["desktop", "tablet"],
+      "states": ["loading", "loaded", "error", "empty"],
+      "required_components": ["AdminLayout", "PageHeader", "DataTable"],
+      "platform_optimizations": "Read-heavy interface optimized for scanning chronological data.",
+      "implementation_priority": 7,
+      "estimated_effort": "6-8 hours",
+      "user_flow_criticality": "medium"
+    },
+    {
+      "screen_name": "Feature Flags Screen",
+      "screen_type": "settings_page",
+      "variants": ["desktop", "tablet"],
+      "states": ["loading", "loaded", "error"],
+      "required_components": ["AdminLayout", "PageHeader", "List", "ToggleSwitch", "ConfirmationModal"],
+      "platform_optimizations": "Simple list view for easy enabling/disabling of features.",
+      "implementation_priority": 8,
+      "estimated_effort": "6-8 hours",
+      "user_flow_criticality": "low"
+    },
+    {
+      "screen_name": "Access Denied Screen",
+      "screen_type": "error_page",
+      "variants": ["desktop", "mobile"],
+      "states": ["default"],
+      "required_components": ["PageLayout", "Alert", "Button"],
+      "platform_optimizations": "Simple, clear message with a link to go back.",
+      "implementation_priority": 3,
+      "estimated_effort": "2-3 hours",
+      "user_flow_criticality": "medium"
+    }
+  ],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Button", "TextInput", "LoadingSpinner", "Alert", "Typography"],
+      "rationale": "Build the smallest, most reusable atomic components first. These are the fundamental building blocks for everything else.",
+      "estimated_duration": "1 week"
+    },
+    "phase_2_authentication": {
+      "components": ["LoginForm", "MfaForm"],
+      "screens": ["Admin Login Screen", "MFA Verification Screen", "Access Denied Screen"],
+      "rationale": "Implement the complete authentication flow. This is a critical gate for accessing any other part of the application.",
+      "estimated_duration": "1 week"
+    },
+    "phase_3_core_layout_and_data_display": {
+      "components": ["AdminLayout", "PageHeader", "DataTable", "PaginationControls", "SkeletonLoader", "ConfirmationModal"],
+      "rationale": "Establish the main application shell and the complex, reusable data table that will power most pages.",
+      "estimated_duration": "2 weeks"
+    },
+    "phase_4_features": {
+      "screens": ["Content Moderation Queue Screen", "User Management Screen", "User Detail Screen", "Audit Log Screen", "Feature Flags Screen"],
+      "rationale": "Build out the individual feature pages, leveraging the now-complete component library and layout.",
+      "estimated_duration": "3 weeks"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Desktop Web Browser",
+    "implementation_approach": "desktop_first",
+    "responsive_strategy": "The primary target is desktop. Responsive adaptations will be made to ensure usability on tablets, but a full mobile-first implementation is not required for this internal tool.",
+    "progressive_enhancement": "Core functionality is paramount. Enhanced interactions like animations or real-time updates are a lower priority.",
+    "browser_support": "Latest two versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 AA compliance will be integrated throughout development, with a focus on keyboard navigation and screen reader support for data-heavy components like tables."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Use Storybook to develop and test components in isolation. Write unit tests with Jest and React Testing Library for component logic.",
+    "integration_testing": "Test component compositions and data fetching logic via Apollo Client mocks and integration tests.",
+    "responsive_testing": "Manual testing using browser developer tools at tablet and smaller breakpoints. The focus is on preventing broken layouts, not a perfect mobile experience.",
+    "accessibility_testing": "Automated checks with Axe in CI/CD pipeline. Manual keyboard navigation and screen reader testing for critical flows (login, moderation actions).",
+    "performance_testing": "Monitor Next.js build outputs and Lighthouse scores for page load performance. GraphQL query performance will be monitored on the backend."
+  }
+}

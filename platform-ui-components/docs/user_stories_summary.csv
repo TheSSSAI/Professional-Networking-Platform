@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"14","79","11","3","0","[""Service Foundation and Operations"",""Core Authentication and User Lifecycle"",""Account Recovery and Advanced Security"",""Account Management Lifecycle""]","5","[""AWS SES Configuration"",""Event Bus Infrastructure"",""AWS EKS Cluster Availability""]"

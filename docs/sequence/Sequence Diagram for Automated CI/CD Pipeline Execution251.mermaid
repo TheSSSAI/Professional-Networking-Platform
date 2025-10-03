@@ -1,0 +1,33 @@
+sequenceDiagram
+    participant "Developer" as Developer
+    participant "GitHub Repository" as GitHubRepository
+    participant "GitHub Actions" as GitHubActions
+    participant "AWS ECR" as AWSECR
+    participant "AWS EKS Cluster (Staging)" as AWSEKSClusterStaging
+
+    Developer->>GitHubRepository: 1. 1. git push origin feature-branch
+    GitHubRepository-->>Developer: Push confirmation
+    activate GitHubActions
+    GitHubRepository->>GitHubActions: 2. 2. Trigger Workflow (on:push)
+    GitHubActions->>GitHubActions: 3. 3. Execute CI Pipeline Workflow
+    GitHubActions->>GitHubActions: 3.1. 3.1. [Job: build-and-test] Checkout code
+    GitHubActions-->>GitHubActions: Source code available in runner workspace
+    GitHubActions->>GitHubActions: 3.2. 3.2. Run Linting and Static Analysis
+    GitHubActions-->>GitHubActions: Pass/Fail status
+    GitHubActions->>GitHubActions: 3.3. 3.3. Run Unit & Integration Tests (REQ-2.5.2)
+    GitHubActions-->>GitHubActions: Test results and coverage report
+    GitHubActions->>GitHubActions: 3.4. 3.4. Perform Security Scans (REQ-2.7.4)
+    GitHubActions-->>GitHubActions: Vulnerability report
+    GitHubActions->>AWSECR: 3.5. 3.5. Build and Push Docker Image
+    AWSECR-->>GitHubActions: Image manifest digest
+    GitHubActions->>GitHubActions: 3.6. 3.6. Scan Container Image for Vulnerabilities
+    GitHubActions-->>GitHubActions: Vulnerability report
+    GitHubActions->>AWSEKSClusterStaging: 3.7. 3.7. Deploy to Staging via Rolling Update
+    AWSEKSClusterStaging-->>GitHubActions: Deployment status (Success/Fail)
+    GitHubActions->>GitHubRepository: 4. 4. Update Commit Status (Success)
+    GitHubRepository->>Developer: 5. 5. Notify on Pipeline Success
+
+    note over GitHubActions: REQ-2.5.2: Code coverage check is a mandatory quality gate. The pipeline step must parse the cove...
+    note over GitHubActions: REQ-2.7.4: A multi-stage security scan is enforced. Failure at any stage (SAST, SCA, Image Scan) ...
+
+    deactivate GitHubActions

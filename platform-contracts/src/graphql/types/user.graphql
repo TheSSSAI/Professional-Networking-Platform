@@ -1,0 +1,112 @@
+# Represents a user on the platform. This is the main public-facing user object.
+# Corresponds to REQ-1-008 through REQ-1-014.
+type User {
+  # The unique identifier for the user.
+  id: ID!
+
+  # The user's full name.
+  name: String!
+
+  # The user's professional headline.
+  headline: String
+
+  # The URL of the user's profile picture.
+  profilePictureUrl: String
+
+  # The custom URL slug for the user's profile.
+  customUrlSlug: String
+
+  # The connection status between the viewing user and this user.
+  connectionStatus: ConnectionStatus
+}
+
+# Represents the detailed profile of a user.
+type UserProfile {
+  # The unique identifier for the user.
+  id: ID!
+
+  # The user's full name.
+  name: String!
+
+  # The user's professional headline.
+  headline: String
+
+  # The user's current location.
+  location: String
+
+  # The user's contact email. Visibility may be restricted.
+  contactEmail: String
+
+  # The user's phone number. Visibility may be restricted.
+  phone: String
+
+  # The URL of the user's profile picture.
+  profilePictureUrl: String
+
+  # The URL of the user's banner image.
+  bannerUrl: String
+
+  # The custom URL slug for the user's profile.
+  customUrlSlug: String
+
+  # The visibility setting of the profile.
+  visibility: ProfileVisibility!
+
+  # The user's work experience.
+  workExperience: [WorkExperience!]
+
+  # The user's education history.
+  education: [Education!]
+
+  # The user's skills.
+  skills: [Skill!]
+
+  # The connection status between the viewing user and this user.
+  connectionStatus: ConnectionStatus
+}
+
+# Represents a single entry in a user's work experience.
+# Corresponds to REQ-1-009.
+type WorkExperience {
+  id: ID!
+  company: String!
+  title: String!
+  description: String
+  startDate: String!
+  endDate: String
+}
+
+# Represents a single entry in a user's education history.
+# Corresponds to REQ-1-010.
+type Education {
+  id: ID!
+  institution: String!
+  degree: String!
+  fieldOfStudy: String
+  startDate: String!
+  endDate: String
+}
+
+# Represents a skill listed on a user's profile.
+# Corresponds to REQ-1-011.
+type Skill {
+  id: ID!
+  name: String!
+  endorsementCount: Int!
+  # Indicates if the viewing user has endorsed this skill.
+  isEndorsedByViewer: Boolean!
+}
+
+# Represents the connection status between two users.
+enum ConnectionStatus {
+  NOT_CONNECTED
+  PENDING_SENT
+  PENDING_RECEIVED
+  CONNECTED
+}
+
+# Represents the visibility setting for a user's profile.
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+}

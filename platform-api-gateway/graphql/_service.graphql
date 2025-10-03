@@ -1,0 +1,17 @@
+# This file is a stub used for local development tooling with Apollo Federation.
+# The actual gateway schema is composed at runtime by fetching the schemas
+# from the downstream microservices defined in the environment configuration.
+
+# Link to the Federation v2.7 specification
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.7", import: ["@key", "@shareable", "@inaccessible", "@override", "@external", "@provides", "@requires", "@tag"])
+
+# A simple health check query specific to the gateway itself.
+# This allows us to confirm that the gateway is running and has composed its schema,
+# without needing to query a downstream service.
+type Query {
+  """
+  Provides a simple health check for the API Gateway service.
+  Returns true if the gateway is operational.
+  """
+  _gatewayHealth: Boolean!
+}

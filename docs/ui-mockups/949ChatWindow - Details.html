@@ -1,0 +1,654 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatWindow - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ChatWindow</h1>
+            <div class="component-type-badge">organism Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">27</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">5</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Component Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Component Id</h4>
+                    <p>MU-0862-002</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Name</h4>
+                    <p>ChatWindow</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Type</h4>
+                    <p>organism</p>
+                </div>
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>A self-contained organism for a one-on-one direct message conversation. It includes a header with user information, a scrollable message history, a message input form, and states for loading and disconnection.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Design System Alignment</h4>
+                    <p>This component is composed of several molecular and atomic components like UserBadge, MessageBubble, and form controls. It heavily utilizes the design system's tokens for color, typography, spacing, and shadows to create a cohesive and consistent user experience.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Design Tokens Used</h2>
+            <div class="tokens-grid"><div class="token">--color-primary-50</div><div class="token">--color-primary-500</div><div class="token">--color-primary-700</div><div class="token">--color-neutral-50</div><div class="token">--color-neutral-100</div><div class="token">--color-neutral-200</div><div class="token">--color-neutral-400</div><div class="token">--color-neutral-600</div><div class="token">--color-neutral-700</div><div class="token">--color-neutral-900</div><div class="token">--color-semantic-warning</div><div class="token">--color-semantic-warning-bg</div><div class="token">--color-white</div><div class="token">--spacing-xs</div><div class="token">--spacing-sm</div><div class="token">--spacing-md</div><div class="token">--spacing-lg</div><div class="token">--font-family-primary</div><div class="token">--font-size-sm</div><div class="token">--font-size-md</div><div class="token">--font-weight-regular</div><div class="token">--font-weight-semibold</div><div class="token">--border-radius-sm</div><div class="token">--border-radius-md</div><div class="token">--border-radius-lg</div><div class="token">--border-radius-pill</div><div class="token">--shadow-md</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Responsive Specifications</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Mobile Adaptations</h4>
+                    <ul><li>Component takes up 100% of the viewport height and width, typical for a dedicated messaging screen on mobile.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Tablet Adaptations</h4>
+                    <ul><li>Component becomes a windowed element with a max-height, border, and shadow, suitable for a two-pane layout (ConversationList + ChatWindow).</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Desktop Enhancements</h4>
+                    <ul><li>Same as tablet; provides a focused, windowed chat experience within a larger application layout.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Accessibility Features</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Keyboard Support</h4><p>The message input area is focusable and submittable with 'Enter'. Action buttons in the header are keyboard-focusable.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Screen Reader Support</h4><p>The main message area has `role="log"` and new messages should be announced via an `aria-live` region (requires JS). The header `UserBadge` link provides context. Input has an associated label.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Focus Management</h4><p>Focus is managed within the form elements in the footer. A clear `:focus-visible` state is applied to interactive elements.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Aria Attributes</h4><ul><li>role="log"</li><li>aria-label for the main chat region</li><li>aria-live for new messages</li><li>aria-label for icon buttons</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Color Contrast</h4><p>All text and background color combinations meet WCAG 2.1 AA contrast standards.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CSS Implementation</h2>
+            <div class="code-block">/* ChatWindow Component CSS */
+
+/* Design System Tokens */
+:root {
+  --color-primary-50: #E3F2FD;
+  --color-primary-500: #2196F3;
+  --color-primary-700: #1976D2;
+  --color-neutral-50: #F8F9FA;
+  --color-neutral-100: #F1F3F5;
+  --color-neutral-200: #E9ECEF;
+  --color-neutral-400: #CED4DA;
+  --color-neutral-600: #6C757D;
+  --color-neutral-700: #495057;
+  --color-neutral-900: #212529;
+  --color-semantic-warning: #ED6C02;
+  --color-semantic-warning-bg: #FFF3E0;
+  --color-white: #FFFFFF;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --font-family-primary: &#039;Inter&#039;, -apple-system, BlinkMacSystemFont, &#039;Segoe UI&#039;, Roboto, &#039;Helvetica Neue&#039;, Arial, sans-serif;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-pill: 9999px;
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+/* Base Organism: ChatWindow */
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+}
+
+/* Header Element */
+.chat-window__header {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-neutral-200);
+  flex-shrink: 0;
+}
+
+/* Messages List Element */
+.chat-window__messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column-reverse; /* Key for chat UIs */
+}
+
+.chat-window__messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Footer/Input Element */
+.chat-window__footer {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-neutral-200);
+  background-color: var(--color-neutral-50);
+  flex-shrink: 0;
+}
+
+/* State Overlays */
+.chat-window__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.chat-window[data-state=&quot;loading&quot;] .chat-window__overlay,
+.chat-window[data-state=&quot;disconnected&quot;] .chat-window__overlay {
+  display: flex;
+}
+
+.chat-window__overlay .spinner--lg {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+/* Dependencies Implementation */
+
+/* UserBadge (in header) */
+.user-badge { display: inline-flex; align-items: center; gap: var(--spacing-sm); text-decoration: none; color: inherit; max-width: 100%; overflow: hidden; }
+.user-badge:hover .user-badge__name { color: var(--color-primary-700); text-decoration: underline; }
+.user-badge:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; border-radius: var(--border-radius-sm); }
+.user-badge__avatar { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.user-badge__info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.user-badge__name, .user-badge__headline { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-badge__name { font-weight: var(--font-weight-semibold); font-size: var(--font-size-md); color: var(--color-neutral-900); line-height: 1.3; }
+.user-badge__headline { font-size: var(--font-size-sm); color: var(--color-neutral-600); line-height: 1.4; }
+
+/* MessageInput (in footer) */
+.message-input {
+  display: flex;
+  align-items: flex-end; 
+  gap: var(--spacing-sm);
+}
+
+.message-input__textarea {
+  flex-grow: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-md);
+  font-family: inherit;
+  resize: none;
+  max-height: 120px;
+}
+
+.message-input__textarea:focus-visible {
+  border-color: var(--color-primary-700);
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 1px;
+}
+
+.message-input__send-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: none; border-radius: 50%; background: var(--color-primary-700); color: var(--color-white); cursor: pointer; transition: background-color 150ms ease; flex-shrink: 0;
+}
+.message-input__send-btn:hover { background: var(--color-primary-900); }
+.message-input__send-btn:disabled { background: var(--color-neutral-200); color: var(--color-neutral-600); cursor: not-allowed; }
+.message-input__send-btn:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+
+/* MessageBubble (in messages list) */
+.message-group { display: flex; flex-direction: column; gap: var(--spacing-xs); max-width: 80%; }
+.message-group--sent { align-self: flex-end; align-items: flex-end; }
+.message-group--received { align-self: flex-start; align-items: flex-start; }
+
+.message-bubble {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.message-bubble--sent {
+  background-color: var(--color-primary-700);
+  color: var(--color-white);
+  border-bottom-right-radius: var(--border-radius-sm);
+}
+
+.message-bubble--received {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  border-bottom-left-radius: var(--border-radius-sm);
+}
+
+.message-group__meta {
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  padding: 0 var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.message-group__meta svg { width: 14px; height: 14px; }
+
+/* Date Separator */
+.date-separator {
+  text-align: center;
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-600);
+  padding: var(--spacing-sm) 0;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.typing-indicator span {
+  height: 8px; width: 8px; background-color: var(--color-neutral-400); border-radius: 50%; animation: typing-bounce 1s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce { 
+  0%, 60%, 100% { transform: translateY(0); } 
+  30% { transform: translateY(-4px); } 
+}
+
+/* Responsive Adaptations */
+@media (min-width: 768px) {
+  .chat-window {
+    max-height: 80vh;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+}
+</div>
+        </div>
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Embedded Css Architecture</h4>
+                    <p>All CSS is self-contained in a single `<style>` tag, using design system tokens as CSS custom properties and a BEM naming convention for clarity. States are managed via `data-state` attributes.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>The HTML is structured semantically with `<header>`, `<main>`, and `<footer>` elements mapping to the component's sections. Dependencies like `UserBadge` and `MessageBubble` are implemented as part of the overall component CSS.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>A mobile-first approach is used, where the component is full-screen by default. A `min-width` media query then adds desktop/tablet-specific styles like `max-height` and `box-shadow`.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>The static HTML provides a strong accessibility foundation with semantic markup. Full compliance for a dynamic chat application requires JavaScript to manage ARIA live regions and focus.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Designed for modern evergreen browsers, using widely supported features like Flexbox and CSS Grid.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>When To Use</h4><p>As the main interface for one-on-one user conversations within the messaging feature.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Content Guidelines</h4><p>Message text should be sanitized on the backend. Timestamps should be formatted for readability.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Placement Rules</h4><p>On mobile, it typically occupies the entire screen. On desktop, it's often placed as the main content area next to a list of conversations.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Customization Options</h4><ul><li style="list-style: disc; margin-left: 16px; padding-left: 0;">The `data-state` attribute on the root `.chat-window` element can be set to 'loading', 'active', or 'disconnected' to control the UI state.</li></ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Testing Recommendations</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Browser Testing</h4><p>Test in Chrome, Firefox, Safari, Edge.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Device Testing</h4><p>Test on mobile to verify the full-screen layout and touch interactions. Test on desktop to verify the windowed layout and keyboard interactions.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Accessibility Testing</h4><ul><li>Keyboard navigation through all interactive elements.</li><li>Screen reader testing to verify that new messages are announced and user context is clear.</li><li>Color contrast validation.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Performance Testing</h4><p>The message list should use virtualization for very long conversations to avoid performance degradation. This is a JS-level concern beyond this static mockup.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1029 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-UJ-005
+
+## 1.2 Name
+
+User Edits Profile Information
+
+## 1.3 Description
+
+A logged-in user navigates to their profile, enters edit mode, changes information (e.g., their headline or a work experience entry), and saves the changes.
+
+## 1.4 Type
+
+🔹 UserJourney
+
+## 1.5 Purpose
+
+To allow users to manage their professional identity on the platform, fulfilling SRS-001-F2 (1.2.1).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-PROFILE
+- REPO-EVENT-BUS
+
+## 1.10 Key Interactions
+
+- User clicks 'Edit Profile' on their own profile page.
+- Client SPA enters an editable state and user modifies data in a form.
+- User clicks 'Save'.
+- Client sends the updated profile data to the API Gateway.
+- API Gateway routes the request to the User Profile Service.
+- User Profile Service validates the data, updates the records in PostgreSQL, and publishes a 'UserProfileUpdated' event.
+- Client UI updates to show the saved information.
+
+## 1.11 Triggers
+
+- User saves changes to their profile.
+
+## 1.12 Outcomes
+
+- The user's profile is updated in the database.
+- The changes are reflected in the search index (handled by SEQ-EP-001).
+
+## 1.13 Business Rules
+
+- Users can only edit their own profiles.
+- All text fields must adhere to defined character limits and input validation (1.2.1).
+
+## 1.14 Error Scenarios
+
+- Submitted data fails validation (e.g., invalid date range for a job).
+- A unique profile URL is already taken.
+
+## 1.15 Integration Points
+
+- Event Bus (for SEQ-EP-001).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-UI-001
+
+## 2.2 Name
+
+User Accesses and Interacts with the Help Center
+
+## 2.3 Description
+
+This sequence details the end-to-end user journey of accessing the static Help Center page. The flow is entirely client-side, initiated by a user clicking a link in the application footer. It covers navigation via the Next.js router, rendering of the page component, and user interaction with expandable FAQ sections (MUI Accordions), including state changes and re-rendering. This sequence fulfills requirement REQ-1-089.
+
+## 2.4 Participants
+
+### 2.4.1 Human Actor
+
+#### 2.4.1.1 Repository Id
+
+USER_ACTOR
+
+#### 2.4.1.2 Display Name
+
+Platform User
+
+#### 2.4.1.3 Type
+
+🔹 Human Actor
+
+#### 2.4.1.4 Technology
+
+N/A
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #E6E6E6 |
+| Stereotype | User |
+
+### 2.4.2.0 Web Browser
+
+#### 2.4.2.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.2.2 Display Name
+
+Client: Browser
+
+#### 2.4.2.3 Type
+
+🔹 Web Browser
+
+#### 2.4.2.4 Technology
+
+Chrome/Firefox/Safari/Edge
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #87CEEB |
+| Stereotype | Browser |
+
+### 2.4.3.0 Client-Side Component
+
+#### 2.4.3.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.3.2 Display Name
+
+Client: Next.js Router
+
+#### 2.4.3.3 Type
+
+🔹 Client-Side Component
+
+#### 2.4.3.4 Technology
+
+Next.js 14 Router
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #ADD8E6 |
+| Stereotype | Routing |
+
+### 2.4.4.0 Client-Side Component
+
+#### 2.4.4.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.4.2 Display Name
+
+Client: HelpPage Component
+
+#### 2.4.4.3 Type
+
+🔹 Client-Side Component
+
+#### 2.4.4.4 Technology
+
+React 18 Component
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #ADD8E6 |
+| Stereotype | UI Page |
+
+### 2.4.5.0 Client-Side Component
+
+#### 2.4.5.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.5.2 Display Name
+
+Client: MUI Accordion
+
+#### 2.4.5.3 Type
+
+🔹 Client-Side Component
+
+#### 2.4.5.4 Technology
+
+MUI v5 Component
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #ADD8E6 |
+| Stereotype | UI Widget |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 UserInteraction
+
+#### 2.5.1.1 Source Id
+
+USER_ACTOR
+
+#### 2.5.1.2 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.3 Message
+
+1. Clicks 'Help' link in application footer.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 UserInteraction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+DOM Event
+
+##### 2.5.1.10.2 Method
+
+onClick
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'event', 'type': 'MouseEvent'}
+
+##### 2.5.1.10.4 Authentication
+
+N/A - Publicly accessible action.
+
+##### 2.5.1.10.5 Error Handling
+
+N/A
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+<50ms
+
+### 2.5.2.0.0.0 Navigation
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.3.0.0 Message
+
+2. Intercepts click on <Link href='/help'>.
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Navigation
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+Client-Side Routing
+
+##### 2.5.2.10.2.0 Method
+
+handleLinkClick
+
+##### 2.5.2.10.3.0 Parameters
+
+- {'name': 'href', 'type': 'string', 'value': "'/help'"}
+
+##### 2.5.2.10.4.0 Authentication
+
+N/A
+
+##### 2.5.2.10.5.0 Error Handling
+
+If route does not exist, Next.js will render a 404 page.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+<10ms
+
+#### 2.5.2.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-APP-CLIENT', 'targetId': 'REPO-APP-CLIENT', 'message': "2.1. Resolves '/help' route and identifies target component.", 'sequenceNumber': 2.1, 'type': 'InternalLogic', 'isSynchronous': True, 'returnMessage': 'Component: HelpPage', 'hasReturn': True, 'technicalDetails': {'protocol': 'Internal State', 'method': 'resolveRoute', 'parameters': [], 'authentication': 'N/A', 'errorHandling': 'N/A', 'performance': {}}}
+
+### 2.5.3.0.0.0 ComponentLifecycle
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.3.0.0 Message
+
+3. Mounts HelpPage component.
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 ComponentLifecycle
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+React Lifecycle
+
+##### 2.5.3.10.2.0 Method
+
+constructor() / useEffect(..., [])
+
+##### 2.5.3.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.3.10.4.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0 Error Handling
+
+React Error Boundary catches rendering errors.
+
+##### 2.5.3.10.6.0 Performance
+
+*No data available*
+
+### 2.5.4.0.0.0 Render
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.3.0.0 Message
+
+4. Renders static content (headings, categories, Q&A accordions).
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Render
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+HTML/CSS to be painted
+
+#### 2.5.4.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+React Virtual DOM
+
+##### 2.5.4.10.2.0 Method
+
+render()
+
+##### 2.5.4.10.3.0 Parameters
+
+- {'name': 'faqContent', 'type': 'JSON/Array', 'description': 'Static content imported from a local file or defined in the component.'}
+
+##### 2.5.4.10.4.0 Authentication
+
+N/A
+
+##### 2.5.4.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.4.10.6.0 Performance
+
+###### 2.5.4.10.6.1 Description
+
+Page is statically generated (SSG) by Next.js at build time to ensure LCP < 2.5s.
+
+### 2.5.5.0.0.0 UIUpdate
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.5.2.0.0 Target Id
+
+USER_ACTOR
+
+#### 2.5.5.3.0.0 Message
+
+5. Displays rendered Help Center page.
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 UIUpdate
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+Browser Paint
+
+##### 2.5.5.10.2.0 Method
+
+N/A
+
+##### 2.5.5.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.5.10.4.0 Authentication
+
+N/A
+
+##### 2.5.5.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.5.10.6.0 Performance
+
+*No data available*
+
+### 2.5.6.0.0.0 UserInteraction
+
+#### 2.5.6.1.0.0 Source Id
+
+USER_ACTOR
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.6.3.0.0 Message
+
+6. Clicks a question (MUI AccordionSummary).
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 UserInteraction
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+DOM Event
+
+##### 2.5.6.10.2.0 Method
+
+onClick / onKeyDown (Enter/Space)
+
+##### 2.5.6.10.3.0 Parameters
+
+- {'name': 'event', 'type': 'MouseEvent/KeyboardEvent'}
+
+##### 2.5.6.10.4.0 Authentication
+
+N/A
+
+##### 2.5.6.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.6.10.6.0 Performance
+
+###### 2.5.6.10.6.1 Latency
+
+<50ms
+
+### 2.5.7.0.0.0 StateChange
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.7.3.0.0 Message
+
+7. Handles 'onChange' event and updates state.
+
+#### 2.5.7.4.0.0 Sequence Number
+
+7
+
+#### 2.5.7.5.0.0 Type
+
+🔹 StateChange
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7.0.0 Return Message
+
+
+
+#### 2.5.7.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.7.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10.0.0 Technical Details
+
+##### 2.5.7.10.1.0 Protocol
+
+React State Hook
+
+##### 2.5.7.10.2.0 Method
+
+setExpanded('panel1')
+
+##### 2.5.7.10.3.0 Parameters
+
+- {'name': 'panelId', 'type': 'string', 'description': 'The unique ID of the accordion being toggled.'}
+
+##### 2.5.7.10.4.0 Authentication
+
+N/A
+
+##### 2.5.7.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.7.10.6.0 Performance
+
+###### 2.5.7.10.6.1 Latency
+
+<10ms
+
+### 2.5.8.0.0.0 Render
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.8.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.8.3.0.0 Message
+
+8. Re-renders with 'expanded' prop set to true.
+
+#### 2.5.8.4.0.0 Sequence Number
+
+8
+
+#### 2.5.8.5.0.0 Type
+
+🔹 Render
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7.0.0 Return Message
+
+Updated HTML/CSS with visible answer.
+
+#### 2.5.8.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.8.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.8.10.0.0 Technical Details
+
+##### 2.5.8.10.1.0 Protocol
+
+React Virtual DOM
+
+##### 2.5.8.10.2.0 Method
+
+render()
+
+##### 2.5.8.10.3.0 Parameters
+
+- {'name': 'props.expanded', 'type': 'boolean', 'value': 'true'}
+
+##### 2.5.8.10.4.0 Authentication
+
+N/A
+
+##### 2.5.8.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.8.10.6.0 Performance
+
+###### 2.5.8.10.6.1 Description
+
+Component re-render should be under 16ms to maintain smooth UI.
+
+### 2.5.9.0.0.0 UIUpdate
+
+#### 2.5.9.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.9.2.0.0 Target Id
+
+USER_ACTOR
+
+#### 2.5.9.3.0.0 Message
+
+9. Displays expanded answer.
+
+#### 2.5.9.4.0.0 Sequence Number
+
+9
+
+#### 2.5.9.5.0.0 Type
+
+🔹 UIUpdate
+
+#### 2.5.9.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7.0.0 Return Message
+
+
+
+#### 2.5.9.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.9.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.9.10.0.0 Technical Details
+
+##### 2.5.9.10.1.0 Protocol
+
+Browser Paint
+
+##### 2.5.9.10.2.0 Method
+
+N/A
+
+##### 2.5.9.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.9.10.4.0 Authentication
+
+N/A
+
+##### 2.5.9.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.9.10.6.0 Performance
+
+*No data available*
+
+### 2.5.10.0.0.0 UserInteraction
+
+#### 2.5.10.1.0.0 Source Id
+
+USER_ACTOR
+
+#### 2.5.10.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.10.3.0.0 Message
+
+10. Clicks the same question again to collapse.
+
+#### 2.5.10.4.0.0 Sequence Number
+
+10
+
+#### 2.5.10.5.0.0 Type
+
+🔹 UserInteraction
+
+#### 2.5.10.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.10.7.0.0 Return Message
+
+
+
+#### 2.5.10.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.10.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.10.10.0.0 Technical Details
+
+##### 2.5.10.10.1.0 Protocol
+
+DOM Event
+
+##### 2.5.10.10.2.0 Method
+
+onClick
+
+##### 2.5.10.10.3.0 Parameters
+
+- {'name': 'event', 'type': 'MouseEvent'}
+
+##### 2.5.10.10.4.0 Authentication
+
+N/A
+
+##### 2.5.10.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.10.10.6.0 Performance
+
+*No data available*
+
+### 2.5.11.0.0.0 StateChange
+
+#### 2.5.11.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.11.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.11.3.0.0 Message
+
+11. Handles 'onChange' event, updates state to collapse.
+
+#### 2.5.11.4.0.0 Sequence Number
+
+11
+
+#### 2.5.11.5.0.0 Type
+
+🔹 StateChange
+
+#### 2.5.11.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.11.7.0.0 Return Message
+
+
+
+#### 2.5.11.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.11.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.11.10.0.0 Technical Details
+
+##### 2.5.11.10.1.0 Protocol
+
+React State Hook
+
+##### 2.5.11.10.2.0 Method
+
+setExpanded(false)
+
+##### 2.5.11.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.11.10.4.0 Authentication
+
+N/A
+
+##### 2.5.11.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.11.10.6.0 Performance
+
+*No data available*
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Accessibility (AC-007): All accordions must be fully navigable and operable via keyboard (Tab to focus, Enter/Space to toggle). This is a standard feature of the MUI Accordion component but must be verified.
+
+#### 2.6.1.2.0.0 Position
+
+bottom
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.1.4.0.0 Sequence Number
+
+6
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Static Content: The initial FAQ content is managed as a static JSON asset within the frontend codebase. Updates to the FAQ require a new frontend deployment. This simplifies the initial implementation by avoiding a CMS or backend API.
+
+#### 2.6.2.2.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+4
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Responsiveness (AC-006): The layout must adapt to mobile, tablet, and desktop viewports. MUI's grid system and built-in responsive styles should be used to ensure readability and usability across all devices.
+
+#### 2.6.3.2.0.0 Position
+
+bottom
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.3.4.0.0 Sequence Number
+
+5
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | As a static content page, the primary security con... |
+| Performance Targets | The page must meet the LCP target of < 2.5s as per... |
+| Error Handling Strategy | For this client-side journey, error handling is mi... |
+| Testing Considerations | 1. **Unit Tests (Jest/RTL):** Test the `HelpPage` ... |
+| Monitoring Requirements | Implement Real User Monitoring (RUM) via the OpenT... |
+| Deployment Considerations | The `/help` page will be pre-rendered as a static ... |
+

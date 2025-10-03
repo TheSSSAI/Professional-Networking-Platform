@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package identity;
+
+import "google/protobuf/empty.proto";
+
+// The Identity service definition.
+// This service is the authoritative source for user identity, authentication, and authorization.
+service IdentityService {
+  // User Registration (REQ-1-001, REQ-1-092)
+  rpc RegisterUser (RegisterRequest) returns (UserResponse);
+
+  // User Login (REQ-1-002, REQ-1-055)
+  rpc Login (LoginRequest) returns (LoginResponse);
+
+  // User Logout (REQ-1-002, REQ-1-005)
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty);
+
+  // Token Validation (for API Gateway)
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+
+  // Token Refresh (REQ-1-004)
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse);
+
+  // Email Verification (REQ-1-001)
+  rpc VerifyEmail (VerifyEmailRequest) returns (google.protobuf.Empty);
+
+  // Password Reset Request (REQ-1-003)
+  rpc RequestPasswordReset (RequestPasswordResetRequest) returns (google.protobuf.Empty);
+
+  // Password Reset Execution (REQ-1-003)
+  rpc ResetPassword (ResetPasswordRequest) returns (google.protobuf.Empty);
+  
+  // MFA Enablement (REQ-1-055)
+  rpc EnableMfa (EnableMfaRequest) returns (EnableMfaResponse);
+  
+  // MFA Verification during Login (REQ-1-055)
+  rpc VerifyMfa (VerifyMfaRequest) returns (LoginResponse);
+}
+
+// -------- User Registration --------
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string dateOfBirth = 3; // ISO 8601 date string
+}
+
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string status = 3;
+}
+
+// -------- Login --------
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+  bool mfaRequired = 3;
+  string mfaSessionToken = 4; // Sent if mfaRequired is true
+}
+
+// -------- Logout --------
+message LogoutRequest {
+  string accessToken = 1;
+}
+
+// -------- Token Validation --------
+
+message ValidateTokenRequest {
+  string accessToken = 1;
+}
+
+message ValidateTokenResponse {
+  string userId = 1;
+  repeated string roles = 2;
+  bool isValid = 3;
+}
+
+// -------- Token Refresh --------
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+// -------- Email Verification --------
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+// -------- Password Reset --------
+
+message RequestPasswordResetRequest {
+  string email = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string newPassword = 2;
+}
+
+// -------- MFA --------
+
+message EnableMfaRequest {
+  // The user ID is implicitly taken from the authenticated context
+}
+
+message EnableMfaResponse {
+  string secret = 1;
+  string qrCodeUrl = 2;
+}
+
+message VerifyMfaRequest {
+  string mfaSessionToken = 1;
+  string code = 2;
+}

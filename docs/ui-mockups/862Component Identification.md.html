@@ -1,0 +1,313 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "Button",
+        "category": "form_controls",
+        "variants": ["primary", "secondary", "danger", "text", "icon"],
+        "states": ["default", "hover", "active", "focus", "disabled", "loading"],
+        "responsive_needs": "Ensure minimum touch target size of 44x44px on mobile.",
+        "dependencies": ["Icon", "LoadingSpinner"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "TextInput",
+        "category": "form_controls",
+        "variants": ["default", "password", "search"],
+        "states": ["default", "focus", "error", "disabled"],
+        "responsive_needs": "Full width on mobile layouts.",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "Avatar",
+        "category": "data_display",
+        "variants": ["small", "medium", "large", "default_initials"],
+        "states": ["default", "with_status_indicator"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "Badge",
+        "category": "data_display",
+        "variants": ["notification_count", "info"],
+        "states": ["default"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "Alert",
+        "category": "feedback",
+        "variants": ["success", "error", "warning", "info"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Adapts to container width.",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "LoadingSpinner",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["spinning"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "SkeletonLoader",
+        "category": "feedback",
+        "variants": ["text", "circle", "rectangle"],
+        "states": ["loading"],
+        "responsive_needs": "Must be composable to mimic various layouts.",
+        "dependencies": [],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "5 hours"
+      },
+      {
+        "component_name": "Modal",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Full-screen on mobile, centered on desktop.",
+        "dependencies": ["Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "Card",
+        "category": "layout",
+        "variants": ["default", "outlined"],
+        "states": ["default", "hover"],
+        "responsive_needs": "Padding adjusted for mobile.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "ToggleSwitch",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["on", "off", "disabled"],
+        "responsive_needs": "Ensure adequate touch target.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3 hours"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "FormGroup",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["default", "error"],
+        "responsive_needs": "Vertical stacking of label and input.",
+        "dependencies": ["TextInput", "Label", "ErrorMessage"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "ActionMenu",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["open", "closed"],
+        "responsive_needs": "None",
+        "dependencies": ["Button", "Icon", "DropdownMenu"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "FileUpload",
+        "category": "form_controls",
+        "variants": ["image_uploader"],
+        "states": ["idle", "uploading", "success", "error"],
+        "responsive_needs": "Clear feedback on mobile.",
+        "dependencies": ["Button", "LoadingSpinner", "Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "ReactionPicker",
+        "category": "form_controls",
+        "variants": ["post_reactions"],
+        "states": ["default", "expanded"],
+        "responsive_needs": "Adapts to long-press on touch devices.",
+        "dependencies": ["Button", "Icon", "Tooltip"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "AutocompleteInput",
+        "category": "form_controls",
+        "variants": ["skills", "location"],
+        "states": ["default", "focused", "loading_suggestions", "error"],
+        "responsive_needs": "Dropdown should be full-width on mobile.",
+        "dependencies": ["TextInput", "DropdownMenu", "LoadingSpinner"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "UserBadge",
+        "category": "data_display",
+        "variants": ["default", "with_headline"],
+        "states": ["default"],
+        "responsive_needs": "Truncate text gracefully.",
+        "dependencies": ["Avatar", "TypographyWrapper"],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "Pagination",
+        "category": "navigation",
+        "variants": ["standard", "simple"],
+        "states": ["default"],
+        "responsive_needs": "Compact version for mobile (e.g., 'Prev/Next' only).",
+        "dependencies": ["Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "5 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "PostCard",
+        "category": "data_display",
+        "variants": ["default", "with_images", "with_link_preview"],
+        "states": ["default"],
+        "responsive_needs": "Adapts to a single-column layout.",
+        "dependencies": ["Card", "UserBadge", "ActionMenu", "ReactionPicker"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "12 hours"
+      },
+      {
+        "component_name": "PostComposer",
+        "category": "forms",
+        "variants": ["modal", "inline"],
+        "states": ["default", "submitting", "error"],
+        "responsive_needs": "May become a full-screen modal on mobile.",
+        "dependencies": ["Card", "Avatar", "TextArea", "Button", "FileUpload"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "16 hours"
+      },
+      {
+        "component_name": "ProfileSection",
+        "category": "layout",
+        "variants": ["experience", "education", "skills"],
+        "states": ["view", "edit", "empty"],
+        "responsive_needs": "Vertical stacking of list items.",
+        "dependencies": ["Card", "Button", "Icon", "ListItemComponents"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "ConfirmationDialog",
+        "category": "feedback",
+        "variants": ["destructive", "standard"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Adapts to screen size.",
+        "dependencies": ["Modal", "Button", "TypographyWrapper"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "5 hours"
+      },
+      {
+        "component_name": "NotificationItem",
+        "category": "data_display",
+        "variants": ["connection_request", "reaction", "comment"],
+        "states": ["read", "unread"],
+        "responsive_needs": "Text truncation.",
+        "dependencies": ["Avatar", "Link", "TypographyWrapper"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "DataTable",
+        "category": "data_display",
+        "variants": ["default"],
+        "states": ["loading", "loaded", "error", "empty"],
+        "responsive_needs": "Horizontal scrolling on mobile.",
+        "dependencies": ["Table", "Pagination", "SkeletonLoader", "ActionMenu"],
+        "complexity_level": "high",
+        "implementation_priority": 5,
+        "estimated_effort": "20 hours"
+      },
+      {
+        "component_name": "MessageBubble",
+        "category": "data_display",
+        "variants": ["sent", "received"],
+        "states": ["default", "with_status_indicator"],
+        "responsive_needs": "Adapts to container width.",
+        "dependencies": ["TypographyWrapper", "Tooltip"],
+        "complexity_level": "medium",
+        "implementation_priority": 6,
+        "estimated_effort": "4 hours"
+      }
+    ]
+  },
+  "screen_inventory": [],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Button", "TextInput", "Avatar", "LoadingSpinner", "Alert", "Modal", "Card", "TypographyWrapper", "Icon"],
+      "rationale": "Build the foundational atomic components that are dependencies for almost all other components. This establishes the core visual language and interaction patterns.",
+      "estimated_duration": "1 sprint"
+    },
+    "phase_2_building_blocks": {
+      "components": ["FormGroup", "Badge", "SkeletonLoader", "ToggleSwitch", "ActionMenu", "UserBadge", "ConfirmationDialog"],
+      "rationale": "Combine atomic components into reusable molecular patterns for forms, feedback, and basic data display.",
+      "estimated_duration": "1 sprint"
+    },
+    "phase_3_core_app_organisms": {
+      "components": ["PostCard", "PostComposer", "ReactionPicker", "AutocompleteInput", "FileUpload", "Pagination"],
+      "rationale": "Develop the complex components required for the main user-facing application's core features like the feed, search, and profile.",
+      "estimated_duration": "2 sprints"
+    },
+    "phase_4_advanced_and_admin_organisms": {
+      "components": ["ProfileSection", "NotificationItem", "DataTable", "MessageBubble"],
+      "rationale": "Build the remaining specialized components for profile management, notifications, admin tables, and messaging to complete the library.",
+      "estimated_duration": "2 sprints"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Web (consumed by React applications)",
+    "implementation_approach": "mobile_first",
+    "responsive_strategy": "Components are designed to be intrinsically responsive, using flexible layouts and media queries based on the defined breakpoints. Consumers of the library will handle page-level responsive layout.",
+    "progressive_enhancement": "Core functionality and accessibility are built-in. Advanced animations and interactions are layered on top and respect `prefers-reduced-motion`.",
+    "browser_support": "Latest two versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 AA compliance is a mandatory requirement for every component. This includes keyboard navigation, ARIA attributes, focus management, and color contrast, enforced through automated and manual testing."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Each component will be developed in isolation using Storybook for visual testing and documentation. Unit tests with Jest and React Testing Library will cover logic, state changes, and props. Aim for >80% test coverage.",
+    "integration_testing": "Not applicable at the library level. The consuming applications ('platform-web-app', 'platform-admin-ui') are responsible for integration testing.",
+    "responsive_testing": "Storybook will be configured with viewport controls to test each component at mobile, tablet, and desktop breakpoints. Visual regression testing will be used to catch unintended layout changes.",
+    "accessibility_testing": "Automated accessibility audits using `axe-core` will be integrated into Storybook and the CI/CD pipeline. Manual testing (keyboard navigation, screen reader checks) is required for complex interactive components like modals and menus.",
+    "performance_testing": "Bundle size analysis will be performed to ensure the library remains lean. Component render performance will be profiled to avoid unnecessary re-renders."
+  }
+}

@@ -1,0 +1,136 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+      - 'modules/**'
+      - '.github/workflows/terraform-ci.yml'
+
+permissions:
+  id-token: write # Required for AWS OIDC authentication
+  contents: read # Required to checkout the code
+  pull-requests: write # Required to post comments on pull requests
+
+jobs:
+  terraform_plan:
+    name: 'Terraform Plan & Validate'
+    runs-on: ubuntu-latest
+    
+    # This assumes PRs to 'main' are for the 'staging' environment.
+    # A more complex setup could map branches to environments.
+    defaults:
+      run:
+        working-directory: ./environments/staging
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.8.0' # Pin version for consistency
+
+      - name: Install TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.51.1
+
+      - name: Install TFSec
+        uses: aquasecurity/tfsec-action@v1.1.2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN_STAGING }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive ../../
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Run TFLint
+        id: tflint
+        run: tflint --recursive ../../
+        continue-on-error: true
+
+      - name: Run TFSec
+        id: tfsec
+        run: tfsec ../../
+        continue-on-error: true
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -out=tfplan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        continue-on-error: true
+
+      - name: Create Plan Output
+        id: plan-output
+        run: |
+          # Convert plan to JSON for easier parsing if needed, but here we use text
+          terraform show -no-color tfplan > plan.txt
+          echo "plan_text<<EOF" >> $GITHUB_ENV
+          cat plan.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post PR Comment
+        uses: actions/github-script@v7
+        env:
+          PLAN: "${{ env.plan_text }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const getJobStatus = (job) => {
+              if (job.outcome === 'success') return '✅';
+              if (job.outcome === 'failure') return '❌';
+              return '⚪';
+            };
+
+            const format = (job) => `${getJobStatus(job)} **${job.name}**\n`;
+
+            const output = `
+            #### Terraform CI Results 🤖
+            
+            - ${format(steps.fmt)} Terraform Format Check
+            - ${format(steps.init)} Terraform Init
+            - ${format(steps.validate)} Terraform Validate
+            - ${format(steps.tflint)} TFLint
+            - ${format(steps.tfsec)} TFSec
+            - ${format(steps.plan)} Terraform Plan
+
+            <details><summary>Show Plan</summary>
+            
+            \`\`\`terraform
+            ${process.env.PLAN}
+            \`\`\`
+
+            </details>
+            
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+            
+            if (steps.fmt.outcome === 'failure' || steps.validate.outcome === 'failure' || steps.tflint.outcome === 'failure' || steps.tfsec.outcome === 'failure' || steps.plan.outcome === 'failure' || steps.init.outcome === 'failure') {
+              core.setFailed('One or more Terraform checks failed.');
+            }

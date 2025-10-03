@@ -1,0 +1,4 @@
+"environment_name","environment_type","deployment_frequency","data_refresh_frequency","infrastructure_stack","service_dependencies","monitoring_tools","access_control","backup_strategy","disaster_recovery","cost_optimization","maintenance_window"
+"Local Development","Isolated","On-demand","N/A","Docker Compose","Prometheus, Alertmanager, Grafana","Container logs, Service UIs","Local user","N/A","N/A","N/A","N/A"
+"CI Environment","Ephemeral","Every commit","N/A","GitHub Actions Runner (VM)","CLI tools (promtool, amtool, trufflehog)","GitHub Actions logs","Automated","N/A","N/A","N/A","N/A"
+"Staging Environment","Shared","On merge to main","As needed","AWS EKS (production-like)","Full stack of microservices; Staging PagerDuty","The observability stack itself","SRE/DevOps Team","Daily snapshots","8-hour RTO","Scheduled scaling","Weekly"

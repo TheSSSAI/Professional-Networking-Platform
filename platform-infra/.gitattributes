@@ -1,0 +1,27 @@
+.gitattributes
+# .gitattributes
+# This file is used to define attributes for pathnames.
+# It helps maintain consistency in the repository across different operating systems and Git configurations.
+
+# Set the default behavior for all text files to be normalized to LF line endings on commit.
+# This prevents issues with mixed line endings (CRLF vs LF) between Windows and Unix-like systems.
+* text=auto eol=lf
+
+# Explicitly declare files that are always text.
+*.hcl text
+*.tf text
+*.tfvars text
+*.yml text
+*.yaml text
+*.json text
+*.md text
+*.gitignore text
+*.gitattributes text
+*.editorconfig text
+
+# Explicitly declare files that are binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.lock binary

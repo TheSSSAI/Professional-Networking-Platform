@@ -1,0 +1,106 @@
+# prometheus.yml
+# Main configuration for the Prometheus server.
+# This file defines global settings, scrape jobs for service discovery, and loads alerting rules.
+# It is the central orchestration point for metrics collection as per REQ-1-083 and REQ-1-084.
+
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alerting specifies configuration for Alertmanager.
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            # The Kubernetes service name for the Alertmanager.
+            # Assumes Alertmanager is running in the same namespace with this service name.
+            - 'alertmanager.observability.svc.cluster.local:9093'
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - 'rules/system.rules.yml'
+  - 'rules/api.rules.yml'
+  - 'rules/business.rules.yml'
+  - 'rules/database.rules.yml'
+
+# A list of scrape configurations.
+scrape_configs:
+  # Job to scrape Prometheus itself.
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Job to scrape application microservices running in Kubernetes.
+  # This uses Kubernetes service discovery to find pods that are annotated for scraping.
+  # This is the primary mechanism for collecting application metrics (REQ-1-083).
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      # Filter for pods with the 'prometheus.io/scrape: "true"' annotation.
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      # Use the pod's 'prometheus.io/path' annotation for the scrape path, default to /metrics.
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      # Use the pod's 'prometheus.io/port' annotation for the scrape port.
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      # Create a 'service' label from the Kubernetes app label for better aggregation.
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        action: replace
+        target_label: service
+      # Create an 'instance' label from the pod name.
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      # Add namespace and pod name as labels.
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+
+  # Job for scraping Kubernetes nodes (kubelets).
+  - job_name: 'kubernetes-nodes'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      insecure_skip_verify: true # In a production setup, consider setting this to false with proper certs.
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+  # Job for scraping cadvisor metrics from nodes for container resource usage.
+  - job_name: 'kubernetes-cadvisor'
+    kubernetes_sd_configs:
+      - role: node
+    scheme: https
+    tls_config:
+      ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor

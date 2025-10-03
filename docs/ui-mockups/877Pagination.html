@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagination Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-100: #BBDEFB;
+      --color-primary-200: #90CAF9;
+      --color-primary-300: #64B5F6;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-600: #6C757D;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-caption: 0.875rem; /* 14px */
+      --font-weight-semibold: 600;
+      /* Spacing */
+      --space-2: 8px;
+      --space-4: 24px;
+      --space-5: 32px;
+      /* Borders */
+      --border-radius-md: 8px;
+    }
+
+    /* --- Base & Showcase Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-50);
+      color: var(--color-neutrals-gray-900);
+      padding: var(--space-5);
+    }
+    .showcase-section {
+      background-color: var(--color-neutrals-white);
+      padding: var(--space-4);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--space-5);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .showcase-section h2 {
+      margin-bottom: var(--space-4);
+    }
+    .showcase-section h3 {
+      font-size: 1rem;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-2);
+      color: var(--color-neutrals-gray-700);
+    }
+    .variant-group {
+      padding: var(--space-4);
+      border: 1px solid var(--color-neutrals-gray-200);
+      border-radius: var(--border-radius-md);
+    }
+    .variant-group + .variant-group {
+        margin-top: var(--space-4);
+    }
+    .variant-instance {
+      margin-bottom: var(--space-4);
+    }
+    .variant-instance:last-child {
+        margin-bottom: 0;
+    }
+    code {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--color-neutrals-gray-600);
+    }
+
+    /* --- Icon Styles --- */
+    .icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      stroke-width: 2.5;
+      vertical-align: middle;
+      fill: none;
+      stroke: currentColor;
+    }
+
+    /* --- Pagination Component CSS --- */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-family: var(--font-family-primary);
+    }
+
+    .pagination__list {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      gap: var(--space-2);
+    }
+
+    .pagination__item {
+      margin: 0;
+    }
+
+    .pagination__link,
+    .pagination__ellipsis {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: 44px;
+      padding: 0 var(--space-2);
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-caption);
+      text-decoration: none;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      border: 1px solid var(--color-neutrals-gray-400);
+      color: var(--color-neutrals-gray-700);
+      background-color: var(--color-neutrals-white);
+    }
+
+    .pagination__link:hover {
+      background-color: var(--color-primary-50);
+      border-color: var(--color-primary-700);
+      color: var(--color-primary-800);
+    }
+
+    .pagination__link:focus-visible {
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: 2px;
+      border-color: var(--color-primary-700);
+    }
+
+    .pagination__item--active .pagination__link {
+      background-color: var(--color-primary-700);
+      border-color: var(--color-primary-700);
+      color: var(--color-neutrals-white);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .pagination__item--disabled .pagination__link {
+      color: var(--color-neutrals-gray-500);
+      background-color: var(--color-neutrals-gray-100);
+      border-color: var(--color-neutrals-gray-200);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
+    .pagination__ellipsis {
+      border: 1px solid transparent;
+      background-color: transparent;
+      color: var(--color-neutrals-gray-600);
+      pointer-events: none;
+    }
+
+    .pagination__link .icon {
+      width: 1.25em;
+      height: 1.25em;
+    }
+    
+    /* Simple Variant */
+    .pagination--simple .pagination__list {
+        display: none; /* Hides number links */
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+      body {
+        padding: var(--space-4);
+      }
+      .pagination--standard .pagination__list {
+        display: none; /* On mobile, standard pagination becomes simple */
+      }
+      .pagination__link {
+        min-width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Icon Definitions -->
+  <svg width="0" height="0" style="display:none;">
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </symbol>
+  </svg>
+
+  <main>
+    <section class="showcase-section">
+      <h2>Pagination Component</h2>
+      <p>Used to navigate between pages of content like data tables or search results. It adapts to mobile screens by hiding page numbers.</p>
+    </section>
+
+    <section class="showcase-section">
+        <div class="variant-group">
+            <h3>Standard Variant</h3>
+            
+            <div class="variant-instance">
+                <code>State: First Page</code>
+                <nav class="pagination pagination--standard" aria-label="pagination">
+                    <a href="#" class="pagination__link" aria-disabled="true" style="pointer-events: none; color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); border-color: var(--color-neutrals-gray-200);">
+                        <svg class="icon"><use href="#icon-chevron-left"/></svg>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <ul class="pagination__list">
+                        <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">1</a></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">2</a></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">3</a></li>
+                        <li class="pagination__item"><span class="pagination__ellipsis">…</span></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">10</a></li>
+                    </ul>
+                    <a href="#" class="pagination__link">
+                        <span class="sr-only">Next</span>
+                        <svg class="icon"><use href="#icon-chevron-right"/></svg>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="variant-instance">
+                <code>State: Middle Page</code>
+                <nav class="pagination pagination--standard" aria-label="pagination">
+                    <a href="#" class="pagination__link">
+                        <svg class="icon"><use href="#icon-chevron-left"/></svg>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <ul class="pagination__list">
+                        <li class="pagination__item"><a href="#" class="pagination__link">1</a></li>
+                        <li class="pagination__item"><span class="pagination__ellipsis">…</span></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">4</a></li>
+                        <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">5</a></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">6</a></li>
+                        <li class="pagination__item"><span class="pagination__ellipsis">…</span></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">10</a></li>
+                    </ul>
+                    <a href="#" class="pagination__link">
+                        <span class="sr-only">Next</span>
+                        <svg class="icon"><use href="#icon-chevron-right"/></svg>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="variant-instance">
+                <code>State: Last Page</code>
+                <nav class="pagination pagination--standard" aria-label="pagination">
+                    <a href="#" class="pagination__link">
+                        <svg class="icon"><use href="#icon-chevron-left"/></svg>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <ul class="pagination__list">
+                        <li class="pagination__item"><a href="#" class="pagination__link">1</a></li>
+                        <li class="pagination__item"><span class="pagination__ellipsis">…</span></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">8</a></li>
+                        <li class="pagination__item"><a href="#" class="pagination__link">9</a></li>
+                        <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">10</a></li>
+                    </ul>
+                    <a href="#" class="pagination__link" aria-disabled="true" style="pointer-events: none; color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); border-color: var(--color-neutrals-gray-200);">
+                        <span class="sr-only">Next</span>
+                        <svg class="icon"><use href="#icon-chevron-right"/></svg>
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="variant-group">
+            <h3>Simple Variant</h3>
+            <div class="variant-instance">
+                <code>State: First Page</code>
+                <nav class="pagination pagination--simple" aria-label="pagination">
+                    <a href="#" class="pagination__link" aria-disabled="true" style="pointer-events: none; color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); border-color: var(--color-neutrals-gray-200);">
+                        Previous
+                    </a>
+                    <a href="#" class="pagination__link">
+                        Next
+                    </a>
+                </nav>
+            </div>
+            <div class="variant-instance">
+                <code>State: Middle Page</code>
+                <nav class="pagination pagination--simple" aria-label="pagination">
+                    <a href="#" class="pagination__link">
+                        Previous
+                    </a>
+                    <a href="#" class="pagination__link">
+                        Next
+                    </a>
+                </nav>
+            </div>
+             <div class="variant-instance">
+                <code>State: Last Page</code>
+                <nav class="pagination pagination--simple" aria-label="pagination">
+                    <a href="#" class="pagination__link">
+                        Previous
+                    </a>
+                    <a href="#" class="pagination__link" aria-disabled="true" style="pointer-events: none; color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); border-color: var(--color-neutrals-gray-200);">
+                        Next
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </section>
+
+  </main>
+  
+  <div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : standard<h3>
+		<normal> Standard pagination with page numbers, responsive on mobile. </normal>
+		<nav class="pagination pagination--standard" aria-label="pagination">
+            <a href="#" class="pagination__link" aria-disabled="true" style="pointer-events: none; color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); border-color: var(--color-neutrals-gray-200);">
+                <svg class="icon"><use href="#icon-chevron-left"/></svg>
+                <span class="sr-only">Previous</span>
+            </a>
+            <ul class="pagination__list">
+                <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">1</a></li>
+                <li class="pagination__item"><a href="#" class="pagination__link">2</a></li>
+                <li class="pagination__item"><a href="#" class="pagination__link">3</a></li>
+            </ul>
+            <a href="#" class="pagination__link">
+                <span class="sr-only">Next</span>
+                <svg class="icon"><use href="#icon-chevron-right"/></svg>
+            </a>
+        </nav>
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : simple<h3>
+		<normal> Minimalist pagination with only 'Previous' and 'Next' controls. </normal>
+		<nav class="pagination pagination--simple" aria-label="pagination">
+            <a href="#" class="pagination__link">
+                Previous
+            </a>
+            <a href="#" class="pagination__link">
+                Next
+            </a>
+        </nav>
+      </div>
+	 </div>    
+	
+</body>
+</html>

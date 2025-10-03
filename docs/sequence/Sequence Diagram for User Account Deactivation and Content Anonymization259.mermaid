@@ -1,0 +1,41 @@
+sequenceDiagram
+    actor "User" as User
+    participant "API Gateway" as APIGateway
+    actor "User Profile Service" as UserProfileService
+    participant "PostgreSQL DB" as PostgreSQLDB
+    participant "Redis Cache" as RedisCache
+    participant "Event Bus" as EventBus
+    participant "Search Service" as SearchService
+    participant "OpenSearch Cluster" as OpenSearchCluster
+    participant "Posts & Engagement Service" as PostsEngagementService
+
+    User->>APIGateway: 1. 1. POST /v1/me/account/deactivate
+    APIGateway-->>User: 9. HTTP 200 OK or 4xx/5xx Error
+    activate UserProfileService
+    APIGateway->>UserProfileService: 2. 2. deactivateAccount(userId)
+    UserProfileService-->>APIGateway: 8. DeactivateAccountResponse { success: true }
+    activate PostgreSQLDB
+    UserProfileService->>PostgreSQLDB: 3. 3. BEGIN TRANSACTION
+    PostgreSQLDB-->>UserProfileService: Success
+    UserProfileService->>PostgreSQLDB: 4. 4. UPDATE "User" SET status = 'DEACTIVATED' WHERE id = :userId
+    PostgreSQLDB-->>UserProfileService: 1 row affected
+    UserProfileService->>RedisCache: 5. 5. Invalidate Profile Cache
+    RedisCache-->>UserProfileService: Success/Failure
+    UserProfileService->>PostgreSQLDB: 6. 6. COMMIT TRANSACTION
+    PostgreSQLDB-->>UserProfileService: Success
+    UserProfileService->>EventBus: 7. 7. Publish(topic='user-events', event='AccountDeactivated')
+    activate SearchService
+    EventBus->>SearchService: 10. 10. Deliver Event: AccountDeactivated
+    SearchService->>OpenSearchCluster: 11. 11. DELETE /user_profiles/_doc/:userId
+    OpenSearchCluster-->>SearchService: 200 OK { result: 'deleted' }
+    activate PostsEngagementService
+    EventBus->>PostsEngagementService: 12. 12. Deliver Event: AccountDeactivated
+    PostsEngagementService->>PostgreSQLDB: 13. 13. Anonymize user's interactive content
+    PostgreSQLDB-->>PostsEngagementService: N rows affected
+
+    note over UserProfileService: A successful transaction here is critical. The Unit of Work pattern is applied to ensure the user...
+
+    deactivate PostsEngagementService
+    deactivate SearchService
+    deactivate PostgreSQLDB
+    deactivate UserProfileService

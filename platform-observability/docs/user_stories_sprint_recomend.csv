@@ -1,0 +1,4 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""OBS-001"",""OBS-003"",""OBS-012"",""OBS-011""]","14","Establish the foundational Prometheus configuration and the CI pipeline to enforce quality for all future changes.","true"
+"2","[""OBS-002"",""OBS-004"",""OBS-005"",""OBS-013""]","21","Implement critical alerting rules for system/API health, configure PagerDuty routing, and automate deployments with a CD pipeline.","true"
+"3","[""OBS-007"",""OBS-008"",""OBS-009"",""OBS-006"",""OBS-010"",""OBS-014""]","15","Build out the Grafana visualization layer by provisioning datasources and key dashboards, and provide a local development environment.","true"

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug NestJS gRPC Service",
+            "runtimeArgs": ["--nolazy", "-r", "ts-node/register", "-r", "tsconfig-paths/register"],
+            "args": ["${workspaceFolder}/src/main.ts"],
+            "autoAttachChildProcesses": true,
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "protocol": "inspector"
+        }
+    ]
+}

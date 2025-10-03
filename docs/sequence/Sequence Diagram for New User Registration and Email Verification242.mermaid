@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor "Web Client (SPA)" as WebClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityAccessService
+    participant "Event Bus" as EventBus
+    participant "Notifications Service" as NotificationsService
+
+    activate WebClientSPA
+    WebClientSPA->>WebClientSPA: 1. User submits registration form with email, password, and date of birth. Client-side validation is performed.
+    WebClientSPA-->>WebClientSPA: UI enters a loading state.
+    activate APIGateway
+    WebClientSPA->>APIGateway: 2. Sends GraphQL mutation to register a new user.
+    APIGateway-->>WebClientSPA: GraphQL response indicating success or failure of registration submission.
+    activate IdentityAccessService
+    APIGateway->>IdentityAccessService: 3. Routes request to Identity Service for processing.
+    IdentityAccessService-->>APIGateway: gRPC response with success/error status.
+    IdentityAccessService->>IdentityAccessService: 3.1. Performs server-side validation, creates user, and generates token.
+    IdentityAccessService-->>IdentityAccessService: Success or throws specific exception.
+    activate EventBus
+    IdentityAccessService->>EventBus: 4. Publishes 'UserRegistered' event for asynchronous processing.
+    APIGateway->>WebClientSPA: 5. Relays the successful submission response to the client.
+    WebClientSPA->>WebClientSPA: 6. Displays success message to the user and exits loading state.
+    activate NotificationsService
+    EventBus->>NotificationsService: 7. Delivers 'UserRegistered' event via a dedicated SQS queue.
+    NotificationsService->>NotificationsService: 7.1. Integrates with external email service to send verification email.
+    NotificationsService-->>NotificationsService: Success or failure status from email service.
+    WebClientSPA->>APIGateway: 8. User clicks verification link in email, sending token to the API.
+    APIGateway-->>WebClientSPA: GraphQL response indicating success or failure of verification.
+    APIGateway->>IdentityAccessService: 9. Routes verification request to Identity Service.
+    IdentityAccessService-->>APIGateway: gRPC response with success/error status.
+    IdentityAccessService->>IdentityAccessService: 9.1. Validates token and activates user account.
+    IdentityAccessService-->>IdentityAccessService: Success or throws exception.
+    APIGateway->>WebClientSPA: 10. Relays the successful verification response.
+    WebClientSPA->>WebClientSPA: 11. Displays verification success page and prompts user to log in.
+
+    note over EventBus: Asynchronous email sending decouples the user-facing registration API from the reliability of the...
+    note over IdentityAccessService: The verification token must be single-use and have a short expiry (e.g., 24 hours) to mitigate se...
+
+    deactivate NotificationsService
+    deactivate EventBus
+    deactivate IdentityAccessService
+    deactivate APIGateway
+    deactivate WebClientSPA

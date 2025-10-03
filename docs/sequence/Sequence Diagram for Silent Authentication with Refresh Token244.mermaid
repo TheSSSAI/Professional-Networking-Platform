@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor "Client App (Auth Interceptor)" as ClientAppAuthInterceptor
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityAccessService
+
+    ClientAppAuthInterceptor->>APIGateway: 1. 1. Request protected resource with expired Access Token
+    APIGateway-->>ClientAppAuthInterceptor: 2. [401 Unauthorized] Token validation failed due to expiration
+    activate ClientAppAuthInterceptor
+    ClientAppAuthInterceptor->>ClientAppAuthInterceptor: 2. 3. Auth interceptor catches 401, pauses original request queue
+    ClientAppAuthInterceptor->>APIGateway: 3. 4. Request new Access Token using Refresh Token
+    APIGateway-->>ClientAppAuthInterceptor: 9. [200 OK] Return new Access Token
+    activate IdentityAccessService
+    APIGateway->>IdentityAccessService: 4. 5. Forward refresh request to Identity Service
+    IdentityAccessService-->>APIGateway: 8. [gRPC OK] Return new Access Token details
+    ClientAppAuthInterceptor->>ClientAppAuthInterceptor: 7. 10. Store new Access Token and release request queue
+    ClientAppAuthInterceptor->>APIGateway: 8. 11. Retry original request with new Access Token
+    APIGateway-->>ClientAppAuthInterceptor: 12. [200 OK] Return successful response from resource
+
+    note over APIGateway: On step 11, the API Gateway's JWT Authorizer successfully validates the new access token before f...
+    note over ClientAppAuthInterceptor: Error Scenario: If Refresh Token validation fails at step 6, the Identity Service returns a gRPC ...
+
+    deactivate IdentityAccessService
+    deactivate ClientAppAuthInterceptor

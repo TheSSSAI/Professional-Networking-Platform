@@ -1,0 +1,121 @@
+name: CD - Deploy to EKS
+
+on:
+  workflow_run:
+    workflows: ["CI - Build, Test, Scan"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Amazon EKS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set up Kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      # In a real-world scenario, you would use a tool like Kustomize or Helm
+      # For simplicity, this step demonstrates updating a Kubernetes deployment manifest directly
+      - name: Deploy to EKS
+        run: |
+          # This is a simplified example. Use Kustomize or Helm for production.
+          echo "Deploying image ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }} to EKS cluster ${{ secrets.EKS_CLUSTER_NAME }}"
+          
+          # 1. Create a temporary manifest directory
+          mkdir -p .k8s/
+          
+          # 2. Placeholder for your Kubernetes manifest. This should be in your repo.
+          # For example, a deployment.yml
+          cat <<EOF > .k8s/deployment.yml
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: platform-service-search
+            namespace: platform-services
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: platform-service-search
+            template:
+              metadata:
+                labels:
+                  app: platform-service-search
+              spec:
+                containers:
+                - name: search-service
+                  image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+                  ports:
+                  - containerPort: 50053
+                    name: grpc
+                  envFrom:
+                  - configMapRef:
+                      name: platform-service-search-config
+                  - secretRef:
+                      name: platform-service-search-secrets
+                  resources:
+                    requests:
+                      cpu: "250m"
+                      memory: "512Mi"
+                    limits:
+                      cpu: "500m"
+                      memory: "1Gi"
+                  readinessProbe:
+                    exec:
+                      command: ["/usr/bin/grpc_health_probe", "-addr=:50053"]
+                    initialDelaySeconds: 10
+                    periodSeconds: 5
+                  livenessProbe:
+                    exec:
+                      command: ["/usr/bin/grpc_health_probe", "-addr=:50053"]
+                    initialDelaySeconds: 15
+                    periodSeconds: 10
+          EOF
+
+          # 3. Apply the manifest
+          kubectl apply -f .k8s/deployment.yml
+
+          # 4. Or use a more robust tool like kustomize
+          # kustomize edit set image ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+          # kubectl apply -k .k8s/overlays/production
+          
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/platform-service-search -n platform-services --timeout=2m
+          
+      - name: Logout from Amazon ECR
+        if: always()
+        run: docker logout ${{ steps.login-ecr.outputs.registry }}

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: AppHeader</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--color-neutral-50);
+      color: var(--color-neutral-900);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      /* Typography */
+      --font-size-lg: 1.125rem;
+      --font-weight-bold: 700;
+      --font-weight-semibold: 600;
+      /* Layout */
+      --container-desktop: 1140px;
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase__section {
+        padding: 2rem;
+        border-bottom: 2px solid var(--color-neutral-200);
+    }
+    .showcase__section h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--color-neutral-600);
+    }
+    .showcase__section > p {
+        text-align: center;
+        color: var(--color-neutral-600);
+        margin: -1rem 0 2rem;
+    }
+    .page-content {
+        height: 200vh;
+        padding: 2rem;
+        background: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 10px, #fff 10px, #fff 20px);
+    }
+
+    /* 4. AppHeader Component Styles */
+    .app-header {
+      background-color: var(--color-white);
+      border-bottom: 1px solid var(--color-neutral-200);
+      padding: 0 var(--spacing-md);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .app-header__container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: var(--container-desktop);
+      margin: 0 auto;
+    }
+
+    .app-header__left, .app-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .app-header__logo {
+      font-weight: var(--font-weight-bold);
+      font-size: 1.25rem;
+      text-decoration: none;
+      color: var(--color-neutral-900);
+      margin-right: var(--spacing-md);
+    }
+    .app-header__logo svg {
+        width: 32px;
+        height: 32px;
+        color: var(--color-primary-700);
+    }
+
+    /* Desktop specific elements */
+    .app-header__search,
+    .app-header__nav--desktop {
+      display: none; /* Mobile first */
+    }
+
+    /* Mobile specific elements */
+    .app-header__mobile-triggers {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .app-header__nav-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--color-neutral-600);
+    }
+    
+    .app-header__nav-toggle:focus-visible {
+        outline: 2px solid var(--color-primary-500);
+        border-radius: 50%;
+    }
+
+    .app-header__nav-toggle .icon-menu {
+      display: block;
+    }
+    .app-header__nav-toggle .icon-close {
+      display: none;
+    }
+
+    /* Mobile Navigation Panel */
+    .app-header__nav--mobile {
+      position: fixed;
+      top: 64px;
+      right: 0;
+      bottom: 0;
+      width: 300px;
+      max-width: 80vw;
+      background-color: var(--color-white);
+      border-left: 1px solid var(--color-neutral-200);
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      padding: var(--spacing-lg);
+    }
+
+    .app-header__nav--mobile .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header__nav--mobile .nav-list__item a {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) 0;
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      font-size: var(--font-size-lg);
+    }
+    .app-header__nav--mobile .nav-list__item a svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .app-header__nav--mobile .nav-actions {
+        margin-top: var(--spacing-lg);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-neutral-200);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+
+    /* Open State for Mobile Nav */
+    .app-header.is-mobile-nav-open .app-header__nav-toggle .icon-menu {
+      display: none;
+    }
+    .app-header.is-mobile-nav-open .app-header__nav-toggle .icon-close {
+      display: block;
+    }
+    .app-header.is-mobile-nav-open .app-header__nav--mobile {
+      transform: translateX(0);
+    }
+
+    /* Tablet and Desktop Breakpoint */
+    @media (min-width: 1024px) {
+      .app-header {
+        height: 72px;
+      }
+      .app-header__left {
+        gap: var(--spacing-lg);
+      }
+      .app-header__search {
+        display: block;
+      }
+      .app-header__mobile-triggers {
+        display: none;
+      }
+      .app-header__nav--desktop {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .app-header__nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
+        text-decoration: none;
+        color: var(--color-neutral-600);
+        font-weight: var(--font-weight-semibold);
+        font-size: 12px;
+        padding: var(--spacing-sm) 0;
+        position: relative;
+        height: 72px;
+        justify-content: center;
+      }
+      .app-header__nav-link svg {
+        width: 24px;
+        height: 24px;
+      }
+      .app-header__nav-link.is-active {
+        color: var(--color-neutral-900);
+      }
+      .app-header__nav-link.is-active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: var(--color-primary-700);
+        border-radius: 3px;
+      }
+    }
+
+    /* Dependent Component simplified styles */
+    .search-bar__input { height: 40px; border-radius: 99px; background-color: var(--color-neutral-100); border: 1px solid var(--color-neutral-100); padding-left: 40px; width: 280px; }
+    .search-bar { position: relative; }
+    .search-bar__icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--color-neutral-600); pointer-events: none;}
+    .notification-bell, .btn--icon-only { width: 44px; height: 44px; border-radius: 50%; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; color: var(--color-neutral-600); }
+    .notification-bell:hover, .btn--icon-only:hover { background-color: var(--color-neutral-100); }
+    .badge--notification { position: absolute; top: 8px; right: 8px; font-size: 10px; background-color: var(--color-semantic-error); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .user-menu__toggle { cursor: pointer; border: none; background: none; padding: 0; border-radius: 50%; }
+    .user-menu__avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid transparent; border-radius: var(--border-radius-md); font-weight: var(--font-weight-semibold); text-decoration: none; cursor: pointer; transition: all 150ms ease; min-height: 44px; }
+    .btn--primary { background: var(--color-primary-700); color: var(--color-white); }
+    .btn--secondary { background: var(--color-white); color: var(--color-primary-700); border-color: var(--color-neutral-400); }
+    .btn--full-width { width: 100%; }
+
+  </style>
+</head>
+<body>
+
+  <div class="showcase__section">
+    <h2>Authenticated User Header</h2>
+    <p>Displays navigation, search, notifications, and user menu for logged-in users. Responsive layout changes at 1024px.</p>
+    <header class="app-header">
+      <div class="app-header__container">
+        <!-- Left Section -->
+        <div class="app-header__left">
+          <a href="#" class="app-header__logo" aria-label="Homepage">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-8 15h2v-2h-2v2zm0-4h2v-2h-2v2zm-4-4h2v-2H7v2zm0 4h2v-2H7v2zm-4-4h2v-2H3v2zm0 4h2v-2H3v2zm4-8h2v-2H7v2zm0-4h2V7H7v2zm4 8h2v-2h-2v2zm0 4h2v-2h-2v2zm4-8h2v-2h-2v2zm0-4h2V7h-2v2z"></path></svg>
+          </a>
+          <form class="app-header__search search-bar" role="search">
+            <label for="header-search" class="sr-only">Search</label>
+            <div class="search-bar__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <input class="search-bar__input" type="search" id="header-search" placeholder="Search">
+          </form>
+        </div>
+
+        <!-- Right Section -->
+        <div class="app-header__right">
+          <!-- Desktop Nav -->
+          <nav aria-label="Main Navigation">
+            <ul class="app-header__nav--desktop">
+              <li><a href="#" class="app-header__nav-link is-active" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Home</span></a></li>
+              <li><a href="#" class="app-header__nav-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg><span>My Network</span></a></li>
+              <li><a href="#" class="app-header__nav-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><span>Messaging</span></a></li>
+            </ul>
+          </nav>
+
+          <!-- Mobile Triggers -->
+          <div class="app-header__mobile-triggers">
+            <button class="btn--icon-only" aria-label="Search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
+            <button class="app-header__nav-toggle" aria-controls="mobile-nav" aria-expanded="false" aria-label="Open navigation menu">
+                <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          
+          <!-- Shared Controls -->
+          <button class="notification-bell" aria-label="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="badge--notification">3</span>
+          </button>
+          <div class="user-menu">
+            <button class="user-menu__toggle" aria-label="Open user menu">
+              <img src="https://i.pravatar.cc/36" alt="User Avatar" class="user-menu__avatar">
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div class="showcase__section">
+    <h2>Mobile Navigation Open State</h2>
+    <p>This shows the authenticated header with the mobile navigation panel visible. It is triggered by adding the <code>.is-mobile-nav-open</code> class to the <code>&lt;header&gt;</code> element.</p>
+    <header class="app-header is-mobile-nav-open">
+        <div class="app-header__container">
+          <div class="app-header__left">
+            <a href="#" class="app-header__logo" aria-label="Homepage">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-8 15h2v-2h-2v2zm0-4h2v-2h-2v2zm-4-4h2v-2H7v2zm0 4h2v-2H7v2zm-4-4h2v-2H3v2zm0 4h2v-2H3v2zm4-8h2v-2H7v2zm0-4h2V7H7v2zm4 8h2v-2h-2v2zm0 4h2v-2h-2v2zm4-8h2v-2h-2v2zm0-4h2V7h-2v2z"></path></svg>
+            </a>
+          </div>
+          <div class="app-header__right">
+            <div class="app-header__mobile-triggers">
+              <button class="app-header__nav-toggle" aria-controls="mobile-nav-2" aria-expanded="true" aria-label="Close navigation menu">
+                <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <button class="notification-bell" aria-label="Notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span class="badge--notification">3</span>
+            </button>
+            <div class="user-menu">
+                <button class="user-menu__toggle" aria-label="Open user menu">
+                <img src="https://i.pravatar.cc/36" alt="User Avatar" class="user-menu__avatar">
+                </button>
+            </div>
+          </div>
+        </div>
+        <nav class="app-header__nav--mobile" id="mobile-nav-2" aria-label="Mobile Main Navigation">
+            <ul class="nav-list">
+                <li class="nav-list__item"><a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>Home</a></li>
+                <li class="nav-list__item"><a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>My Network</a></li>
+                <li class="nav-list__item"><a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>Messaging</a></li>
+            </ul>
+        </nav>
+    </header>
+  </div>
+
+  <div class="showcase__section">
+    <h2>Guest Header</h2>
+    <p>A simplified header for unauthenticated visitors, providing primary actions for login and registration.</p>
+    <header class="app-header">
+        <div class="app-header__container">
+          <div class="app-header__left">
+            <a href="#" class="app-header__logo" aria-label="Homepage">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14zm-8 15h2v-2h-2v2zm0-4h2v-2h-2v2zm-4-4h2v-2H7v2zm0 4h2v-2H7v2zm-4-4h2v-2H3v2zm0 4h2v-2H3v2zm4-8h2v-2H7v2zm0-4h2V7H7v2zm4 8h2v-2h-2v2zm0 4h2v-2h-2v2zm4-8h2v-2h-2v2zm0-4h2V7h-2v2z"></path></svg>
+            </a>
+          </div>
+          <div class="app-header__right">
+              <div class="app-header__nav--desktop"> <!-- Re-using desktop nav for structure -->
+                <button class="btn btn--secondary">Log In</button>
+                <button class="btn btn--primary">Sign Up</button>
+              </div>
+              <div class="app-header__mobile-triggers">
+                <button class="app-header__nav-toggle" aria-controls="mobile-nav-guest" aria-expanded="false" aria-label="Open navigation menu">
+                    <svg class="icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+              </div>
+          </div>
+        </div>
+        <nav class="app-header__nav--mobile" id="mobile-nav-guest">
+            <div class="nav-actions">
+                <button class="btn btn--secondary btn--full-width">Log In</button>
+                <button class="btn btn--primary btn--full-width">Sign Up</button>
+            </div>
+        </nav>
+    </header>
+  </div>
+
+  <div class="page-content">
+      <h1>Page Content</h1>
+      <p>Scroll down to see the sticky header in action.</p>
+  </div>
+</body>
+</html>

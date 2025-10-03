@@ -1,0 +1,52 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'chore/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate Contracts & Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Buf
+        uses: bufbuild/buf-setup-action@v1.35.1
+
+      - name: Format Check (Prettier)
+        run: npm run format:check
+
+      - name: Lint Protobuf
+        run: npm run lint:grpc
+
+      - name: Lint GraphQL
+        run: npm run lint:graphql
+
+      - name: Lint TypeScript
+        run: npm run lint:ts
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Build Contracts
+        run: npm run build

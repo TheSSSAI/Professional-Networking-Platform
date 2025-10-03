@@ -1,0 +1,17 @@
+.prettierignore
+# Ignore files and directories that should not be formatted by Prettier.
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Generated files
+*.generated.ts

@@ -1,0 +1,146 @@
+# .github/workflows/ci.yml
+# Continuous Integration Workflow for the Professional Networking Platform Web App
+# This workflow enforces code quality, runs tests, performs security scans, and builds the application.
+# It aligns with requirements REQ-1-063, REQ-1-064, and REQ-1-078.
+
+name: 'CI: Platform Web App'
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'chore/**'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-test:
+    name: 'Validate, Test, and Scan'
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: 'Setup Node.js environment'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 'Install Dependencies'
+        run: npm ci
+
+      - name: 'Code Formatting Check (Prettier)'
+        run: npm run format:check
+
+      - name: 'Linting (ESLint)'
+        run: npm run lint
+
+      - name: 'Unit & Integration Tests (Jest)'
+        run: npm run test:unit -- --coverage
+        # REQ-1-064: Enforce 80% code coverage. This is configured in jest.config.js
+
+      - name: 'Install Playwright Browsers'
+        run: npx playwright install --with-deps
+
+      - name: 'Run E2E Tests (Playwright)'
+        run: npm run test:e2e
+      
+      - name: 'Upload E2E Test Report'
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: 'Build Application'
+        run: npm run build
+
+  security-scan:
+    name: 'Security Scans'
+    runs-on: ubuntu-latest
+    needs: validate-and-test
+    if: github.event_name == 'pull_request' # Run scans on PRs to main
+
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: 'Setup Node.js environment'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 'Install Dependencies'
+        run: npm ci
+
+      - name: 'Static Application Security Testing (SAST) - CodeQL'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: 'typescript'
+          queries: security-extended
+
+      - name: 'Build Application for CodeQL'
+        run: npm run build
+      
+      - name: 'Perform CodeQL Analysis'
+        uses: github/codeql-action/analyze@v3
+
+      - name: 'Software Composition Analysis (SCA) - NPM Audit'
+        run: npm audit --audit-level=high
+
+  build-docker-image:
+    name: 'Build Docker Image'
+    runs-on: ubuntu-latest
+    needs: [validate-and-test, security-scan]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: 'Set up Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 'Build Docker Image'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false # We only build here, CD job will push
+          tags: platform-web-app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 'Scan Container Image for Vulnerabilities (Trivy)'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'platform-web-app:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: 'Upload Trivy scan results to GitHub Security tab'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'

@@ -1,0 +1,109 @@
+flowchart TD
+    subgraph "User Layer"
+        Client[Browser / SPA <br> Next.js, React]
+    end
+
+    subgraph "Edge Layer"
+        Cloudflare[Cloudflare <br> CDN & WAF]
+    end
+
+    subgraph "AWS Cloud Infrastructure (EKS)"
+        direction LR
+        APIGateway[AWS API Gateway <br> GraphQL Endpoint]
+        
+        subgraph "Microservices (NestJS)"
+            direction TB
+            IdentityService[Identity & Access Service]
+            ProfileService[User Profile Service]
+            ConnectionsService[Connections Service]
+            PostsService[Posts & Engagement Service]
+            MessagingService[Messaging Service <br> Socket.IO]
+            SearchService[Search Service]
+            NotificationsService[Notifications Service]
+        end
+
+        subgraph "Messaging & Events"
+            EventBus{Event Bus <br> e.g., SNS/SQS}
+        end
+
+        subgraph "Data Stores"
+            direction TB
+            PostgreSQL[(PostgreSQL <br> AWS RDS)]
+            Redis[(Redis <br> AWS ElastiCache)]
+            OpenSearch[(OpenSearch <br> AWS Managed)]
+        end
+        
+        subgraph "Object Storage"
+            S3[(AWS S3 <br> Media Files)]
+        end
+
+        subgraph "External Services"
+            SES[AWS SES <br> Transactional Emails]
+        end
+    end
+
+    %% --- Connections ---
+
+    %% Client to Backend
+    Client -- "HTTPS / GraphQL / WSS" --> Cloudflare
+    Cloudflare --> APIGateway
+
+    %% API Gateway to Services
+    APIGateway -- "gRPC / GraphQL" --> IdentityService
+    APIGateway -- "gRPC / GraphQL" --> ProfileService
+    APIGateway -- "gRPC / GraphQL" --> ConnectionsService
+    APIGateway -- "gRPC / GraphQL" --> PostsService
+    APIGateway -- "gRPC / GraphQL" --> SearchService
+    APIGateway -- "WSS" --> MessagingService
+
+    %% Event-Driven Flows
+    ProfileService -- "Publishes 'ProfileUpdated'" --> EventBus
+    PostsService -- "Publishes 'PostCreated'" --> EventBus
+    EventBus -- "Consumes 'ProfileUpdated'" --> SearchService
+    EventBus -- "Consumes 'PostCreated'" --> NotificationsService
+
+    %% Service to Database/Cache Interactions
+    IdentityService --> PostgreSQL
+    IdentityService --> Redis
+    ProfileService --> PostgreSQL
+    ProfileService --> Redis
+    ConnectionsService --> PostgreSQL
+    ConnectionsService --> Redis
+    PostsService --> PostgreSQL
+    PostsService --> Redis
+    MessagingService --> PostgreSQL
+    
+    %% Service to Search
+    SearchService -- "Updates/Queries Index" --> OpenSearch
+    
+    %% Service to Service Communication (gRPC)
+    PostsService -- "Get Author Info" --> ProfileService
+    SearchService -- "Get Connection Info" --> ConnectionsService
+    
+    %% Media Flow
+    ProfileService -- "1. Generates Pre-signed URL" --> Client
+    Client -- "2. Uploads directly" --> S3
+    S3 -- "Served via" --> Cloudflare
+
+    %% Email Flow
+    IdentityService -- "Sends Verification/Reset Emails" --> SES
+    NotificationsService -- "Sends Notification Emails" --> SES
+
+    %% Real-time Flow
+    Client <-.-> |WebSocket Connection| MessagingService
+    NotificationsService -.-> |Pushes via WebSocket| MessagingService
+
+    %% Styling
+    classDef service fill:#dae8fc,stroke:#6c8ebf,color:#000
+    classDef datastore fill:#d5e8d4,stroke:#82b366,color:#000
+    classDef external fill:#f8cecc,stroke:#b85450,color:#000
+    classDef client fill:#fff2cc,stroke:#d6b656,color:#000
+    classDef edge fill:#e1d5e7,stroke:#9673a6,color:#000
+    classDef messaging fill:#f5e8d4,stroke:#b38600,color:#000
+    
+    class Client client
+    class Cloudflare,APIGateway edge
+    class IdentityService,ProfileService,ConnectionsService,PostsService,MessagingService,SearchService,NotificationsService service
+    class PostgreSQL,Redis,OpenSearch,S3 datastore
+    class SES external
+    class EventBus messaging

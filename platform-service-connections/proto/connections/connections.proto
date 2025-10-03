@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package connections;
+
+// The main gRPC service for managing user connections.
+// This contract is consumed by other microservices in the platform.
+service ConnectionsService {
+  // Sends a new connection request. (REQ-1-015, REQ-1-090)
+  rpc SendRequest(SendRequestRequest) returns (StatusResponse);
+
+  // Accepts a pending connection request. (REQ-1-016)
+  rpc AcceptRequest(AcceptRequestRequest) returns (StatusResponse);
+
+  // Declines a pending connection request. (REQ-1-016)
+  rpc DeclineRequest(DeclineRequestRequest) returns (StatusResponse);
+
+  // Removes an existing first-degree connection. (REQ-1-018)
+  rpc RemoveConnection(RemoveConnectionRequest) returns (StatusResponse);
+
+  // Retrieves a list of pending incoming connection requests for a user. (REQ-1-016)
+  rpc GetPendingRequests(GetPendingRequestsRequest) returns (GetPendingRequestsResponse);
+
+  // Retrieves a list of a user's first-degree connections. (REQ-1-017)
+  rpc GetConnections(GetConnectionsRequest) returns (GetConnectionsResponse);
+
+  // Checks if two users are first-degree connections. (Performance-critical)
+  rpc IsConnected(IsConnectedRequest) returns (IsConnectedResponse);
+}
+
+// Generic response for command operations indicating success or failure.
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// --- SendRequest RPC Messages ---
+message SendRequestRequest {
+  string senderId = 1;
+  string recipientId = 2;
+  optional string message = 3; // Max 300 chars, validated by application layer.
+}
+
+// --- AcceptRequest RPC Messages ---
+message AcceptRequestRequest {
+  string accepterId = 1; // The user accepting the request.
+  string requesterId = 2; // The user who sent the original request.
+}
+
+// --- DeclineRequest RPC Messages ---
+message DeclineRequestRequest {
+  string declinerId = 1; // The user declining the request.
+  string requesterId = 2; // The user who sent the original request.
+}
+
+// --- RemoveConnection RPC Messages ---
+message RemoveConnectionRequest {
+  string removerId = 1; // The user initiating the removal.
+  string connectionUserId = 2; // The user being removed.
+}
+
+// --- GetPendingRequests RPC Messages ---
+message GetPendingRequestsRequest {
+  string userId = 1;
+  PaginationOptions pagination = 2;
+}
+
+message PendingRequest {
+  string requesterId = 1;
+  string requesterName = 2;
+  string requesterHeadline = 3;
+  string requesterProfilePictureUrl = 4;
+  optional string message = 5;
+  string createdAt = 6;
+}
+
+message GetPendingRequestsResponse {
+  repeated PendingRequest requests = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+// --- GetConnections RPC Messages ---
+enum SortBy {
+  DATE_CONNECTED = 0;
+  NAME = 1;
+}
+
+enum SortOrder {
+  DESC = 0;
+  ASC = 1;
+}
+
+message GetConnectionsRequest {
+  string userId = 1;
+  PaginationOptions pagination = 2;
+  SortBy sortBy = 3;
+  SortOrder sortOrder = 4;
+}
+
+message ConnectionDetails {
+  string userId = 1;
+  string name = 2;
+  string headline = 3;
+  string profilePictureUrl = 4;
+  string connectedAt = 5;
+}
+
+message GetConnectionsResponse {
+  repeated ConnectionDetails connections = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+// --- IsConnected RPC Messages ---
+message IsConnectedRequest {
+  string userIdA = 1;
+  string userIdB = 2;
+}
+
+message IsConnectedResponse {
+  bool areConnected = 1;
+}
+
+// --- Common Messages ---
+message PaginationOptions {
+  int32 page = 1;
+  int32 limit = 2;
+}

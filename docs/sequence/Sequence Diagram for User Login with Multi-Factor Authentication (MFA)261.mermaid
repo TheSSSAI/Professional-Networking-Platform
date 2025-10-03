@@ -1,0 +1,33 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityAccessService
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. Phase 1: POST /graphql (mutation: login)
+    APIGateway-->>ClientSPA: 200 OK with { data: { login: { mfaRequired: true, mfaSessionToken: '...' } } }
+    APIGateway->>IdentityAccessService: 2. Invoke Login(LoginRequest)
+    IdentityAccessService-->>APIGateway: LoginResponse { mfaRequired: true, mfaSessionToken: '...' }
+    IdentityAccessService->>IdentityAccessService: 2.1. [DB] Find user by email
+    IdentityAccessService-->>IdentityAccessService: User record with hashed password and MFA status
+    IdentityAccessService->>IdentityAccessService: 2.2. Verify password and check MFA status
+    IdentityAccessService-->>IdentityAccessService: Password valid, MFA enabled
+    IdentityAccessService->>IdentityAccessService: 2.3. Generate temporary MFA session token
+    IdentityAccessService-->>IdentityAccessService: Signed JWT (mfaSessionToken)
+    ClientSPA->>ClientSPA: 3. Render TOTP input form
+    ClientSPA->>APIGateway: 4. Phase 2: POST /graphql (mutation: verifyMfa)
+    APIGateway-->>ClientSPA: 200 OK with { data: { verifyMfa: { accessToken: '...', refreshToken: '...' } } }
+    APIGateway->>IdentityAccessService: 5. Invoke VerifyMfa(VerifyMfaRequest)
+    IdentityAccessService-->>APIGateway: VerifyMfaResponse { accessToken: '...', refreshToken: '...' }
+    IdentityAccessService->>IdentityAccessService: 5.1. Validate MFA session token and retrieve user secret
+    IdentityAccessService-->>IdentityAccessService: Valid session, user's MFA secret retrieved
+    IdentityAccessService->>IdentityAccessService: 5.2. Verify TOTP code
+    IdentityAccessService-->>IdentityAccessService: TOTP code is valid
+    IdentityAccessService->>IdentityAccessService: 5.3. Issue final Access and Refresh Tokens
+    IdentityAccessService-->>IdentityAccessService: Signed Access Token and Refresh Token
+    ClientSPA->>ClientSPA: 6. Establish session and redirect
+
+    note over IdentityAccessService: The mfaSessionToken is a critical, short-lived JWT that bridges the two phases of the login. It i...
+    note over ClientSPA: The client should ideally invalidate the mfaSessionToken from its state after a single use or upo...
+
+    deactivate APIGateway

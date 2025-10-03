@@ -1,0 +1,26 @@
+# grafana/provisioning/datasources/loki.yml
+#
+# Declarative provisioning for the Loki datasource in Grafana.
+# Implements part of REQ-1-083.
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: Loki
+    orgId: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    # URL should point to the Kubernetes service for Loki.
+    url: http://loki.monitoring.svc.cluster.local:3100
+    jsonData:
+      # Link metrics and logs by matching labels.
+      derivedFields:
+        - datasourceName: Jaeger # Name of the Jaeger datasource
+          matcherRegex: '"trace_id":"(\w+)"'
+          name: TraceID
+          url: '$${__value.raw}'
+    editable: false

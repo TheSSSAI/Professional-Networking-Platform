@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atomic Components Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD; --color-primary-100: #BBDEFB; --color-primary-200: #90CAF9; --color-primary-300: #64B5F6; --color-primary-500: #2196F3; --color-primary-700: #1976D2; --color-primary-800: #1565C0; --color-primary-900: #0D47A1;
+      --color-secondary-500: #009688;
+      --color-danger-500: #D32F2F; --color-danger-600: #C62828;
+      --color-neutrals-white: #FFFFFF; --color-neutrals-gray-50: #F8F9FA; --color-neutrals-gray-100: #F1F3F5; --color-neutrals-gray-200: #E9ECEF; --color-neutrals-gray-400: #CED4DA; --color-neutrals-gray-500: #ADB5BD; --color-neutrals-gray-600: #6C757D; --color-neutrals-gray-700: #495057; --color-neutrals-gray-900: #212529;
+      --color-semantic-success: #2E7D32; --color-semantic-warning: #ED6C02; --color-semantic-error: #D32F2F; --color-semantic-info: #0288D1;
+      --color-semantic-success-bg: #E8F5E9; --color-semantic-warning-bg: #FFF4E5; --color-semantic-error-bg: #FFEBEE; --color-semantic-info-bg: #E1F5FE;
+      
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif; --font-family-mono: 'Roboto Mono', monospace;
+      --font-size-h1: 3rem; --font-size-h2: 2.25rem; --font-size-h3: 1.75rem; --font-size-h4: 1.25rem; --font-size-body: 1rem; --font-size-caption: 0.875rem;
+      --font-weight-regular: 400; --font-weight-semibold: 600; --font-weight-bold: 700;
+
+      /* Spacing */
+      --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 32px; --space-6: 48px;
+
+      /* Borders & Shadows */
+      --border-radius-sm: 4px; --border-radius-md: 8px; --border-radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    /* --- Base & Layout Styles --- */
+    body { font-family: var(--font-family-primary); font-size: var(--font-size-body); color: var(--color-neutrals-gray-900); background-color: var(--color-neutrals-gray-50); padding: var(--space-4); }
+    main { max-width: 1200px; margin: 0 auto; }
+    h1, h2, h3, h4 { margin-bottom: var(--space-3); line-height: 1.3; }
+    h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); } h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); } h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-semibold); } h4 { font-size: var(--font-size-h4); font-weight: var(--font-weight-semibold); }
+    p { margin-bottom: var(--space-3); color: var(--color-neutrals-gray-700); }
+    .component-section { background-color: var(--color-neutrals-white); padding: var(--space-4); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm); margin-bottom: var(--space-5); }
+    .component-group { margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-neutrals-gray-200); } .component-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .state-grid { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+
+    /* --- Icon Styles --- */
+    .icon { display: inline-block; width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; fill: none; stroke: currentColor; }
+
+    /* --- Button Component --- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); padding: 10px 22px; border-radius: var(--border-radius-md); font-weight: var(--font-weight-semibold); text-decoration: none; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; min-height: 44px; }
+    .btn:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+    .btn--primary { background-color: var(--color-primary-700); color: var(--color-neutrals-white); }
+    .btn--primary:hover { background-color: var(--color-primary-800); transform: translateY(-1px); }
+    .btn--primary:active { background-color: var(--color-primary-900); transform: translateY(0); }
+    .btn--primary:disabled { background-color: var(--color-neutrals-gray-200); color: var(--color-neutrals-gray-500); cursor: not-allowed; transform: none; }
+    .btn--secondary { background-color: transparent; color: var(--color-primary-700); border-color: var(--color-primary-700); }
+    .btn--secondary:hover { background-color: var(--color-primary-50); }
+    .btn--secondary:active { background-color: var(--color-primary-100); }
+    .btn--secondary:disabled { border-color: var(--color-neutrals-gray-400); color: var(--color-neutrals-gray-500); cursor: not-allowed; background-color: transparent; }
+    .btn--danger { background-color: var(--color-danger-500); color: var(--color-neutrals-white); }
+    .btn--danger:hover { background-color: var(--color-danger-600); }
+    .btn--text { padding: 10px; color: var(--color-primary-700); background-color: transparent; }
+    .btn--text:hover { background-color: var(--color-primary-50); }
+    .btn--icon { padding: 10px; font-size: 1.25rem; line-height: 1; }
+    .btn--loading { cursor: wait; }
+    .btn--loading .btn-text { visibility: hidden; }
+    .btn .spinner { position: absolute; }
+
+    /* --- TextInput Component --- */
+    .form-field { display: flex; flex-direction: column; margin-bottom: var(--space-3); }
+    .form-field label { font-weight: var(--font-weight-semibold); margin-bottom: var(--space-2); font-size: var(--font-size-caption); }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    .input-wrapper .icon { position: absolute; left: var(--space-3); color: var(--color-neutrals-gray-500); pointer-events: none; }
+    .input { width: 100%; max-width: 320px; border: 1px solid var(--color-neutrals-gray-400); background-color: var(--color-neutrals-white); padding: 12px 16px; border-radius: var(--border-radius-md); font-size: var(--font-size-body); transition: all 0.2s ease; }
+    .input[type="search"] { padding-left: calc(var(--space-3) * 2 + 1em); }
+    .input:focus { border: 2px solid var(--color-primary-700); padding: 11px 15px; outline: none; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
+    .input.is-error { border: 2px solid var(--color-semantic-error); padding: 11px 15px; }
+    .input.is-error:focus { box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
+    .input:disabled { background-color: var(--color-neutrals-gray-100); cursor: not-allowed; }
+    .error-message { color: var(--color-semantic-error); font-size: var(--font-size-caption); margin-top: var(--space-1); }
+    .password-toggle { position: absolute; right: var(--space-3); background: none; border: none; cursor: pointer; color: var(--color-neutrals-gray-600); }
+
+    /* --- Avatar Component --- */
+    .avatar { display: inline-block; position: relative; border-radius: 50%; object-fit: cover; background-color: var(--color-neutrals-gray-200); color: var(--color-neutrals-gray-700); text-align: center; font-weight: var(--font-weight-semibold); }
+    .avatar--sm { width: 24px; height: 24px; font-size: 0.75rem; line-height: 24px; }
+    .avatar--md { width: 40px; height: 40px; font-size: 1rem; line-height: 40px; }
+    .avatar--lg { width: 64px; height: 64px; font-size: 1.5rem; line-height: 64px; }
+    .avatar .status-indicator { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background-color: var(--color-semantic-success); border-radius: 50%; border: 2px solid var(--color-neutrals-white); }
+    .avatar--lg .status-indicator { width: 14px; height: 14px; }
+
+    /* --- Badge Component --- */
+    .badge { display: inline-block; padding: var(--space-1) var(--space-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); border-radius: var(--border-radius-lg); }
+    .badge--notification { background-color: var(--color-danger-500); color: var(--color-neutrals-white); min-width: 22px; text-align: center; }
+    .badge--info { background-color: var(--color-semantic-info); color: var(--color-neutrals-white); }
+
+    /* --- Alert Component --- */
+    .alert { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3); border-radius: var(--border-radius-md); font-size: var(--font-size-caption); }
+    .alert .icon { font-size: 1.25rem; flex-shrink: 0; margin-top: 2px; }
+    .alert--success { background-color: var(--color-semantic-success-bg); color: var(--color-semantic-success); } .alert--success .icon { color: var(--color-semantic-success); }
+    .alert--error { background-color: var(--color-semantic-error-bg); color: var(--color-semantic-error); } .alert--error .icon { color: var(--color-semantic-error); }
+    .alert--warning { background-color: var(--color-semantic-warning-bg); color: var(--color-semantic-warning); } .alert--warning .icon { color: var(--color-semantic-warning); }
+    .alert--info { background-color: var(--color-semantic-info-bg); color: var(--color-semantic-info); } .alert--info .icon { color: var(--color-semantic-info); }
+
+    /* --- LoadingSpinner Component --- */
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .spinner { display: inline-block; border-style: solid; border-color: currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+    .spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+    .spinner--md { width: 24px; height: 24px; border-width: 3px; }
+    .spinner--lg { width: 48px; height: 48px; border-width: 4px; }
+
+    /* --- SkeletonLoader Component --- */
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    .skeleton { position: relative; overflow: hidden; background-color: var(--color-neutrals-gray-200); }
+    .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 60%, rgba(255,255,255,0)); animation: shimmer 2s infinite; }
+    .skeleton--text { height: 1em; border-radius: var(--border-radius-sm); } .skeleton--text-long { width: 100%; } .skeleton--text-short { width: 60%; }
+    .skeleton--circle { border-radius: 50%; } .skeleton--circle-md { width: 40px; height: 40px; }
+    .skeleton--rect { border-radius: var(--border-radius-md); } .skeleton--rect-lg { width: 100%; height: 150px; }
+    
+    /* --- Card Component --- */
+    .card { background-color: var(--color-neutrals-white); border-radius: var(--border-radius-lg); padding: var(--space-4); box-shadow: var(--shadow-md); transition: all 0.2s ease; }
+    .card--outlined { border: 1px solid var(--color-neutrals-gray-200); box-shadow: none; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
+
+    /* --- ToggleSwitch Component --- */
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-neutrals-gray-400); border-radius: 34px; transition: .4s; }
+    .toggle-switch .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: .4s; }
+    .toggle-switch input:checked + .slider { background-color: var(--color-primary-700); }
+    .toggle-switch input:focus-visible + .slider { box-shadow: 0 0 1px var(--color-primary-700); outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+    .toggle-switch input:checked + .slider:before { transform: translateX(20px); }
+    .toggle-switch input:disabled + .slider { background-color: var(--color-neutrals-gray-200); cursor: not-allowed; }
+
+    /* --- Modal Component --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all .3s ease; z-index: 1000; }
+    .modal-content { background: white; padding: var(--space-5); border-radius: var(--border-radius-lg); max-width: 500px; width: 90%; transform: translateY(-50px); transition: all .3s ease; position: relative; }
+    .modal-overlay:target { opacity: 1; visibility: visible; } .modal-overlay:target .modal-content { transform: translateY(0); }
+    .modal-close { position: absolute; top: var(--space-3); right: var(--space-3); font-size: 1.5rem; text-decoration: none; color: var(--color-neutrals-gray-600); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Atomic Components Showcase</h1>
+    <p>A comprehensive library of all atomic components with embedded, mobile-first CSS.</p>
+
+    <!-- SVG Icon Definitions -->
+    <svg width="0" height="0" style="display:none;">
+      <symbol id="icon-loader" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></symbol>
+      <symbol id="icon-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-alert-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    </svg>
+
+    <!-- Button Section -->
+    <section class="component-section">
+      <h2>Button</h2>
+      <div class="component-group">
+        <h4>Variants & States</h4>
+        <p>Buttons for primary, secondary, and destructive actions.</p>
+        <div class="state-grid">
+          <button class="btn btn--primary">Primary</button>
+          <button class="btn btn--secondary">Secondary</button>
+          <button class="btn btn--danger">Danger</button>
+          <button class="btn btn--text">Text</button>
+          <button class="btn btn--primary" disabled>Disabled</button>
+          <button class="btn btn--primary btn--loading"><span class="spinner spinner--sm"></span><span class="btn-text">Loading</span></button>
+          <button class="btn btn--secondary btn--icon"><svg class="icon"><use href="#icon-search"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TextInput Section -->
+    <section class="component-section">
+      <h2>TextInput</h2>
+      <div class="component-group">
+        <h4>States</h4>
+        <p>Input fields for forms, including various states.</p>
+        <div class="state-grid" style="flex-direction: column; align-items: flex-start;">
+          <div class="form-field">
+            <label for="ti-default">Default</label>
+            <input type="text" class="input" id="ti-default" placeholder="Enter text...">
+          </div>
+          <div class="form-field">
+            <label for="ti-focus">Focus</label>
+            <input type="text" class="input" id="ti-focus" placeholder="Focused..." value="This input is focused">
+          </div>
+          <div class="form-field">
+            <label for="ti-error">Error</label>
+            <input type="email" class="input is-error" id="ti-error" value="not-an-email">
+            <span class="error-message">Please enter a valid email address.</span>
+          </div>
+          <div class="form-field">
+            <label for="ti-disabled">Disabled</label>
+            <input type="text" class="input" id="ti-disabled" placeholder="Disabled" disabled>
+          </div>
+        </div>
+      </div>
+      <div class="component-group">
+        <h4>Variants</h4>
+        <div class="state-grid" style="flex-direction: column; align-items: flex-start;">
+          <div class="form-field">
+            <label for="ti-password">Password</label>
+            <div class="input-wrapper">
+              <input type="password" class="input" id="ti-password" value="secretpassword">
+              <button class="password-toggle" aria-label="Show password"><svg class="icon"><use href="#icon-eye"/></svg></button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="ti-search">Search</label>
+            <div class="input-wrapper">
+              <svg class="icon"><use href="#icon-search"/></svg>
+              <input type="search" class="input" id="ti-search" placeholder="Search...">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Avatar Section -->
+    <section class="component-section">
+        <h2>Avatar</h2>
+        <div class="component-group">
+          <h4>Variants & Sizes</h4>
+          <p>Used to represent users.</p>
+          <div class="state-grid">
+            <span class="avatar avatar--sm">JD</span>
+            <span class="avatar avatar--md">JD</span>
+            <span class="avatar avatar--lg">JD</span>
+            <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=a" alt="Jane Doe">
+            <div class="avatar avatar--lg">
+              <img class="avatar avatar--lg" src="https://i.pravatar.cc/64?u=b" alt="John Smith">
+              <span class="status-indicator"></span>
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- Badge Section -->
+    <section class="component-section">
+        <h2>Badge</h2>
+        <div class="component-group">
+          <h4>Variants</h4>
+          <p>Small status descriptors for counts or information.</p>
+          <div class="state-grid">
+            <span class="badge badge--notification">3</span>
+            <span class="badge badge--notification">99+</span>
+            <span class="badge badge--info">Info</span>
+          </div>
+        </div>
+    </section>
+
+    <!-- Alert Section -->
+    <section class="component-section">
+        <h2>Alert</h2>
+        <div class="component-group">
+          <h4>Variants</h4>
+          <p>Contextual feedback messages for user actions.</p>
+          <div class="state-grid" style="flex-direction: column; align-items: stretch; width: 100%; max-width: 500px;">
+            <div class="alert alert--success" role="alert"><svg class="icon"><use href="#icon-check"/></svg> <div><strong>Success!</strong> Your profile has been updated.</div></div>
+            <div class="alert alert--error" role="alert"><svg class="icon"><use href="#icon-alert-triangle"/></svg> <div><strong>Error!</strong> Could not save your changes.</div></div>
+            <div class="alert alert--warning" role="alert"><svg class="icon"><use href="#icon-alert-triangle"/></svg> <div><strong>Warning:</strong> Your session is about to expire.</div></div>
+            <div class="alert alert--info" role="alert"><svg class="icon"><use href="#icon-alert-circle"/></svg> <div><strong>Info:</strong> Our terms of service have been updated.</div></div>
+          </div>
+        </div>
+    </section>
+
+    <!-- LoadingSpinner & SkeletonLoader Section -->
+    <section class="component-section">
+        <h2>Feedback & Loading</h2>
+        <div class="component-group">
+            <h4>LoadingSpinner</h4>
+            <div class="state-grid">
+                <span class="spinner spinner--sm"></span>
+                <span class="spinner spinner--md"></span>
+                <span class="spinner spinner--lg"></span>
+            </div>
+        </div>
+        <div class="component-group">
+            <h4>SkeletonLoader</h4>
+            <p>Used to indicate content is loading, preventing layout shift.</p>
+            <div class="card" style="max-width: 400px;">
+              <div style="display: flex; align-items: center; gap: var(--space-3);">
+                  <div class="skeleton skeleton--circle skeleton--circle-md"></div>
+                  <div style="flex-grow: 1;">
+                      <div class="skeleton skeleton--text skeleton--text-short" style="margin-bottom: var(--space-2);"></div>
+                      <div class="skeleton skeleton--text skeleton--text-short" style="width: 40%;"></div>
+                  </div>
+              </div>
+              <div class="skeleton skeleton--text skeleton--text-long" style="margin-top: var(--space-3);"></div>
+              <div class="skeleton skeleton--text skeleton--text-long" style="margin-top: var(--space-2);"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Card Section -->
+    <section class="component-section">
+        <h2>Card</h2>
+        <div class="component-group">
+          <h4>Variants</h4>
+          <p>A flexible container for content.</p>
+          <div class="state-grid" style="width: 100%; max-width: 400px;">
+            <div class="card">
+                <h4>Default Card</h4>
+                <p>This card uses the default shadow for elevation.</p>
+            </div>
+            <div class="card card--outlined">
+                <h4>Outlined Card</h4>
+                <p>This card uses a border instead of a shadow.</p>
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- ToggleSwitch Section -->
+    <section class="component-section">
+        <h2>ToggleSwitch</h2>
+        <div class="component-group">
+          <h4>States</h4>
+          <p>A control for turning a setting on or off.</p>
+          <div class="state-grid">
+            <label class="toggle-switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" disabled>
+                <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+    </section>
+
+    <!-- Modal Section -->
+    <section class="component-section">
+        <h2>Modal</h2>
+        <div class="component-group">
+          <h4>Demonstration</h4>
+          <p>A dialog that overlays the page. This demo uses CSS `:target` for activation.</p>
+          <div class="state-grid">
+            <a href="#demo-modal" class="btn btn--primary">Open Modal</a>
+          </div>
+        </div>
+    </section>
+    <div id="demo-modal" class="modal-overlay">
+      <div class="modal-content">
+        <a href="#" class="modal-close" aria-label="Close modal">&times;</a>
+        <h3>Modal Title</h3>
+        <p>This is the content of the modal dialog. It can contain forms, information, or confirmation actions.</p>
+        <div style="text-align: right; margin-top: var(--space-4);">
+            <a href="#" class="btn btn--secondary">Cancel</a>
+            <a href="#" class="btn btn--primary">Confirm</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Components Implementation Overview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0 0 8px 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 32px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 32px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 14px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            color: white;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fcfcfd;
+        }
+        
+        tr:nth-child(even):hover {
+            background-color: #f1f5f9;
+        }
+        
+        .component-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 15px;
+        }
+        
+        .feature-list {
+            max-width: 280px;
+        }
+        
+        .feature-list ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .feature-list li {
+            background: #f1f5f9;
+            margin: 3px 0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border-left: 3px solid #e2e8f0;
+        }
+        
+        .states-list li {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+        
+        .variants-list li {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+            color: #92400e;
+        }
+        
+        .accessibility-list li {
+            border-left-color: #8b5cf6;
+            background: #f3e8ff;
+            color: #5b21b6;
+        }
+        
+        .feature-count {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .implementation-section {
+            margin-top: 32px;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .implementation-section h3 {
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .implementation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 16px;
+        }
+        
+        .implementation-item {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .implementation-item h4 {
+            color: #4f46e5;
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .implementation-item p {
+            color: #64748b;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-primary {
+            background: #ddd6fe;
+            color: #5b21b6;
+        }
+        
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+                font-size: 13px;
+            }
+            
+            .feature-list {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Atomic Components Implementation</h1>
+            <p>Complete overview of all implemented atomic UI components</p>
+        </div>
+        
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">10</span>
+                    <div class="stat-label">Components</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">23</span>
+                    <div class="stat-label">Total States</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">28</span>
+                    <div class="stat-label">Total Variants</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">10</span>
+                    <div class="stat-label">Accessibility Features</div>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component Name</th>
+                            <th>States Implemented</th>
+                            <th>Variants</th>
+                            <th>Accessibility Features</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="component-name">Button</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">6</span>
+                                    <ul>
+                                        <li>default</li><li>hover</li><li>active</li><li>focus</li><li>disabled</li><li>loading</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">5</span>
+                                    <ul>
+                                        <li>primary</li><li>secondary</li><li>danger</li><li>text</li><li>icon</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>focus-visible outline</li><li>minimum touch target size</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">TextInput</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">4</span>
+                                    <ul>
+                                        <li>default</li><li>focus</li><li>error</li><li>disabled</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">3</span>
+                                    <ul>
+                                        <li>default</li><li>password</li><li>search</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>label association</li><li>aria-label on icon button</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">Avatar</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>default</li><li>with_status_indicator</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">4</span>
+                                    <ul>
+                                        <li>small</li><li>medium</li><li>large</li><li>default initials</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>alt text on images</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">Badge</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>default</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>notification count</li><li>info</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">0</span>
+                                    <ul>
+                                        
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">Alert</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>visible</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">4</span>
+                                    <ul>
+                                        <li>success</li><li>error</li><li>warning</li><li>info</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>role='alert'</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">LoadingSpinner</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>spinning</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">3</span>
+                                    <ul>
+                                        <li>small</li><li>medium</li><li>large</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">0</span>
+                                    <ul>
+                                        
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">SkeletonLoader</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>loading</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">3</span>
+                                    <ul>
+                                        <li>text</li><li>circle</li><li>rectangle</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>aria-busy would be applied on the container in a real app</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">Modal</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>open</li><li>closed</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>default</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>aria-label on close button</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">Card</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>default</li><li>hover</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>default</li><li>outlined</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">0</span>
+                                    <ul>
+                                        
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="component-name">ToggleSwitch</div>
+                                <span class="badge badge-primary">Atomic</span>
+                            </td>
+                            <td>
+                                <div class="feature-list states-list">
+                                    <span class="feature-count">3</span>
+                                    <ul>
+                                        <li>on</li><li>off</li><li>disabled</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list variants-list">
+                                    <span class="feature-count">1</span>
+                                    <ul>
+                                        <li>default</li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="feature-list accessibility-list">
+                                    <span class="feature-count">2</span>
+                                    <ul>
+                                        <li>focus-visible outline on slider</li><li>based on semantic checkbox</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="implementation-section">
+                <h3>Implementation Guidelines & Notes</h3>
+                <div class="implementation-grid">
+                    <div class="implementation-item">
+                        <h4>Css Architecture</h4>
+                        <p>All styles are embedded in a `<style>` tag. Design system tokens from provided documentation are implemented as CSS custom properties in `:root` for consistency. A simple BEM-like convention is used for class names.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Component Organization</h4>
+                        <p>Components are organized into logical sections (`<section>`) with clear headings and descriptive paragraphs, following the structure of a professional component library.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Responsive Design</h4>
+                        <p>Basic responsive considerations are included, such as flexible grids and a responsive main container. More complex responsive behaviors are noted in the component inventory.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Accessibility Compliance</h4>
+                        <p>WCAG 2.1 AA compliance is a primary consideration. Semantic HTML is used throughout. Focus states are clearly defined and visible. Interactive elements like icon buttons have `aria-label` where necessary, and alerts use `role='alert'`. The modal demonstration uses a CSS-only `:target` trick, which is less accessible than a JavaScript implementation regarding focus trapping, but sufficient for a static showcase.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Browser Support</h4>
+                        <p>Styles use modern CSS features like custom properties and flexbox, which are supported by all modern browsers (Chrome, Firefox, Safari, Edge).</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>File Purpose</h4>
+                        <p>This HTML file serves as a live, static style guide for the project's atomic components. It provides a single source of truth for the visual appearance, states, and variants of fundamental UI elements.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Development Workflow</h4>
+                        <p>Developers should reference this file to understand available components. The HTML structure and CSS classes for each component can be copied and adapted into the project's React/Next.js components.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Testing Scenarios</h4>
+                        <p>This file is ideal for visual regression testing. A snapshot of this page can be compared against future versions to detect unintended visual changes to the core components.</p>
+                    </div>
+                    <div class="implementation-item">
+                        <h4>Stakeholder Review</h4>
+                        <p>This page can be shared with designers, product managers, and other stakeholders to review and approve the implementation of the design system's foundational elements before they are integrated into complex screens.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UserBadge Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-300: #64B5F6;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-600: #6C757D;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 1rem;
+      /* 16px */
+      --font-size-caption: 0.875rem;
+      /* 14px */
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* --- Base & Showcase Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-50);
+      color: var(--color-neutrals-gray-900);
+      padding: var(--space-4);
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .showcase {
+      background-color: var(--color-neutrals-white);
+      padding: var(--space-4);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .showcase__header {
+      padding-bottom: var(--space-3);
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+
+    .showcase__header h1 {
+      font-size: 1.75rem;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-1);
+    }
+
+    .showcase__header p {
+      color: var(--color-neutrals-gray-600);
+      font-size: var(--font-size-body);
+    }
+
+    .variant-section {
+      margin-bottom: var(--space-4);
+    }
+
+    .variant-section h2 {
+      font-size: 1.25rem;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-3);
+    }
+
+    .component-grid {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    /* --- Atomic Dependency: Avatar --- */
+    .avatar {
+      display: inline-block;
+      flex-shrink: 0;
+      /* Prevents shrinking in flex container */
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: var(--color-neutrals-gray-200);
+      color: var(--color-neutrals-gray-700);
+      text-align: center;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .avatar--md {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+      line-height: 40px;
+    }
+
+    /* --- UserBadge Component --- */
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      /* 16px */
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--border-radius-md);
+      transition: background-color 0.2s ease;
+      padding: var(--space-1);
+      max-width: 280px;
+      /* Set a max-width for truncation to work */
+    }
+
+    .user-badge:hover {
+      background-color: var(--color-neutrals-gray-100);
+    }
+
+    .user-badge:focus-visible {
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: 2px;
+    }
+
+    .user-badge__text-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      /* Crucial for enabling truncation on children */
+      min-width: 0;
+    }
+
+    .user-badge__name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutrals-gray-900);
+      font-size: var(--font-size-body);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-badge__headline {
+      font-weight: var(--font-weight-regular);
+      color: var(--color-neutrals-gray-600);
+      font-size: var(--font-size-caption);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="showcase">
+      <header class="showcase__header">
+        <h1>UserBadge</h1>
+        <p>Displays a user's avatar and name, with an optional headline. It's a single, clickable link.</p>
+      </header>
+
+      <div class="component-grid">
+        <section class="variant-section">
+          <h2>Default Variant (Name Only)</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Example 1: With Image -->
+            <a href="#" class="user-badge">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=jane" alt="Profile picture of Jane Doe">
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Jane Doe</span>
+              </div>
+            </a>
+
+            <!-- Example 2: With Initials -->
+            <a href="#" class="user-badge">
+              <span class="avatar avatar--md">JS</span>
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">John Smith</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="variant-section">
+          <h2>With Headline Variant</h2>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Example 1: With Image -->
+            <a href="#" class="user-badge">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=aisha" alt="Profile picture of Aisha Khan">
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Aisha Khan</span>
+                <span class="user-badge__headline">Principal Software Engineer</span>
+              </div>
+            </a>
+
+            <!-- Example 2: With Initials -->
+            <a href="#" class="user-badge">
+              <span class="avatar avatar--md">CL</span>
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Carlos Lopez</span>
+                <span class="user-badge__headline">Lead Product Designer</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="variant-section">
+          <h2>Text Truncation Behavior</h2>
+          <p>The component gracefully truncates long names and headlines.</p>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Example with long content -->
+            <a href="#" class="user-badge">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=cassandra" alt="Profile picture of Cassandra Montgomery-Williams">
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Cassandra Montgomery-Williams</span>
+                <span class="user-badge__headline">Senior Director of Global Strategic Alliances and Innovations</span>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+
+  
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> Displays only the user's avatar and name. Suitable for compact spaces. </normal>
+		<!-- vrient 1 html -->
+        <a href="#" class="user-badge">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=jane" alt="Profile picture of Jane Doe">
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Jane Doe</span>
+              </div>
+            </a>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "with_headline"<h3>
+		<!--description--><normal> Displays the user's avatar, name, and professional headline. Used in contexts where more information is needed, like post headers. </normal>
+		<!-- vrient 1 html -->
+        <a href="#" class="user-badge">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/40?u=aisha" alt="Profile picture of Aisha Khan">
+              <div class="user-badge__text-wrapper">
+                <span class="user-badge__name">Aisha Khan</span>
+                <span class="user-badge__headline">Principal Software Engineer</span>
+              </div>
+            </a>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

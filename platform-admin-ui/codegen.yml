@@ -1,0 +1,56 @@
+# Configuration for GraphQL Code Generator
+# https://www.graphql-code-generator.com/docs/getting-started/installation
+
+# Specifies where to find the GraphQL schema.
+# It introspects the running GraphQL server endpoint defined in the environment variable.
+schema:
+  - ${NEXT_PUBLIC_GRAPHQL_API_URL}:
+      headers:
+        # If the schema endpoint requires authentication, add headers here.
+        # Example:
+        # Authorization: "Bearer ${API_TOKEN}"
+        Content-Type: "application/json"
+
+# Specifies where to find the GraphQL documents (queries, mutations, fragments).
+documents: "src/graphql/**/*.graphql"
+
+# Configures the output and plugins for code generation.
+generates:
+  # The output file for all generated types and hooks.
+  src/graphql/generated.ts:
+    plugins:
+      # Generates base TypeScript types (e.g., for query variables and results).
+      - "typescript"
+      # Generates TypeScript types for GraphQL operations (queries, mutations).
+      - "typescript-operations"
+      # Generates type-safe React hooks (useQuery, useMutation) for Apollo Client.
+      - "typescript-react-apollo"
+    config:
+      # Configuration options for the plugins.
+      withHooks: true
+      # Ensures enums from the schema are treated as strings.
+      enumsAsTypes: true
+      # Avoids name conflicts by adding suffixes to generated types.
+      namingConvention:
+        typeNames: "change-case-all#pascalCase"
+        enumValues: "change-case-all#upperCase"
+      # Ensures that if a field is nullable in the schema, it's optional in the generated types.
+      strictScalars: true
+      scalars:
+        # If your schema uses custom scalars (e.g., DateTime), map them here.
+        # DateTime: "string"
+        # UUID: "string"
+        JSON: "{ [key: string]: any }"
+        JSONObject: "{ [key: string]: any }"
+
+# Global configuration for the codegen process.
+config:
+  # Ensures that generated types for optional fields are 'T | null' instead of 'T | undefined'.
+  # This can be more consistent with GraphQL's JSON response format.
+  avoidOptionals: true
+  # Ensures that immutable types are generated, which can help prevent accidental state mutation.
+  immutableTypes: true
+
+# This command will be run to execute the code generation.
+# It should be added to the package.json scripts.
+# command: "graphql-codegen --config codegen.yml"

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package messaging;
+
+import "google/protobuf/timestamp.proto";
+
+// The Messaging service definition, exposing methods for backend-to-backend communication.
+// This specifically fulfills the need for the API Gateway to fetch message history (REQ-1-028).
+service MessagingService {
+  rpc GetMessageHistory(GetMessageHistoryRequest) returns (GetMessageHistoryResponse) {}
+}
+
+// Represents a single message entity in protobuf format.
+message Message {
+  string id = 1;
+  string content = 2;
+  string authorId = 3;
+  string status = 4; // e.g., "SENT", "DELIVERED", "READ"
+  google.protobuf.Timestamp createdAt = 5;
+  optional google.protobuf.Timestamp readAt = 6;
+  string conversationId = 7;
+}
+
+// Request payload for the GetMessageHistory RPC call.
+message GetMessageHistoryRequest {
+  string conversationId = 1;
+  // User ID of the requesting user for authorization checks.
+  string requestingUserId = 2;
+  // Optional cursor for pagination.
+  optional string cursor = 3;
+  // Number of messages to fetch per page.
+  int32 limit = 4;
+}
+
+// Response payload for the GetMessageHistory RPC call.
+message GetMessageHistoryResponse {
+  repeated Message messages = 1;
+  // The cursor for the next page of results, if available.
+  optional string nextCursor = 2;
+}

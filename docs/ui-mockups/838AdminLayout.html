@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: AdminLayout</title>
+  <style>
+    /* CSS Reset & Basic Setup */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background-color: #F8F9FA; color: #212529; }
+    h1, h2, h3, h4, p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-primary-900: #0D47A1;
+      --color-neutral-100: #F8F9FA;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-700: #495057;
+      --color-neutral-800: #343A40;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      
+      /* Layout */
+      --layout-sidebar-width: 260px;
+      --layout-header-height: 64px;
+      --layout-breakpoint-desktop: 1024px;
+
+      /* Spacing */
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Typography */
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+
+      /* Borders & Shadows */
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    /* AdminLayout Organism CSS */
+    .admin-layout {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--color-neutral-100);
+    }
+
+    /* Sidebar */
+    .admin-layout__sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--layout-sidebar-width);
+      background-color: var(--color-neutral-900);
+      color: var(--color-neutral-200);
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-lg) 0;
+    }
+
+    /* Header */
+    .admin-layout__header {
+      height: var(--layout-header-height);
+      background-color: var(--color-white);
+      border-bottom: 1px solid var(--color-neutral-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--spacing-md);
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+
+    /* Main Content Area */
+    .admin-layout__main {
+      flex-grow: 1;
+      padding: var(--spacing-lg);
+    }
+
+    /* Mobile Navigation Toggle (Checkbox Hack) */
+    .admin-layout__nav-toggle-input {
+      display: none;
+    }
+    .admin-layout__nav-toggle-label {
+      display: block; /* Visible on mobile by default */
+      padding: var(--spacing-sm);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .admin-layout__nav-toggle-label:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Mobile Navigation Overlay */
+    .admin-layout__overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s;
+    }
+
+    /* State: Mobile Nav Open */
+    .admin-layout__nav-toggle-input:checked ~ .admin-layout__sidebar {
+      transform: translateX(0);
+    }
+    .admin-layout__nav-toggle-input:checked ~ .admin-layout__overlay {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Desktop Styles */
+    @media (min-width: 1024px) {
+      .admin-layout {
+        display: grid;
+        grid-template-columns: var(--layout-sidebar-width) 1fr;
+        grid-template-rows: var(--layout-header-height) 1fr;
+        grid-template-areas:
+          "sidebar header"
+          "sidebar main";
+      }
+
+      .admin-layout__sidebar {
+        grid-area: sidebar;
+        position: static;
+        transform: translateX(0);
+        height: 100vh;
+      }
+
+      .admin-layout__header {
+        grid-area: header;
+        position: static;
+      }
+
+      .admin-layout__main {
+        grid-area: main;
+        overflow-y: auto;
+      }
+
+      .admin-layout__nav-toggle-label, .admin-layout__overlay {
+        display: none; /* Hide mobile controls on desktop */
+      }
+    }
+    
+    /* Skip to Content Link */
+    .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 10px;
+        background: var(--color-primary-700);
+        color: white;
+        padding: var(--spacing-sm) var(--spacing-md);
+        z-index: 2000;
+        transition: top 0.3s;
+        border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+        font-weight: var(--font-weight-semibold);
+    }
+    .skip-link:focus {
+        top: 0;
+    }
+
+    /* Placeholder styles for child components */
+    .sidebar-header {
+        padding: 0 var(--spacing-lg) var(--spacing-lg);
+        border-bottom: 1px solid var(--color-neutral-700);
+        font-size: 1.25rem;
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-white);
+    }
+    .sidebar-nav {
+        flex-grow: 1;
+        padding: var(--spacing-lg) 0;
+    }
+    .sidebar-nav__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .sidebar-nav__link {
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        color: var(--color-neutral-300);
+        font-weight: var(--font-weight-medium);
+        transition: background-color 0.2s, color 0.2s;
+        border-left: 3px solid transparent;
+    }
+    .sidebar-nav__link:hover {
+        background-color: var(--color-neutral-800);
+        color: var(--color-white);
+    }
+    .sidebar-nav__link--active {
+        background-color: var(--color-primary-900);
+        color: var(--color-white);
+        border-left-color: var(--color-primary-500);
+        font-weight: var(--font-weight-semibold);
+    }
+    .sidebar-nav__icon {
+        margin-right: var(--spacing-md);
+        width: 20px;
+        height: 20px;
+    }
+    .sidebar-footer {
+        padding: var(--spacing-lg);
+        border-top: 1px solid var(--color-neutral-700);
+        font-size: 0.875rem;
+        color: var(--color-neutral-500);
+    }
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+    .user-menu__avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--color-primary-700);
+        color: var(--color-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: var(--font-weight-medium);
+    }
+    .placeholder-content {
+        background-color: var(--color-white);
+        padding: var(--spacing-xl);
+        border-radius: 8px;
+        border: 1px solid var(--color-neutral-200);
+        min-height: 400px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div class="admin-layout">
+    <input type="checkbox" id="mobile-nav-toggle" class="admin-layout__nav-toggle-input">
+    
+    <aside class="admin-layout__sidebar">
+      <header class="sidebar-header">Admin Panel</header>
+      <nav class="sidebar-nav" aria-label="Main Navigation">
+        <ul class="sidebar-nav__list">
+          <li>
+            <a href="#" class="sidebar-nav__link sidebar-nav__link--active">
+              <svg class="sidebar-nav__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+              <span>Moderation Queue</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-nav__link">
+              <svg class="sidebar-nav__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-2.305c.395-.44-.122-1.162-.642-1.43l-2.12-1.102a3 3 0 0 0-3.293.126l-1.38 1.135A9.375 9.375 0 0 0 8.25 19.5" /></svg>
+              <span>User Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-nav__link">
+              <svg class="sidebar-nav__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+              <span>Audit Log</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-nav__link">
+              <svg class="sidebar-nav__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.438.995a6.473 6.473 0 0 1 0 1.062c0 .382.145.755.438.995l1.003.827c.424.35.534.954.26 1.431l-1.296 2.247a1.125 1.125 0 0 1-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.075.124a6.57 6.57 0 0 1-.22.127c-.332.183-.582.495-.645.87l-.213 1.281c-.09.543-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 0 1-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 0 1-1.37-.49l-1.296-2.247a1.125 1.125 0 0 1 .26-1.431l1.003-.827c.293-.24.438-.613.438-.995a6.473 6.473 0 0 1 0-1.062c0-.382-.145-.755-.438-.995l-1.003-.827a1.125 1.125 0 0 1-.26-1.431l1.296-2.247a1.125 1.125 0 0 1 1.37-.49l1.217.456c.355.133.75.072 1.075-.124.072-.044.146-.087.22-.127.332-.183.582-.495.645-.87l.213-1.281Z" /></svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <footer class="sidebar-footer">
+        <p>&copy; 2024 Platform Inc.</p>
+      </footer>
+    </aside>
+
+    <header class="admin-layout__header">
+      <div class="header-content">
+        <label for="mobile-nav-toggle" class="admin-layout__nav-toggle-label" aria-label="Open navigation menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </label>
+        <!-- Placeholder for SearchBar molecular component -->
+        <div style="font-weight: 500;">Admin Dashboard</div>
+      </div>
+      <div class="header-content">
+        <!-- Placeholder for notifications -->
+        <button style="background:none; border:none; cursor:pointer; padding: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </button>
+        <!-- Placeholder for UserMenu molecular component -->
+        <div class="user-menu__avatar">JD</div>
+      </div>
+    </header>
+
+    <main class="admin-layout__main" id="main-content">
+      <!-- Placeholder for ContentArea organism -->
+      <div class="placeholder-content">
+        <h1>Page Content Goes Here</h1>
+        <p>This is the main content area where specific page views like data tables, forms, or dashboards will be rendered.</p>
+      </div>
+    </main>
+
+    <label for="mobile-nav-toggle" class="admin-layout__overlay" aria-label="Close navigation menu"></label>
+  </div>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>
+		<normal> The standard layout for the admin panel. On desktop, it shows a fixed sidebar. On mobile, the sidebar is hidden and can be toggled. </normal>
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : mobile_nav_open<h3>
+		<normal> The state of the layout on mobile devices when the navigation sidebar is visible. </normal>
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

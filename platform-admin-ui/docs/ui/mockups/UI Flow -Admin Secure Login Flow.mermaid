@@ -1,0 +1,56 @@
+flowchart TD
+    subgraph User Action
+        A[User navigates to /admin]
+        F[User submits email & password]
+        L[User submits TOTP code]
+    end
+
+    subgraph System Logic
+        B{Is user already authenticated?}
+        D{Is user role 'Admin'?}
+        C[Show Admin Login Form]
+        G{Credentials Valid AND User is Admin?}
+        I{MFA Enabled?}
+        K[Show MFA Code Input Form]
+        M{TOTP Code Valid?}
+        O[Issue Admin Session Token]
+    end
+
+    subgraph Outcomes
+        direction LR
+        E["Redirect to /403 Permission Denied<br>(Non-admin access attempt)"]
+        H["Show 'Invalid Credentials' Error<br>(Prevents user enumeration)"]
+        J["Redirect to Mandatory MFA Setup<br>(First-time admin login)"]
+        N["Show 'Invalid Code' Error<br>(Increment failure count)"]
+        P[Redirect to Admin Dashboard]
+    end
+
+    A --> B
+    B -->|Yes| D
+    B -->|No| C
+    D -->|Yes| P
+    D -->|No| E
+    C --> F
+    F --> G
+    G -->|No| H
+    H --> C
+    G -->|Yes| I
+    I -->|No| J
+    I -->|Yes| K
+    K --> L
+    L --> M
+    M -->|No| N
+    N --> K
+    M -->|Yes| O
+    O --> P
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#c62828,color:#c62828
+    classDef successNode fill:#e8f5e9,stroke:#2e7d32,color:#2e7d32
+    classDef processNode fill:#e3f2fd,stroke:#0d47a1,color:#000
+    classDef decisionNode fill:#fffde7,stroke:#f57f17,color:#000
+    
+    class E,H,J,N errorNode
+    class P,O successNode
+    class A,F,L,C,K processNode
+    class B,D,G,I,M decisionNode

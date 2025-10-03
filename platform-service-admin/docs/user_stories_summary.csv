@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"15","96","12","3","0","[""Core User Authentication & Registration"",""Advanced Security & Account Lifecycle"",""Service Foundation""]","8","[""Database schema must be established before application logic."",""Login must be implemented before logout or MFA."",""Containerization is a prerequisite for CI/CD deployment.""]"

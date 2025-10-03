@@ -1,0 +1,280 @@
+
+{
+  "visual_foundation": {
+    "typography": {
+      "font_families": {
+        "primary": "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        "secondary": "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif",
+        "monospace": "'Roboto Mono', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+      },
+      "font_scale": {
+        "h1": {
+          "size": "48px",
+          "weight": "700",
+          "line_height": "1.2"
+        },
+        "h2": {
+          "size": "36px",
+          "weight": "700",
+          "line_height": "1.25"
+        },
+        "h3": {
+          "size": "28px",
+          "weight": "600",
+          "line_height": "1.3"
+        },
+        "h4": {
+          "size": "20px",
+          "weight": "600",
+          "line_height": "1.4"
+        },
+        "body": {
+          "size": "16px",
+          "weight": "400",
+          "line_height": "1.5"
+        },
+        "caption": {
+          "size": "14px",
+          "weight": "400",
+          "line_height": "1.4"
+        }
+      },
+      "responsive_scaling": "Font sizes are reduced by one step on mobile viewports (e.g., H1 becomes 36px). Line heights are slightly increased for body copy on mobile for better readability."
+    },
+    "color_palette": {
+      "primary": {
+        "50": "#E3F2FD",
+        "100": "#BBDEFB",
+        "200": "#90CAF9",
+        "300": "#64B5F6",
+        "400": "#42A5F5",
+        "500": "#2196F3",
+        "600": "#1E88E5",
+        "700": "#1976D2",
+        "800": "#1565C0",
+        "900": "#0D47A1"
+      },
+      "secondary": {
+        "50": "#E0F2F1",
+        "500": "#009688",
+        "900": "#004D40"
+      },
+      "neutrals": {
+        "white": "#FFFFFF",
+        "gray_50": "#F8F9FA",
+        "gray_100": "#F1F3F5",
+        "gray_200": "#E9ECEF",
+        "gray_300": "#DEE2E6",
+        "gray_400": "#CED4DA",
+        "gray_500": "#ADB5BD",
+        "gray_600": "#6C757D",
+        "gray_700": "#495057",
+        "gray_800": "#343A40",
+        "gray_900": "#212529",
+        "black": "#000000"
+      },
+      "semantic": {
+        "success": "#2E7D32",
+        "warning": "#ED6C02",
+        "error": "#D32F2F",
+        "info": "#0288D1"
+      }
+    },
+    "spacing_system": {
+      "scale": [
+        "4px",
+        "8px",
+        "16px",
+        "24px",
+        "32px",
+        "48px",
+        "64px",
+        "96px"
+      ],
+      "grid_system": "A 12-column responsive grid based on CSS Grid. Gutters are 24px on desktop, reduced to 16px on mobile. The grid provides flexibility for the 3-column desktop layout and single-column mobile layout.",
+      "container_widths": {
+        "mobile": "100%",
+        "tablet": "720px",
+        "desktop": "1140px"
+      },
+      "responsive_spacing": "Spacing values are reduced by one step on mobile breakpoints. For example, a 32px padding on desktop becomes 24px on tablet and 16px on mobile."
+    }
+  },
+  "component_specifications": {
+    "buttons": {
+      "primary": {
+        "default_state": {
+          "background": "#1976D2",
+          "text": "#FFFFFF",
+          "padding": "10px 22px",
+          "border_radius": "8px",
+          "font_weight": "600"
+        },
+        "hover_state": {
+          "background": "#1565C0",
+          "elevation": "2px"
+        },
+        "active_state": {
+          "background": "#0D47A1",
+          "transform": "scale(0.98)"
+        },
+        "disabled_state": {
+          "background": "#E9ECEF",
+          "text": "#ADB5BD",
+          "cursor": "not-allowed"
+        },
+        "focus_state": {
+          "outline": "2px solid #64B5F6",
+          "outline_offset": "2px"
+        }
+      },
+      "secondary": {
+        "default_state": {
+          "background": "transparent",
+          "text": "#1976D2",
+          "border": "1px solid #1976D2",
+          "padding": "10px 22px",
+          "border_radius": "8px",
+          "font_weight": "600"
+        },
+        "hover_state": {
+          "background": "#E3F2FD"
+        },
+        "active_state": {
+          "background": "#BBDEFB"
+        },
+        "disabled_state": {
+          "border": "1px solid #CED4DA",
+          "text": "#ADB5BD",
+          "cursor": "not-allowed"
+        },
+        "focus_state": {
+          "outline": "2px solid #64B5F6",
+          "outline_offset": "2px"
+        }
+      },
+      "accessibility": "Buttons must have a minimum touch target size of 44x44px. Icon-only buttons must have an `aria-label`."
+    },
+    "form_inputs": {
+      "text_input": {
+        "default_state": {
+          "border": "1px solid #CED4DA",
+          "background": "#FFFFFF",
+          "padding": "12px 16px",
+          "border_radius": "8px"
+        },
+        "focus_state": {
+          "border": "2px solid #1976D2",
+          "box_shadow": "0 0 0 3px rgba(25, 118, 210, 0.1)"
+        },
+        "error_state": {
+          "border": "2px solid #D32F2F"
+        },
+        "disabled_state": {
+          "background": "#F1F3F5",
+          "cursor": "not-allowed"
+        },
+        "accessibility": "Each input must be associated with a `<label>`. Error messages must be linked via `aria-describedby`."
+      }
+    },
+    "navigation": {
+      "header": {
+        "desktop_layout": "Persistent top app bar with logo, primary navigation links, global search bar, and user profile menu.",
+        "mobile_layout": "Top app bar with logo, search icon, and hamburger menu icon. Primary navigation links are housed within a slide-out drawer.",
+        "active_states": "The active navigation link has a distinct style (e.g., bold text and a colored underline) to indicate the user's current location.",
+        "accessibility": "The mobile navigation drawer must trap focus. All navigation links must be keyboard accessible and have clear, descriptive text."
+      }
+    },
+    "data_display": {
+      "cards": {
+        "default_card": {
+          "padding": "24px",
+          "border_radius": "12px",
+          "background": "#FFFFFF",
+          "shadow": "0 2px 4px rgba(0,0,0,0.05)"
+        },
+        "hover_state": {
+          "shadow": "0 4px 12px rgba(0,0,0,0.1)",
+          "transform": "translateY(-2px)"
+        },
+        "content_structure": "Cards are composed of CardHeader, CardContent, and CardActions sections to structure content like posts and profile summaries."
+      }
+    },
+    "feedback": {
+      "alerts": {
+        "success": {
+          "background": "#E8F5E9",
+          "icon": "CheckCircle",
+          "text": "#2E7D32"
+        },
+        "error": {
+          "background": "#FFEBEE",
+          "icon": "Error",
+          "text": "#D32F2F"
+        },
+        "accessibility": "Alerts used for dynamic feedback must use `role='alert'` or an ARIA live region to be announced by screen readers."
+      }
+    }
+  },
+  "interaction_patterns": {
+    "micro_interactions": [
+      {
+        "pattern_name": "Button Press Feedback",
+        "trigger": "User clicks/taps a primary or secondary button.",
+        "animation": "Element scales down to 0.98 over 150ms with an ease-out timing function.",
+        "accessibility": "This animation is disabled if the user has `prefers-reduced-motion` enabled."
+      },
+      {
+        "pattern_name": "Focus Ring",
+        "trigger": "User navigates to an interactive element using the keyboard (Tab key).",
+        "animation": "A 2px solid outline in the primary color appears with a 2px offset. The outline fades in over 100ms.",
+        "accessibility": "This is a critical accessibility feature and is always enabled."
+      }
+    ],
+    "loading_states": [
+      {
+        "pattern_name": "Content Loading (Feed/Cards)",
+        "visual": "Use skeleton screens that mimic the layout of the final content (e.g., a circle for an avatar, rectangles for text lines).",
+        "duration": "A subtle shimmer animation with a 1.5s loop duration.",
+        "accessibility": "The loading region should be marked with `aria-busy='true'`."
+      },
+      {
+        "pattern_name": "Action Loading (Buttons)",
+        "visual": "Replace the button's text/icon with a small circular progress indicator.",
+        "duration": "N/A",
+        "accessibility": "The button should be disabled and an ARIA live region should announce the loading state, e.g., 'Saving...'"
+      }
+    ]
+  },
+  "implementation_guidelines": {
+    "css_architecture": {
+      "custom_properties": {
+        "--color-primary-500": "#2196F3",
+        "--color-primary-700": "#1976D2",
+        "--color-neutral-100": "#F1F3F5",
+        "--color-neutral-900": "#212529",
+        "--spacing-md": "16px",
+        "--font-size-body": "16px",
+        "--font-family-primary": "'Inter', sans-serif"
+      },
+      "naming_conventions": "BEM (Block Element Modifier) methodology is recommended for custom components to ensure scoped, predictable, and maintainable styles (e.g., `.post-card__header--featured`).",
+      "component_organization": "Each component should be in its own directory, co-locating the component file (e.g., `Button.tsx`), its styles (`Button.module.css`), and its tests (`Button.test.tsx`).",
+      "utility_classes": "A minimal set of utility classes for margin, padding, and flexbox alignment can be used for one-off layout adjustments, but component-based styling is preferred."
+    },
+    "responsive_strategy": {
+      "breakpoints": {
+        "mobile": "0px",
+        "tablet": "768px",
+        "desktop": "1024px"
+      },
+      "approach": "A mobile-first approach is mandatory. Styles should be written for the smallest viewport first, then enhanced for larger screens using `min-width` media queries.",
+      "component_adaptations": "Components like Data Tables may become horizontally scrollable on mobile. Navigation collapses into a drawer. Grid layouts reflow from multiple columns to a single column."
+    },
+    "accessibility_implementation": {
+      "focus_management": "A highly visible, consistent focus ring is required for all interactive elements. For modals and drawers, focus must be trapped within the component until it is closed.",
+      "color_contrast": "All text and UI elements must pass WCAG 2.1 AA contrast ratios (4.5:1 for normal text, 3:1 for large text). Automated testing for this is required in the CI/CD pipeline.",
+      "screen_reader_support": "Use semantic HTML5 elements (`<main>`, `<nav>`, `<article>`) wherever possible. Use ARIA attributes (`role`, `aria-label`, `aria-live`) for dynamic components and to provide context where semantics are insufficient.",
+      "keyboard_navigation": "All interactive functionality must be operable via keyboard. The tab order must be logical and predictable. Standard keyboard patterns (e.g., arrow keys for tabs/menus, space/enter for activation) must be implemented."
+    }
+  }
+}

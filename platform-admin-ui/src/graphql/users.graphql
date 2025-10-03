@@ -1,0 +1,68 @@
+# src/graphql/users.graphql
+
+# ==========================================
+# ENUMS & TYPES
+# ==========================================
+
+enum UserAccountStatus {
+  ACTIVE
+  INACTIVE
+  DEACTIVATED
+  SUSPENDED
+  BANNED
+  PENDING_DELETION
+}
+
+type AdminUser {
+  id: ID!
+  name: String!
+  email: String!
+  status: UserAccountStatus!
+  createdAt: DateTime!
+  lastLoginAt: DateTime
+}
+
+type UserSearchPayload {
+  users: [AdminUser!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+}
+
+# ==========================================
+# INPUTS
+# ==========================================
+
+input UserFilterInput {
+  status: UserAccountStatus
+}
+
+# ==========================================
+# QUERIES & MUTATIONS
+# ==========================================
+
+query SearchUsersAdmin($query: String, $filter: UserFilterInput, $page: Int = 1, $limit: Int = 25) {
+  searchUsersAdmin(query: $query, filter: $filter, page: $page, limit: $limit) {
+    users {
+      id
+      name
+      email
+      status
+      createdAt
+      lastLoginAt
+    }
+    totalCount
+    pageInfo {
+      currentPage
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+mutation TriggerPasswordResetAdmin($userId: ID!) {
+  triggerPasswordResetAdmin(userId: $userId) {
+    success
+    message
+  }
+}

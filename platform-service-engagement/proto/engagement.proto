@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package engagement;
+
+// The EngagementService is responsible for managing high-volume, lightweight user interactions
+// such as comments, reactions (likes), and skill endorsements.
+service EngagementService {
+  // Adds a comment to a post (REQ-1-022)
+  rpc AddComment(AddCommentRequest) returns (CommentResponse);
+  // Edits an existing comment (REQ-1-025)
+  rpc EditComment(EditCommentRequest) returns (StatusResponse);
+  // Deletes an existing comment (REQ-1-025)
+  rpc DeleteComment(DeleteCommentRequest) returns (StatusResponse);
+
+  // Adds or updates a reaction to a post (REQ-1-021)
+  rpc AddReaction(AddReactionRequest) returns (StatusResponse);
+  // Removes a reaction from a post (Part of REQ-1-021 'undo their Like')
+  rpc RemoveReaction(RemoveReactionRequest) returns (StatusResponse);
+
+  // Adds a skill endorsement to a user's profile (REQ-1-011)
+  rpc AddSkillEndorsement(AddEndorsementRequest) returns (StatusResponse);
+  // Removes a skill endorsement from a user's profile
+  rpc RemoveSkillEndorsement(RemoveEndorsementRequest) returns (StatusResponse);
+}
+
+// Requests and Responses for Comment actions
+
+message AddCommentRequest {
+  string post_id = 1;
+  string author_id = 2; // Authenticated user ID passed from gateway
+  string content = 3;
+}
+
+message CommentResponse {
+  string id = 1;
+  string content = 2;
+  string author_id = 3;
+  string post_id = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message EditCommentRequest {
+  string comment_id = 1;
+  string user_id = 2; // For authorization check (must be comment author)
+  string new_content = 3;
+}
+
+message DeleteCommentRequest {
+  string comment_id = 1;
+  string user_id = 2; // For authorization check (must be comment author)
+}
+
+// Requests for Reaction actions
+
+message AddReactionRequest {
+  string post_id = 1;
+  string user_id = 2; // Authenticated user ID
+  string reaction_type = 3;
+}
+
+message RemoveReactionRequest {
+  string post_id = 1;
+  string user_id = 2; // Authenticated user ID
+}
+
+// Requests for Skill Endorsement actions
+
+message AddEndorsementRequest {
+  string endorsed_user_id = 1; // The user whose skill is being endorsed
+  string endorser_id = 2;      // The authenticated user giving the endorsement
+  string skill_id = 3;
+}
+
+message RemoveEndorsementRequest {
+  string endorsed_user_id = 1;
+  string endorser_id = 2;
+  string skill_id = 3;
+}
+
+// Generic status response for operations that don't return data
+
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+}

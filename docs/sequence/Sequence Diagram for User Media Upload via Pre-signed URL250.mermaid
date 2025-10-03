@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor "User (Browser)" as UserBrowser
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Profile Service" as ProfileService
+    participant "AWS S3" as AWSS3
+
+    UserBrowser->>ClientSPA: 1. 1. Selects file to upload (e.g., profile.jpg)
+    activate APIGateway
+    ClientSPA->>APIGateway: 2. 2. Request Upload URL: generateUploadUrl(fileInfo)
+    APIGateway-->>ClientSPA: 4. { data: { generateUploadUrl: { url, objectKey } } }
+    activate ProfileService
+    APIGateway->>ProfileService: 3. 3. generateUploadUrl(fileInfo, userId)
+    ProfileService-->>APIGateway: Returns { url, objectKey }
+    ClientSPA->>AWSS3: 5. 5. Upload file directly to pre-signed URL
+    AWSS3-->>ClientSPA: 6. HTTP 200 OK
+    ClientSPA->>APIGateway: 7. 7. Confirm Upload Success: confirmMediaUpload(objectKey)
+    APIGateway-->>ClientSPA: 9. { data: { confirmMediaUpload: { success: true, cdnUrl } } }
+    APIGateway->>ProfileService: 8. 8. confirmMediaUpload(objectKey, userId)
+    ProfileService-->>APIGateway: Returns { success, cdnUrl }
+
+    note over ProfileService: Business Rule Enforcement (1.2.1): The Profile Service validates that the file's contentType is '...
+    note over AWSS3: Security: Pre-signed URL Expiry The generated URL is valid for a short duration (e.g., 5 minutes)...
+    note over ClientSPA: CDN Delivery (2.6.8): The cdnUrl returned upon confirmation points to the Cloudflare distribution...
+
+    deactivate ProfileService
+    deactivate APIGateway

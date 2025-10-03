@@ -1,0 +1,7 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""US-001"",""US-004"",""US-005"",""US-006"",""US-009""]","14","Establish the foundational user registration and secure login flows, including core validation and error handling.","true"
+"2","[""US-002"",""US-003"",""US-007"",""US-008""]","13","Complete the account activation loop with email verification and implement secure session termination (logout).","true"
+"3","[""US-010"",""US-011"",""US-012""]","11","Implement the complete, secure self-service password recovery user journey.","true"
+"4","[""US-018"",""US-019""]","13","Implement Multi-Factor Authentication (MFA) setup and login to provide enhanced account security.","true"
+"5","[""US-013"",""US-014""]","13","Implement temporary account deactivation and seamless reactivation to improve user retention and control.","true"
+"6","[""US-015"",""US-016"",""US-017"",""US-020""]","26","This sprint is overloaded and should be split. Initial Goal: Implement the complete, compliant permanent account deletion workflow and the user-facing security audit trail.","true"

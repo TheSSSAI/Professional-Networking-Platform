@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Build artifacts
+dist
+.DS_Store
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Config
+.env
+.env.test
+
+# VSCode
+.vscode

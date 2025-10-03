@@ -1,0 +1,93 @@
+name: Notifications Service CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Lint Code
+        run: npm run lint
+
+      - name: Run Unit & Integration Tests
+        run: npm test
+
+      # Placeholder for E2E tests which would require a running DB and other services
+      # - name: Run End-to-End Tests
+      #   run: npm run test:e2e
+
+      - name: Build Project
+        run: npm run build
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' # Only run on merge to main
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+
+      # In a real enterprise pipeline, you would use tools like Snyk, Checkmarx, or GitHub Advanced Security
+      - name: Static Application Security Testing (SAST)
+        run: echo "Running SAST scan..." # Placeholder for a real SAST tool
+
+      - name: Software Composition Analysis (SCA)
+        run: echo "Running SCA scan for dependency vulnerabilities..." # Placeholder for a real SCA tool
+
+  build-and-push-docker:
+    runs-on: ubuntu-latest
+    needs: security-scan
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Add steps here to log in to a container registry (e.g., AWS ECR, Docker Hub)
+      # - name: Login to Amazon ECR
+      #   uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          # ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: platform-service-notifications
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Building and pushing Docker image..."
+          # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # The above lines are commented out as they require actual registry credentials.

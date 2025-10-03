@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversation List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    ul, ol {
+      list-style: none;
+    }
+    img {
+      max-width: 100%;
+      display: block;
+    }
+    input, button, textarea, select {
+      font: inherit;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      --color-success: #2E7D32;
+
+      /* Spacing */
+      --space-xxs: 4px;
+      --space-xs: 8px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+
+      /* Borders */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-full: 9999px;
+    }
+
+    /* Screen Layout */
+    .app-layout {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      background-color: var(--color-white);
+    }
+
+    .conversation-sidebar {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--color-neutral-200);
+      background-color: var(--color-neutral-50);
+    }
+    
+    .conversation-main {
+        display: none; /* Hidden on mobile by default */
+        flex-grow: 1;
+        background-color: var(--color-white);
+        padding: var(--space-xl);
+    }
+
+    /* Sidebar Components */
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--color-neutral-200);
+      flex-shrink: 0;
+    }
+    .sidebar-header__title {
+      font-size: 20px;
+      font-weight: var(--font-weight-semibold);
+    }
+    .sidebar-header__action {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--space-xs);
+      border-radius: var(--border-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-neutral-600);
+    }
+    .sidebar-header__action:hover {
+        background-color: var(--color-neutral-200);
+    }
+
+    .search-container {
+        padding: var(--space-sm) var(--space-lg);
+        border-bottom: 1px solid var(--color-neutral-200);
+        flex-shrink: 0;
+    }
+    .search-input {
+        width: 100%;
+        padding: var(--space-sm) var(--space-md);
+        border: 1px solid var(--color-neutral-400);
+        border-radius: var(--border-radius-md);
+        background-color: var(--color-white);
+        font-size: var(--font-size-sm);
+    }
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 2px var(--color-primary-50);
+    }
+    
+    .conversation-list-wrapper {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .conversation-list {
+        padding: var(--space-xs) 0;
+    }
+
+    /* Conversation Item (ListItem + UserBadge) */
+    .conversation-item {
+        display: block;
+        padding: var(--space-sm) var(--space-lg);
+    }
+    .conversation-item:hover {
+        background-color: var(--color-neutral-200);
+    }
+    .conversation-item.is-active {
+        background-color: var(--color-primary-50);
+        border-right: 3px solid var(--color-primary-700);
+    }
+
+    .conversation-item__content {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+    
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius-full);
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .conversation-details {
+        flex-grow: 1;
+        min-width: 0; /* Important for flexbox truncation */
+    }
+
+    .details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-xs);
+    }
+    .user-name {
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-md);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .timestamp {
+        font-size: 12px;
+        color: var(--color-neutral-600);
+        flex-shrink: 0;
+    }
+
+    .details-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--space-xs);
+        margin-top: var(--space-xxs);
+    }
+    .message-preview {
+        font-size: var(--font-size-sm);
+        color: var(--color-neutral-600);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .message-preview--unread {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-neutral-900);
+    }
+    
+    .unread-badge {
+        background-color: var(--color-success);
+        color: var(--color-white);
+        font-size: 12px;
+        font-weight: var(--font-weight-medium);
+        padding: 2px 6px;
+        border-radius: var(--border-radius-full);
+        flex-shrink: 0;
+    }
+
+    /* States */
+    .conversation-list-wrapper.is-loading .conversation-item,
+    .conversation-list-wrapper.is-empty .conversation-item {
+        display: none;
+    }
+    
+    /* Loading State (SkeletonLoader) */
+    .skeleton-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        padding: var(--space-sm) var(--space-lg);
+    }
+    .skeleton {
+        background-color: var(--color-neutral-200);
+        position: relative;
+        overflow: hidden;
+    }
+    .skeleton::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 150%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 1.5s infinite;
+    }
+    .skeleton-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius-full);
+    }
+    .skeleton-text-wrapper {
+        flex-grow: 1;
+    }
+    .skeleton-text {
+        height: 12px;
+        border-radius: var(--border-radius-sm);
+    }
+    .skeleton-text--short {
+        width: 40%;
+    }
+    .skeleton-text--long {
+        width: 80%;
+    }
+    .skeleton-text + .skeleton-text {
+        margin-top: var(--space-xs);
+    }
+    @keyframes shimmer {
+        0% { left: -150%; }
+        100% { left: 150%; }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        display: none; /* Hidden by default */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: var(--space-xl);
+        height: 100%;
+        color: var(--color-neutral-600);
+    }
+    .conversation-list-wrapper.is-empty .empty-state {
+        display: flex;
+    }
+    .empty-state__icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: var(--space-md);
+    }
+    .empty-state__title {
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-md);
+        color: var(--color-neutral-900);
+        margin-bottom: var(--space-xs);
+    }
+    .empty-state__text {
+        font-size: var(--font-size-sm);
+        max-width: 280px;
+    }
+
+    /* Responsive Design */
+    @media (min-width: 768px) {
+      .conversation-sidebar {
+        width: 360px;
+        flex-shrink: 0;
+      }
+      .conversation-main {
+        display: block;
+      }
+    }
+    
+    /* For Variations Demo */
+    .screen-variations {
+        padding: 2rem;
+        background-color: #f0f2f5;
+    }
+    .variation-group {
+        margin-top: 2rem;
+        border: 1px dashed #ccc;
+        padding: 1rem;
+        background-color: #fff;
+    }
+    .variation-group h3 { margin-bottom: 1rem; }
+    .variation-group p { margin-bottom: 1rem; color: #666; font-style: italic;}
+    .variation-container {
+        height: 500px;
+        width: 360px;
+        border: 1px solid #dee2e6;
+        margin: 0 auto;
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="conversation-sidebar">
+      <header class="sidebar-header">
+        <h1 class="sidebar-header__title">Messages</h1>
+        <button class="sidebar-header__action" aria-label="New Message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+      </header>
+      <div class="search-container">
+        <input type="search" class="search-input" placeholder="Search messages...">
+      </div>
+      <div class="conversation-list-wrapper">
+        <ul class="conversation-list">
+          <li>
+            <a href="#" class="conversation-item">
+              <div class="conversation-item__content">
+                <img src="https://i.pravatar.cc/150?u=jane" alt="Jane Cooper" class="avatar">
+                <div class="conversation-details">
+                  <div class="details-header">
+                    <span class="user-name">Jane Cooper</span>
+                    <span class="timestamp">2m ago</span>
+                  </div>
+                  <div class="details-body">
+                    <p class="message-preview message-preview--unread">Sounds great! I will review the proposal and get back to you by EOD.</p>
+                    <span class="unread-badge">2</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="conversation-item is-active">
+              <div class="conversation-item__content">
+                <img src="https://i.pravatar.cc/150?u=cody" alt="Cody Fisher" class="avatar">
+                <div class="conversation-details">
+                  <div class="details-header">
+                    <span class="user-name">Cody Fisher</span>
+                    <span class="timestamp">1h ago</span>
+                  </div>
+                  <div class="details-body">
+                    <p class="message-preview">You: Yes, that works for me.</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="conversation-item">
+              <div class="conversation-item__content">
+                <img src="https://i.pravatar.cc/150?u=esther" alt="Esther Howard" class="avatar">
+                <div class="conversation-details">
+                  <div class="details-header">
+                    <span class="user-name">Esther Howard</span>
+                    <span class="timestamp">Yesterday</span>
+                  </div>
+                  <div class="details-body">
+                    <p class="message-preview">Just wanted to follow up on our conversation from last week.</p>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+    <main class="conversation-main">
+      <h2>Selected Conversation</h2>
+      <p>The content of the selected conversation (e.g., from Cody Fisher) would appear here.</p>
+    </main>
+  </div>
+  
+  <div class="screen-variations">
+    <h1>Screen Variations</h1>
+
+    <div class="variation-group">
+      <h3>Variant Name: "Loaded State (Default)"</h3>
+      <p>This is the standard view when the user has active conversations. It shows a list of items, with states for unread messages (Jane Cooper) and the currently active conversation (Cody Fisher).</p>
+      <div class="variation-container">
+        <div class="conversation-sidebar" style="height: 100%;">
+          <header class="sidebar-header"><h1 class="sidebar-header__title">Messages</h1></header>
+          <div class="search-container"><input type="search" class="search-input" placeholder="Search..."></div>
+          <div class="conversation-list-wrapper">
+            <ul class="conversation-list">
+              <li><a href="#" class="conversation-item"><div class="conversation-item__content"><img src="https://i.pravatar.cc/150?u=jane" alt="" class="avatar"><div class="conversation-details"><div class="details-header"><span class="user-name">Jane Cooper</span><span class="timestamp">2m ago</span></div><div class="details-body"><p class="message-preview message-preview--unread">Sounds great! I will review...</p><span class="unread-badge">2</span></div></div></div></a></li>
+              <li><a href="#" class="conversation-item is-active"><div class="conversation-item__content"><img src="https://i.pravatar.cc/150?u=cody" alt="" class="avatar"><div class="conversation-details"><div class="details-header"><span class="user-name">Cody Fisher</span><span class="timestamp">1h ago</span></div><div class="details-body"><p class="message-preview">You: Yes, that works for me.</p></div></div></div></a></li>
+              <li><a href="#" class="conversation-item"><div class="conversation-item__content"><img src="https://i.pravatar.cc/150?u=esther" alt="" class="avatar"><div class="conversation-details"><div class="details-header"><span class="user-name">Esther Howard</span><span class="timestamp">Yesterday</span></div><div class="details-body"><p class="message-preview">Just wanted to follow up...</p></div></div></div></a></li>
+              <li><a href="#" class="conversation-item"><div class="conversation-item__content"><img src="https://i.pravatar.cc/150?u=ronald" alt="" class="avatar"><div class="conversation-details"><div class="details-header"><span class="user-name">Ronald Richards</span><span class="timestamp">2d ago</span></div><div class="details-body"><p class="message-preview">Thanks for the connection!</p></div></div></div></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Loading State"</h3>
+      <p>This view is shown while the initial list of conversations is being fetched from the server. It uses skeleton loaders to provide a good user experience and prevent layout shifts.</p>
+       <div class="variation-container">
+        <div class="conversation-sidebar" style="height: 100%;">
+          <header class="sidebar-header"><h1 class="sidebar-header__title">Messages</h1></header>
+          <div class="search-container"><input type="search" class="search-input" placeholder="Search..."></div>
+          <div class="conversation-list-wrapper is-loading">
+            <!-- Skeleton items are shown instead of the list -->
+            <div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-text-wrapper"><div class="skeleton skeleton-text skeleton-text--long"></div><div class="skeleton skeleton-text skeleton-text--short"></div></div></div>
+            <div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-text-wrapper"><div class="skeleton skeleton-text skeleton-text--long"></div><div class="skeleton skeleton-text skeleton-text--short"></div></div></div>
+            <div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-text-wrapper"><div class="skeleton skeleton-text skeleton-text--long"></div><div class="skeleton skeleton-text skeleton-text--short"></div></div></div>
+            <div class="skeleton-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-text-wrapper"><div class="skeleton skeleton-text skeleton-text--long"></div><div class="skeleton skeleton-text skeleton-text--short"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Empty State"</h3>
+      <p>This view is displayed for new users or users who have no message history. It provides a helpful message and guides them on how to start a conversation.</p>
+       <div class="variation-container">
+        <div class="conversation-sidebar" style="height: 100%;">
+          <header class="sidebar-header"><h1 class="sidebar-header__title">Messages</h1></header>
+          <div class="search-container"><input type="search" class="search-input" placeholder="Search..."></div>
+          <div class="conversation-list-wrapper is-empty">
+            <!-- The empty state is shown instead of the list -->
+            <div class="empty-state">
+              <svg class="empty-state__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <h4 class="empty-state__title">No conversations yet</h4>
+              <p class="empty-state__text">Start a conversation with one of your connections to see it here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

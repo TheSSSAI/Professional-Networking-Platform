@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant "Service A" as ServiceA
+    participant "Service B" as ServiceB
+
+    activate ServiceB
+    ServiceA->>ServiceB: 1. [Circuit: CLOSED] Attempt gRPC call: performCriticalTask(request)
+    ServiceB-->>ServiceA: gRPC Error: DEADLINE_EXCEEDED
+    ServiceA->>ServiceA: 2. Circuit Breaker records failure. Failure count: 1/10.
+    ServiceA->>ServiceB: 3. [Loop] Subsequent gRPC calls continue to fail...
+    ServiceB-->>ServiceA: gRPC Error: UNAVAILABLE
+    ServiceA->>ServiceA: 4. Failure threshold reached (>= 50% failures in 30s). Transition state to OPEN.
+    ServiceA->>ServiceA: 5. [Circuit: OPEN] Intercept call to performCriticalTask(request) locally.
+    ServiceA-->>ServiceA: Error: CircuitBreakerOpenException
+    ServiceA->>ServiceA: 6. [Circuit: HALF-OPEN] After open state duration (60s), transition state.
+    ServiceA->>ServiceB: 7. [Circuit: HALF-OPEN] Allow a single gRPC 'trial' call: performCriticalTask(request).
+    ServiceB-->>ServiceA: gRPC Success Response (Service B has recovered)
+    ServiceA->>ServiceA: 8. Trial call successful. Reset failure counter and transition state to CLOSED.
+
+    note over ServiceB: Service B is considered unhealthy. This could be due to a crash loop, database connection failure...
+    note over ServiceA: Circuit Breaker Config: - failureThreshold: 0.5 (50%) - monitoringTimeWindow: 30s - minimumReques...
+
+    deactivate ServiceB

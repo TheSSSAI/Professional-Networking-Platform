@@ -1,0 +1,37 @@
+# Represents a comment made on a post.
+# Corresponds to REQ-1-022.
+type Comment {
+  # The unique identifier for the comment.
+  id: ID!
+
+  # The text content of the comment.
+  content: String!
+
+  # The user who authored the comment.
+  author: User!
+
+  # The post to which this comment belongs.
+  post: Post!
+
+  # The timestamp when the comment was created.
+  createdAt: String!
+
+  # The timestamp when the comment was last updated.
+  updatedAt: String!
+}
+
+# Represents a paginated list of comments.
+type CommentConnection {
+  # The list of comment edges.
+  edges: [CommentEdge!]!
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+}
+
+# Represents a comment in a connection.
+type CommentEdge {
+  # A cursor for use in pagination.
+  cursor: String!
+  # The comment item.
+  node: Comment!
+}

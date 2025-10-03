@@ -1,0 +1,2 @@
+# This directory is managed by 'prisma migrate'.
+# The first migration will be created by running 'npx prisma migrate dev --name init'

@@ -1,0 +1,59 @@
+# -----------------------------------------------------------------------------
+# Common GraphQL Definitions
+#
+# This file contains common types, scalars, and interfaces that are reused
+# across multiple domains in the GraphQL schema.
+# -----------------------------------------------------------------------------
+
+"""
+A custom scalar representing a date-time string in ISO 8601 format.
+Example: "2024-05-24T10:00:00.000Z"
+"""
+scalar DateTime
+
+"""
+Provides information about pagination in a connection.
+This is a standard type used in GraphQL pagination patterns.
+"""
+type PageInfo {
+  """Indicates if there are more pages to fetch."""
+  hasNextPage: Boolean!
+
+  """Indicates if there are previous pages to fetch."""
+  hasPreviousPage: Boolean!
+
+  """The cursor for the first item on the page."""
+  startCursor: String
+
+  """The cursor for the last item on the page."""
+  endCursor: String
+}
+
+"""
+A generic response for mutations that only need to indicate success or failure,
+optionally returning a message.
+"""
+type SuccessPayload {
+  """Indicates whether the operation was successful."""
+  success: Boolean!
+
+  """An optional message providing more details about the operation's result."""
+  message: String
+}
+
+"""
+Standard input for pagination arguments.
+"""
+input PaginationInput {
+  """The number of items to return after the cursor."""
+  first: Int
+
+  """The cursor for the item to start after."""
+  after: String
+
+  """The number of items to return before the cursor."""
+  last: Int
+
+  """The cursor for the item to start before."""
+  before: String
+}

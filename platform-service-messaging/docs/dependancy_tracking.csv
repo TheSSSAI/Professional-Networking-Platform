@@ -1,0 +1,5 @@
+"dependency_id","from_task","to_task","dependency_type","description","critical_path","lead_time_days","responsible_team","coordination_required","risk_level","mitigation_plan","status","resolution_date","impact_if_delayed","escalation_required"
+"DEP-001","ID-TASK-038","ID-TASK-039","Technical","DB config needs a project structure.","true","","Backend Team","","Low","None needed.","Active","","Blocks all subsequent work.",""
+"DEP-002","ID-TASK-039","ID-TASK-001","Technical","Entities require TypeORM configuration.","true","","Backend Team","","Low","None needed.","Active","","Blocks all database and service logic.",""
+"DEP-003","ID-TASK-016","ID-TASK-017","Technical","JWT strategy needs the blocklist to be populated by the logout endpoint.","true","","Backend Team","","Medium","Ensure API contract between service and strategy is clear.","Active","","Secure logout feature will not work.",""
+"DEP-004","ID-TASK-006","ID-TASK-007","Validation","E2E test validates the full registration flow.","","1","QA Team","true","Low","QA to pair with developers to understand the flow.","Active","","Reduces confidence in feature correctness.",""

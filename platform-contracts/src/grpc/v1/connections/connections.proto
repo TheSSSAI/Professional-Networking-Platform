@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package platform.contracts.connections.v1;
+
+import "google/protobuf/timestamp.proto";
+import "grpc/v1/common/pagination.proto";
+import "grpc/v1/users/user.proto";
+
+// ConnectionsService handles all operations related to the social graph,
+// such as sending, accepting, and managing connection requests.
+service ConnectionsService {
+  // Sends a new connection request.
+  rpc SendConnectionRequest(SendConnectionRequestRequest) returns (SendConnectionRequestResponse);
+  
+  // Accepts a pending connection request.
+  rpc AcceptConnectionRequest(AcceptConnectionRequestRequest) returns (AcceptConnectionRequestResponse);
+  
+  // Declines a pending connection request.
+  rpc DeclineConnectionRequest(DeclineConnectionRequestRequest) returns (DeclineConnectionRequestResponse);
+  
+  // Removes an existing connection. This action is reciprocal.
+  rpc RemoveConnection(RemoveConnectionRequest) returns (RemoveConnectionResponse);
+  
+  // Retrieves a list of pending incoming connection requests for the authenticated user.
+  rpc GetPendingRequests(GetPendingRequestsRequest) returns (GetPendingRequestsResponse);
+
+  // Retrieves a list of a user's first-degree connections.
+  rpc GetConnections(GetConnectionsRequest) returns (GetConnectionsResponse);
+
+  // Checks the connection status between two users.
+  rpc GetConnectionStatus(GetConnectionStatusRequest) returns (GetConnectionStatusResponse);
+
+  // Retrieves the IDs of a user's first-degree connections for internal use.
+  rpc GetFirstDegreeConnectionIds(GetFirstDegreeConnectionIdsRequest) returns (GetFirstDegreeConnectionIdsResponse);
+}
+
+enum ConnectionStatus {
+  CONNECTION_STATUS_UNSPECIFIED = 0;
+  NOT_CONNECTED = 1;
+  PENDING_SENT = 2;
+  PENDING_RECEIVED = 3;
+  CONNECTED = 4;
+}
+
+message Connection {
+  string user_id = 1;
+  platform.contracts.users.v1.UserProfile user_profile = 2;
+  google.protobuf.Timestamp connected_at = 3;
+}
+
+message ConnectionRequest {
+  string request_id = 1;
+  string sender_id = 2;
+  platform.contracts.users.v1.User sender_profile = 3;
+  google.protobuf.Timestamp requested_at = 4;
+  optional string message = 5;
+}
+
+// RPC: SendConnectionRequest
+message SendConnectionRequestRequest {
+  string sender_id = 1;
+  string recipient_id = 2;
+  optional string message = 3;
+}
+
+message SendConnectionRequestResponse {
+  bool success = 1;
+}
+
+// RPC: AcceptConnectionRequest
+message AcceptConnectionRequestRequest {
+  string user_id = 1; // The user accepting the request
+  string request_id = 2;
+}
+
+message AcceptConnectionRequestResponse {
+  bool success = 1;
+}
+
+// RPC: DeclineConnectionRequest
+message DeclineConnectionRequestRequest {
+  string user_id = 1; // The user declining the request
+  string request_id = 2;
+}
+
+message DeclineConnectionRequestResponse {
+  bool success = 1;
+}
+
+// RPC: RemoveConnection
+message RemoveConnectionRequest {
+  string user_id = 1; // The user initiating the removal
+  string connection_id = 2; // The user to be removed
+}
+
+message RemoveConnectionResponse {
+  bool success = 1;
+}
+
+// RPC: GetPendingRequests
+message GetPendingRequestsRequest {
+  string user_id = 1;
+  platform.contracts.common.v1.PaginationRequest pagination = 2;
+}
+
+message GetPendingRequestsResponse {
+  repeated ConnectionRequest requests = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}
+
+// RPC: GetConnections
+message GetConnectionsRequest {
+  string user_id = 1;
+  platform.contracts.common.v1.PaginationRequest pagination = 2;
+  optional string sort_by = 3; // "name" or "connected_at"
+  optional string sort_direction = 4; // "asc" or "desc"
+}
+
+message GetConnectionsResponse {
+  repeated Connection connections = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}
+
+// RPC: GetConnectionStatus
+message GetConnectionStatusRequest {
+  string user_id = 1;
+  string other_user_id = 2;
+}
+
+message GetConnectionStatusResponse {
+  ConnectionStatus status = 1;
+}
+
+// RPC: GetFirstDegreeConnectionIds
+message GetFirstDegreeConnectionIdsRequest {
+  string user_id = 1;
+}
+
+message GetFirstDegreeConnectionIdsResponse {
+  repeated string connection_ids = 1;
+}

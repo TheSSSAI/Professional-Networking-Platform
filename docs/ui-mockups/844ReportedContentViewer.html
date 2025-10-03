@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: ReportedContentViewer</title>
+  <style>
+    /* Global Styles & Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-600: #6C757D;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-white: #FFFFFF;
+      --color-error: #D32F2F;
+      --color-error-bg: #FFEBEE;
+      --color-danger-500: #DC2626;
+
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-size-small: 12px;
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-lg: 12px;
+      --border-radius-md: 8px;
+      --shadow-default: 0 2px 4px rgba(0,0,0,0.05);
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      margin: 0;
+      padding: var(--spacing-xl);
+    }
+    
+    .showcase {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .showcase h1, .showcase h2 {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .showcase h2 {
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-neutral-300);
+    }
+
+    /* ReportedContentViewer Organism CSS */
+    .reported-content-viewer {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-default);
+      border: 1px solid var(--color-neutral-200);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .reported-content-viewer__header {
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-neutral-200);
+      background-color: #FAFBFC;
+    }
+
+    .reported-content-viewer__metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .reported-content-viewer__metadata-item {
+      font-size: var(--font-size-caption);
+    }
+
+    .reported-content-viewer__metadata-label {
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-600);
+      display: block;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .reported-content-viewer__metadata-value {
+      font-weight: var(--font-weight-normal);
+      color: var(--color-neutral-900);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .reported-content-viewer__metadata-value a {
+      color: var(--color-primary-700);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .reported-content-viewer__metadata-value a:hover {
+      text-decoration: underline;
+    }
+
+    .reported-content-viewer__metadata-value .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--color-neutral-300);
+      object-fit: cover;
+    }
+
+    .reported-content-viewer__body {
+      padding: var(--spacing-lg);
+      flex-grow: 1;
+    }
+    
+    .reported-content-viewer__body:not(.reported-content-viewer__state-container) {
+      display: none;
+    }
+
+    .reported-content-viewer--loaded .reported-content-viewer__body:not(.reported-content-viewer__state-container) {
+      display: block;
+    }
+    .reported-content-viewer--loading .reported-content-viewer__state-container--loading,
+    .reported-content-viewer--error .reported-content-viewer__state-container--error {
+      display: flex;
+    }
+
+
+    /* Post Variant */
+    .reported-content-viewer__content--post .post-author {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .reported-content-viewer__content--post .post-author .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+    }
+
+    .reported-content-viewer__content--post .post-author-info strong {
+      display: block;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .reported-content-viewer__content--post .post-author-info span {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-600);
+    }
+
+    .reported-content-viewer__content--post .post-text {
+      line-height: 1.6;
+      margin-bottom: var(--spacing-lg);
+      white-space: pre-wrap; /* Preserve line breaks */
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .reported-content-viewer__content--post .post-images {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--spacing-sm);
+    }
+
+    .reported-content-viewer__content--post .post-images img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: var(--border-radius-md);
+    }
+
+    /* Comment Variant */
+    .reported-content-viewer__content--comment .comment-context {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-600);
+      margin-bottom: var(--spacing-sm);
+      padding-left: var(--spacing-md);
+      border-left: 2px solid var(--color-neutral-200);
+    }
+    
+    .reported-content-viewer__content--comment .comment-context a {
+      color: var(--color-primary-700);
+      text-decoration: none;
+    }
+    
+    .reported-content-viewer__content--comment .comment-context a:hover {
+      text-decoration: underline;
+    }
+
+    .reported-content-viewer__content--comment .comment-body {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .reported-content-viewer__content--comment .comment-body .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .reported-content-viewer__content--comment .comment-content {
+      background-color: var(--color-neutral-100);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-lg);
+      flex-grow: 1;
+    }
+
+    .reported-content-viewer__content--comment .comment-author {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    /* States */
+    .reported-content-viewer__state-container {
+      padding: var(--spacing-xl);
+      text-align: center;
+      min-height: 250px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .reported-content-viewer--loading .skeleton {
+      background-color: var(--color-neutral-200);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reported-content-viewer--loading .skeleton::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    .reported-content-viewer--loading .skeleton--text { height: 1em; border-radius: 4px; }
+    .reported-content-viewer--loading .skeleton--circle { border-radius: 50%; }
+    .reported-content-viewer--loading .skeleton--rect { border-radius: var(--border-radius-md); }
+
+    .reported-content-viewer--error .alert {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      background-color: var(--color-error-bg);
+      color: var(--color-error);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-error);
+    }
+
+    .reported-content-viewer--error .alert__icon { width: 24px; height: 24px; }
+    .reported-content-viewer--error .alert__message { font-weight: var(--font-weight-medium); }
+
+    .reported-content-viewer__actions {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-top: 1px solid var(--color-neutral-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      background-color: var(--color-neutral-100);
+    }
+
+    /* Dependency: Button (simplified) */
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: var(--font-weight-semibold); text-decoration: none; border: 1px solid transparent; border-radius: var(--border-radius-md); padding: var(--spacing-sm) var(--spacing-md); min-height: 44px; cursor: pointer; }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .btn--primary { background-color: var(--color-primary-700); color: var(--color-white); }
+    .btn--secondary { background-color: var(--color-white); color: var(--color-neutral-700); border-color: var(--color-neutral-300); }
+    .btn--danger { background-color: var(--color-danger-500); color: var(--color-white); }
+  </style>
+</head>
+<body>
+
+  <div class="showcase">
+    <h1>Reported Content Viewer Organism</h1>
+
+    <!-- All variants and states will be shown below -->
+  </div>
+
+  <div class="showcase">
+    <h2>States</h2>
+
+    <h3>Loading State</h3>
+    <article class="reported-content-viewer reported-content-viewer--loading">
+      <header class="reported-content-viewer__header">
+        <div class="reported-content-viewer__metadata-grid">
+          <div class="reported-content-viewer__metadata-item">
+            <div class="skeleton skeleton--text" style="width: 80px; height: 12px; margin-bottom: 8px;"></div>
+            <div class="skeleton skeleton--text" style="width: 120px;"></div>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <div class="skeleton skeleton--text" style="width: 60px; height: 12px; margin-bottom: 8px;"></div>
+            <div class="skeleton skeleton--text" style="width: 140px;"></div>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <div class="skeleton skeleton--text" style="width: 100px; height: 12px; margin-bottom: 8px;"></div>
+            <div class="skeleton skeleton--text" style="width: 100px;"></div>
+          </div>
+        </div>
+      </header>
+      <div class="reported-content-viewer__body reported-content-viewer__state-container reported-content-viewer__state-container--loading">
+        <div style="width: 100%;">
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+            <div class="skeleton skeleton--circle" style="width: 48px; height: 48px; flex-shrink: 0;"></div>
+            <div style="flex-grow: 1;">
+              <div class="skeleton skeleton--text" style="width: 40%;"></div>
+              <div class="skeleton skeleton--text" style="width: 30%; height: 12px;"></div>
+            </div>
+          </div>
+          <div class="skeleton skeleton--text" style="width: 100%;"></div>
+          <div class="skeleton skeleton--text" style="width: 90%;"></div>
+          <div class="skeleton skeleton--text" style="width: 60%;"></div>
+        </div>
+      </div>
+      <footer class="reported-content-viewer__actions">
+        <button class="btn btn--secondary" disabled>Dismiss Report</button>
+        <button class="btn btn--danger" disabled>Remove Content</button>
+      </footer>
+    </article>
+
+    <h3>Error State</h3>
+    <article class="reported-content-viewer reported-content-viewer--error">
+        <header class="reported-content-viewer__header">
+            <!-- Header could be empty or show minimal info if available -->
+        </header>
+        <div class="reported-content-viewer__body reported-content-viewer__state-container reported-content-viewer__state-container--error">
+            <div class="alert" role="alert">
+                <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+                <span class="alert__message">Failed to load reported content.</span>
+            </div>
+        </div>
+        <footer class="reported-content-viewer__actions">
+            <!-- Actions could be hidden or disabled -->
+        </footer>
+    </article>
+  </div>
+
+  <div class="showcase">
+    <h2>Variants (Loaded State)</h2>
+
+    <h3>Post Variant</h3>
+    <article class="reported-content-viewer reported-content-viewer--loaded">
+      <header class="reported-content-viewer__header">
+        <div class="reported-content-viewer__metadata-grid">
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reported By</span>
+            <span class="reported-content-viewer__metadata-value">
+              <img src="https://i.pravatar.cc/48?u=reporter" alt="" class="avatar">
+              <a href="#">Diana Prince</a>
+            </span>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reason</span>
+            <span class="reported-content-viewer__metadata-value">Hate Speech</span>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reported On</span>
+            <span class="reported-content-viewer__metadata-value">2025-01-18 14:30 UTC</span>
+          </div>
+        </div>
+      </header>
+      <div class="reported-content-viewer__body">
+        <div class="reported-content-viewer__content--post">
+          <div class="post-author">
+            <img src="https://i.pravatar.cc/96?u=author" alt="" class="avatar">
+            <div class="post-author-info">
+              <strong><a href="#">Bruce Wayne</a></strong>
+              <span>CEO, Wayne Enterprises</span>
+            </div>
+          </div>
+          <p class="post-text">Excited to share our Q4 results, which highlight strong growth in our technology division. Innovation remains at the core of our strategy as we move into the new year.
+          
+A big thank you to the entire team for their hard work and dedication. Looking forward to what we will achieve together in 2025.</p>
+          <div class="post-images">
+            <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&q=80" alt="Corporate meeting">
+            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&q=80" alt="Team working on laptops">
+          </div>
+        </div>
+      </div>
+      <footer class="reported-content-viewer__actions">
+        <button class="btn btn--secondary">Dismiss Report</button>
+        <button class="btn btn--danger">Remove Content</button>
+      </footer>
+    </article>
+
+    <h3>Comment Variant</h3>
+    <article class="reported-content-viewer reported-content-viewer--loaded">
+      <header class="reported-content-viewer__header">
+        <div class="reported-content-viewer__metadata-grid">
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reported By</span>
+            <span class="reported-content-viewer__metadata-value">
+              <img src="https://i.pravatar.cc/48?u=reporter2" alt="" class="avatar">
+              <a href="#">Clark Kent</a>
+            </span>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reason</span>
+            <span class="reported-content-viewer__metadata-value">Spam / Misleading</span>
+          </div>
+          <div class="reported-content-viewer__metadata-item">
+            <span class="reported-content-viewer__metadata-label">Reported On</span>
+            <span class="reported-content-viewer__metadata-value">2025-01-19 09:15 UTC</span>
+          </div>
+        </div>
+      </header>
+      <div class="reported-content-viewer__body">
+        <div class="reported-content-viewer__content--comment">
+          <p class="comment-context">Comment on <a href="#">Selina Kyle's post</a>: "Announcing our new line of sustainable products..."</p>
+          <div class="comment-body">
+            <img src="https://i.pravatar.cc/80?u=commenter" alt="" class="avatar">
+            <div class="comment-content">
+              <div class="comment-author">Oswald Cobblepot</div>
+              <p>This is clearly a pyramid scheme, buy my umbrellas instead. They are much better and not a scam at all. Visit my website for more info!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="reported-content-viewer__actions">
+        <button class="btn btn--secondary">Dismiss Report</button>
+        <button class="btn btn--danger">Remove Comment</button>
+      </footer>
+    </article>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SearchBar - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SearchBar</h1>
+            <div class="component-type-badge">molecular Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">13</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">5</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Component Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Component Id</h4>
+                    <p>MU-MOLC-002</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Name</h4>
+                    <p>SearchBar</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Type</h4>
+                    <p>molecular</p>
+                </div>
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>A composite form control that combines a text input with an icon and an optional button, used for initiating user searches. It includes states for focus and loading, and has variants for global navigation and page-specific contexts.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Design System Alignment</h4>
+                    <p>This component utilizes the design system's tokens for colors (primary, neutrals), spacing (padding, gaps), typography, and border radius to ensure visual consistency with other components like TextInput and Button.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Organism Map</h4>
+                    <p>AppHeader,User Management Screen</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Design Tokens Used</h2>
+            <div class="tokens-grid"><div class="token">--color-primary-100</div><div class="token">--color-primary-700</div><div class="token">--color-neutral-100</div><div class="token">--color-neutral-200</div><div class="token">--color-neutral-400</div><div class="token">--color-neutral-600</div><div class="token">--color-neutral-900</div><div class="token">--color-white</div><div class="token">--spacing-sm</div><div class="token">--spacing-md</div><div class="token">--font-family-primary</div><div class="token">--font-size-md</div><div class="token">--border-radius-md</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Responsive Specifications</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Mobile Adaptations</h4>
+                    <ul><li>The 'global_header' variant collapses to a single icon-only button to save space in the mobile navigation bar.</li><li>The 'page_specific' variant expands to occupy the full available width of its container.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Tablet Adaptations</h4>
+                    <ul><li>The 'global_header' variant may still be collapsed on smaller tablets but becomes the full input on larger tablets.</li><li>The 'page_specific' variant maintains its standard desktop appearance.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Desktop Enhancements</h4>
+                    <ul><li>Full input field is always visible for the 'global_header' variant.</li><li>Hover and focus states provide clear visual feedback.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Accessibility Features</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Keyboard Support</h4><p>The input field is focusable via the Tab key. The form can be submitted by pressing Enter.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Screen Reader Support</h4><p>The component is wrapped in a `<form>` with `role="search"`. The input has a visually hidden `<label>` for programmatic association. Icons are decorative (`aria-hidden="true"`) as the input's placeholder and label provide context.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Focus Management</h4><p>A clear, high-contrast focus ring is applied to the entire component using `:focus-within` to indicate when the search bar is active.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Aria Attributes</h4><ul><li>role="search" on the parent form element.</li><li>aria-label on the input field, provided by a visually hidden label.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Color Contrast</h4><p>Placeholder text and icon colors meet WCAG AA contrast ratios against the background.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CSS Implementation</h2>
+            <div class="code-block">/* SearchBar Component CSS */
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 450px;
+  font-family: var(--font-family-primary);
+}
+
+.search-bar__icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neutral-600);
+  pointer-events: none; /* Allows clicks to pass through to the input */
+  width: 20px;
+  height: 20px;
+  transition: color 150ms ease;
+}
+
+.search-bar__input {
+  width: 100%;
+  height: 44px; /* Touch-friendly size */
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 44px; /* Left padding for icon */
+  border: 1px solid var(--color-neutral-400);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-neutral-100);
+  font-size: var(--font-size-md);
+  color: var(--color-neutral-900);
+  transition: all 150ms ease-in-out;
+}
+
+.search-bar__input::placeholder {
+  color: var(--color-neutral-600);
+}
+
+.search-bar__input:focus {
+  outline: none;
+}
+
+.search-bar__spinner {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  display: none; /* Hidden by default */
+}
+
+/* States */
+.search-bar:focus-within .search-bar__icon {
+  color: var(--color-primary-700);
+}
+
+.search-bar:focus-within .search-bar__input {
+  border-color: var(--color-primary-700);
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--color-primary-100);
+}
+
+/* To visually demonstrate focus state without interaction */
+.search-bar.pseudo-focus-within .search-bar__icon {
+  color: var(--color-primary-700);
+}
+
+.search-bar.pseudo-focus-within .search-bar__input {
+  border-color: var(--color-primary-700);
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--color-primary-100);
+}
+
+.search-bar--loading .search-bar__spinner {
+  display: block;
+}
+
+.search-bar--loading .search-bar__submit-btn {
+  display: none;
+}
+
+
+/* Variants */
+
+/* Global Header Variant */
+.search-bar--global .search-bar__input {
+  border-radius: 99px; /* Pill shape */
+  background-color: var(--color-neutral-200);
+  border-color: transparent;
+}
+
+.search-bar--global:focus-within .search-bar__input {
+  background-color: var(--color-white);
+  border-color: var(--color-primary-700);
+}
+
+.search-bar--global.pseudo-focus-within .search-bar__input {
+  background-color: var(--color-white);
+  border-color: var(--color-primary-700);
+}
+
+/* Page-Specific Variant (Default styles are sufficient) */
+.search-bar--page {
+  /* Uses base styles */
+}
+
+
+/* Responsive Adaptations */
+
+/* For demonstrating the collapsed state in the header */
+.mobile-header-search {
+  display: none; /* Hidden by default on desktop */
+}
+
+@media (max-width: 768px) {
+  /* Hide the full search bar in the global context on mobile */
+  .search-bar--global {
+    display: none;
+  }
+  
+  /* Show the icon-only button instead */
+  .mobile-header-search {
+    display: inline-flex;
+  }
+
+  /* Page-specific search bars take full width */
+  .search-bar--page {
+    max-width: 100%;
+  }
+}
+</div>
+        </div>
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Embedded Css Architecture</h4>
+                    <p>All styles are embedded in a single `<style>` tag, using design system tokens defined as CSS custom properties at the `:root` level. BEM is used for component class naming (`.search-bar`, `.search-bar__input`).</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>The HTML is structured in a showcase format, demonstrating each variant and state with descriptive headers. A visually hidden label is included for accessibility.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>A mobile-first approach is demonstrated for the global header variant, where the full search bar is hidden and an icon button is shown instead on screens narrower than 768px.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>WCAG 2.1 AA compliance is achieved through semantic HTML (`<form role="search">`, `<label>`), keyboard accessibility, and visible focus states via `:focus-within`.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Designed for modern evergreen browsers. Uses widely supported CSS properties like Flexbox and `:focus-within`.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>When To Use</h4><p>Use the 'global_header' variant in the main application header for persistent, site-wide search. Use the 'page_specific' variant for contextual searches within a specific page or data table (e.g., searching a list of users).</p>
+                </div>
+                <div class="info-card">
+                    <h4>Content Guidelines</h4><p>Placeholder text should be concise and action-oriented, e.g., 'Search connections...' or 'Search users by name...'.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Placement Rules</h4><p>The 'global_header' variant is placed in the `AppHeader` organism. The 'page_specific' variant is typically placed above a data table or list that it controls.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Customization Options</h4><ul><li style="list-style: disc; margin-left: 16px; padding-left: 0;">Add the `.search-bar--loading` class to the parent form to display the loading spinner.</li></ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Testing Recommendations</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Browser Testing</h4><p>Test in Chrome, Firefox, Safari, and Edge.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Device Testing</h4><p>Test on mobile, tablet, and desktop viewports to verify responsive behavior, especially the collapsing of the global header variant.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Accessibility Testing</h4><ul><li>Verify keyboard navigation allows tabbing into and out of the input.</li><li>Test with a screen reader to ensure the label is announced correctly.</li><li>Check that the focus indicator is clear and meets contrast requirements.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Performance Testing</h4><p>N/A for this component, as performance is primarily dependent on the backend search query.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

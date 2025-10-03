@@ -1,0 +1,44 @@
+name: Engagement Service CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+
+    - name: Run linter
+      run: npm run lint
+
+    - name: Run unit tests
+      run: npm run test
+
+    # E2E tests would require a database. For a simple CI, we might skip them
+    # or set up a DB service. Here we assume they are skipped for simplicity.
+    # - name: Run E2E tests
+    #   run: npm run test:e2e
+
+    - name: Build project
+      run: npm run build

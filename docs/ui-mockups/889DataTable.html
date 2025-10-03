@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: DataTable</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset & Base Styles --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-300: #64B5F6;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-semantic-success: #2E7D32;
+      --color-semantic-warning: #ED6C02;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-600: #6C757D;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+      
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 1rem;
+      --font-size-caption: 0.875rem;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      
+      /* Spacing */
+      --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 32px; --space-6: 48px;
+      
+      /* Borders & Shadows */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+    
+    /* --- Showcase & Layout Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-100);
+      color: var(--color-neutrals-gray-900);
+      padding: var(--space-5);
+    }
+    .showcase {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .showcase-header {
+      margin-bottom: var(--space-4);
+    }
+    .showcase-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    .showcase-section {
+      margin-bottom: var(--space-6);
+    }
+    .showcase-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: var(--space-4);
+    }
+
+    /* --- DEPENDENT COMPONENT STYLES --- */
+    
+    /* UserBadge Styles */
+    .user-badge { display: inline-flex; align-items: center; gap: var(--space-3); }
+    .user-badge__avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background-color: var(--color-neutrals-gray-200); }
+    .user-badge__text { min-width: 0; }
+    .user-badge__name { font-weight: var(--font-weight-semibold); color: var(--color-neutrals-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-badge__email { font-size: var(--font-size-caption); color: var(--color-neutrals-gray-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    /* Badge Styles */
+    .status-badge { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); font-size: 0.8rem; font-weight: var(--font-weight-semibold); border-radius: 50px; }
+    .status-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; }
+    .status-badge--active { background-color: #E8F5E9; color: #2E7D32; } .status-badge--active::before { background-color: #2E7D32; }
+    .status-badge--inactive { background-color: #F1F3F5; color: #495057; } .status-badge--inactive::before { background-color: #495057; }
+    .status-badge--pending { background-color: #FFF4E5; color: #ED6C02; } .status-badge--pending::before { background-color: #ED6C02; }
+    .status-badge--banned { background-color: #FFEBEE; color: #D32F2F; } .status-badge--banned::before { background-color: #D32F2F; }
+
+    /* ActionMenu Styles */
+    .action-menu { position: relative; display: inline-block; }
+    .action-menu__trigger { display: inline-flex; align-items: center; justify-content: center; background-color: transparent; border: none; border-radius: 50%; padding: var(--space-2); color: var(--color-neutrals-gray-600); cursor: pointer; width: 40px; height: 40px; transition: background-color 0.2s ease; }
+    .action-menu__trigger:hover { background-color: var(--color-neutrals-gray-100); }
+    .action-menu__trigger:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+    .action-menu__dropdown { position: absolute; top: calc(100% + var(--space-1)); right: 0; min-width: 180px; background-color: var(--color-neutrals-white); border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); padding: var(--space-2) 0; z-index: 10; list-style: none; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: opacity 0.2s ease, transform 0.2s ease; }
+    .action-menu:focus-within > .action-menu__dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+    .action-menu__item { display: flex; width: 100%; padding: var(--space-2) var(--space-3); background: none; border: none; text-align: left; font-size: var(--font-size-body); color: var(--color-neutrals-gray-900); cursor: pointer; }
+    .action-menu__item:hover, .action-menu__item:focus { background-color: var(--color-neutrals-gray-100); outline: none; }
+    .action-menu__item--danger { color: var(--color-semantic-error); }
+    .action-menu__item--danger:hover, .action-menu__item--danger:focus { background-color: var(--color-semantic-error-bg); }
+
+    /* Pagination Styles */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: var(--space-2); }
+    .pagination__list { display: flex; list-style: none; gap: var(--space-2); }
+    .pagination__link { display: flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 var(--space-2); border-radius: var(--border-radius-md); font-weight: var(--font-weight-semibold); font-size: var(--font-size-caption); text-decoration: none; border: 1px solid var(--color-neutrals-gray-400); color: var(--color-neutrals-gray-700); background-color: var(--color-neutrals-white); }
+    .pagination__link:hover { background-color: var(--color-primary-50); }
+    .pagination__item--active .pagination__link { background-color: var(--color-primary-700); border-color: var(--color-primary-700); color: var(--color-neutrals-white); }
+    .pagination__item--disabled .pagination__link { color: var(--color-neutrals-gray-500); background-color: var(--color-neutrals-gray-100); cursor: not-allowed; }
+
+    /* SkeletonLoader Styles */
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+    .skeleton { position: relative; overflow: hidden; background-color: var(--color-neutrals-gray-200); }
+    .skeleton::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 60%, rgba(255,255,255,0)); animation: shimmer 2s infinite; }
+    .skeleton--text { height: 1em; border-radius: var(--border-radius-sm); }
+    .skeleton--circle { border-radius: 50%; }
+
+    /* --- ORGANISM: DataTable --- */
+    
+    .data-table-container { background-color: var(--color-neutrals-white); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-md); overflow: hidden; }
+    .table-wrapper { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; font-family: var(--font-family-primary); color: var(--color-neutrals-gray-700); }
+    .data-table caption { position: absolute; left: -9999px; }
+    .data-table thead { background-color: var(--color-neutrals-gray-50); }
+    .data-table th { padding: var(--space-3) var(--space-4); text-align: left; font-weight: var(--font-weight-semibold); font-size: var(--font-size-caption); color: var(--color-neutrals-gray-600); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; border-bottom: 1px solid var(--color-neutrals-gray-200); }
+    .data-table .sortable-header { cursor: pointer; transition: color 0.2s ease; }
+    .data-table .sortable-header:hover { color: var(--color-neutrals-gray-900); }
+    .data-table .sort-icon { display: inline-block; vertical-align: middle; margin-left: var(--space-1); width: 1em; height: 1em; opacity: 0.5; transition: opacity 0.2s ease, transform 0.2s ease; }
+    .data-table .sortable-header:hover .sort-icon { opacity: 1; }
+    .data-table .sortable-header[aria-sort=\"ascending\"] .sort-icon { opacity: 1; transform: rotate(0deg); }
+    .data-table .sortable-header[aria-sort=\"descending\"] .sort-icon { opacity: 1; transform: rotate(180deg); }
+    .data-table tbody tr { transition: background-color 0.2s ease; }
+    .data-table tbody tr:hover { background-color: var(--color-primary-50); }
+    .data-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-neutrals-gray-200); font-size: var(--font-size-body); vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table .cell-user-badge { min-width: 250px; }
+    .data-table .cell-status { white-space: nowrap; }
+    .data-table .cell-actions { text-align: right; }
+    .data-table tfoot td { padding: var(--space-3) var(--space-4); background-color: var(--color-neutrals-white); }
+    .data-table .state-cell { padding: var(--space-6); text-align: center; color: var(--color-neutrals-gray-600); }
+    .data-table .state-cell-content { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); }
+    .data-table .state-icon { font-size: 2.5rem; color: var(--color-neutrals-gray-400); }
+
+    @media (max-width: 768px) {
+      body { padding: var(--space-4); }
+      .data-table th, .data-table td { padding: var(--space-3) var(--space-3); white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Icon Definitions -->
+  <svg width="0" height="0" style="display:none;">
+    <symbol id="icon-more-vertical" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></symbol>
+    <symbol id="icon-chevron-up" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></symbol>
+    <symbol id="icon-inbox" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></symbol>
+    <symbol id="icon-server-off" viewBox="0 0 24 24"><path d="M7 2h13a2 2 0 0 1 2 2v4M10 10.5V7a2 2 0 0 1 2-2h4.5M22 14v-1.5M1 6.13M1 18h11.5M19.3 19.3l-1.8-1.8M17 22v-4.5M2 2l20 20M13.5 10H10M7 18v-4.5M10.5 18H2"></path></symbol>
+  </svg>
+
+  <main class="showcase">
+    <div class="showcase-header">
+      <h1>DataTable Component</h1>
+    </div>
+
+    <!-- Loaded State -->
+    <section class="showcase-section">
+      <h2>Loaded State</h2>
+      <div class="data-table-container">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <caption class="sr-only">List of users for moderation</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="sortable-header" aria-sort="descending">
+                  User
+                  <svg class="icon sort-icon"><use href="#icon-chevron-up"/></svg>
+                </th>
+                <th scope="col" class="sortable-header" aria-sort="none">
+                  Date Joined
+                  <svg class="icon sort-icon"><use href="#icon-chevron-up"/></svg>
+                </th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="cell-user-badge">
+                  <div class="user-badge">
+                    <img src="https://i.pravatar.cc/40?u=aisha.khan" alt="" class="user-badge__avatar">
+                    <div class="user-badge__text">
+                      <div class="user-badge__name">Aisha Khan</div>
+                      <div class="user-badge__email">aisha.khan@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>2024-07-28</td>
+                <td class="cell-status"><span class="status-badge status-badge--active">Active</span></td>
+                <td class="cell-actions">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" type="button" aria-label="More actions for Aisha Khan"><svg class="icon"><use href="#icon-more-vertical"/></svg></button>
+                    <div class="action-menu__dropdown" role="menu">
+                      <button class="action-menu__item" role="menuitem">View Profile</button>
+                      <button class="action-menu__item action-menu__item--danger" role="menuitem">Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="cell-user-badge">
+                  <div class="user-badge">
+                    <img src="https://i.pravatar.cc/40?u=ben.carter" alt="" class="user-badge__avatar">
+                    <div class="user-badge__text">
+                      <div class="user-badge__name">Ben Carter</div>
+                      <div class="user-badge__email">ben.carter@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>2024-07-27</td>
+                <td class="cell-status"><span class="status-badge status-badge--inactive">Inactive</span></td>
+                <td class="cell-actions">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" type="button" aria-label="More actions for Ben Carter"><svg class="icon"><use href="#icon-more-vertical"/></svg></button>
+                    <div class="action-menu__dropdown" role="menu">
+                      <button class="action-menu__item" role="menuitem">View Profile</button>
+                      <button class="action-menu__item action-menu__item--danger" role="menuitem">Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="cell-user-badge">
+                  <div class="user-badge">
+                    <img src="https://i.pravatar.cc/40?u=chloe.davis" alt="" class="user-badge__avatar">
+                    <div class="user-badge__text">
+                      <div class="user-badge__name">Chloe Davis</div>
+                      <div class="user-badge__email">chloe.davis@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>2024-07-26</td>
+                <td class="cell-status"><span class="status-badge status-badge--pending">Pending Review</span></td>
+                <td class="cell-actions">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" type="button" aria-label="More actions for Chloe Davis"><svg class="icon"><use href="#icon-more-vertical"/></svg></button>
+                    <div class="action-menu__dropdown" role="menu">
+                      <button class="action-menu__item" role="menuitem">View Profile</button>
+                      <button class="action-menu__item action-menu__item--danger" role="menuitem">Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="cell-user-badge">
+                  <div class="user-badge">
+                    <img src="https://i.pravatar.cc/40?u=david.evans" alt="" class="user-badge__avatar">
+                    <div class="user-badge__text">
+                      <div class="user-badge__name">David Evans</div>
+                      <div class="user-badge__email">david.evans@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>2024-07-25</td>
+                <td class="cell-status"><span class="status-badge status-badge--banned">Banned</span></td>
+                <td class="cell-actions">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" type="button" aria-label="More actions for David Evans"><svg class="icon"><use href="#icon-more-vertical"/></svg></button>
+                    <div class="action-menu__dropdown" role="menu">
+                      <button class="action-menu__item" role="menuitem">View Profile</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4">
+                  <nav class="pagination" aria-label="pagination">
+                    <a href="#" class="pagination__link pagination__item--disabled"><svg class="icon"><use href="#icon-chevron-left"/></svg></a>
+                    <ul class="pagination__list">
+                      <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">1</a></li>
+                      <li class="pagination__item"><a href="#" class="pagination__link">2</a></li>
+                      <li class="pagination__item"><a href="#" class="pagination__link">3</a></li>
+                    </ul>
+                    <a href="#" class="pagination__link"><svg class="icon"><use href="#icon-chevron-right"/></svg></a>
+                  </nav>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <section class="showcase-section">
+      <h2>Loading State</h2>
+      <div class="data-table-container">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <caption class="sr-only">Loading list of users</caption>
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Date Joined</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <div class="skeleton skeleton--circle" style="width: 40px; height: 40px;"></div>
+                    <div style="flex-grow: 1;">
+                      <div class="skeleton skeleton--text" style="width: 80%; margin-bottom: var(--space-2);"></div>
+                      <div class="skeleton skeleton--text" style="width: 60%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><div class="skeleton skeleton--text" style="width: 70%;"></div></td>
+                <td><div class="skeleton skeleton--text" style="width: 50%;"></div></td>
+                <td><div class="skeleton skeleton--text" style="width: 20%; margin-left: auto;"></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <div class="skeleton skeleton--circle" style="width: 40px; height: 40px;"></div>
+                    <div style="flex-grow: 1;">
+                      <div class="skeleton skeleton--text" style="width: 75%; margin-bottom: var(--space-2);"></div>
+                      <div class="skeleton skeleton--text" style="width: 55%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><div class="skeleton skeleton--text" style="width: 70%;"></div></td>
+                <td><div class="skeleton skeleton--text" style="width: 50%;"></div></td>
+                <td><div class="skeleton skeleton--text" style="width: 20%; margin-left: auto;"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty State -->
+    <section class="showcase-section">
+      <h2>Empty State</h2>
+      <div class="data-table-container">
+        <table class="data-table">
+          <caption class="sr-only">No users found</caption>
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Date Joined</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="state-cell">
+                <div class="state-cell-content">
+                  <svg class="icon state-icon"><use href="#icon-inbox"/></svg>
+                  <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--color-neutrals-gray-900);">No Items Found</h3>
+                    <p style="margin: var(--space-1) 0 0 0;">There are no items to display at this time.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Error State -->
+    <section class="showcase-section">
+      <h2>Error State</h2>
+      <div class="data-table-container">
+        <table class="data-table">
+          <caption class="sr-only">Error loading users</caption>
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Date Joined</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="4" class="state-cell">
+                <div class="state-cell-content">
+                  <svg class="icon state-icon"><use href="#icon-server-off"/></svg>
+                  <div>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--color-neutrals-gray-900);">Could Not Load Data</h3>
+                    <p style="margin: var(--space-1) 0 0 0;">There was an error fetching the data. Please try again later.</p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<normal> The default DataTable implementation supports various data types in cells, including text, molecular components like UserBadge and Badge, and interactive elements like the ActionMenu. It also includes sorting indicators on headers and a pagination component in the footer. This variant is designed for desktop-first admin interfaces and becomes horizontally scrollable on smaller viewports. </normal>
+		<div class="data-table-container">
+        <div class="table-wrapper">
+          <table class="data-table">
+            <caption class="sr-only">List of users for moderation</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="sortable-header" aria-sort="descending">
+                  User
+                  <svg class="icon sort-icon"><use href="#icon-chevron-up"></use></svg>
+                </th>
+                <th scope="col" class="sortable-header" aria-sort="none">
+                  Date Joined
+                  <svg class="icon sort-icon"><use href="#icon-chevron-up"></use></svg>
+                </th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="cell-user-badge">
+                  <div class="user-badge">
+                    <img src="https://i.pravatar.cc/40?u=aisha.khan" alt="" class="user-badge__avatar">
+                    <div class="user-badge__text">
+                      <div class="user-badge__name">Aisha Khan</div>
+                      <div class="user-badge__email">aisha.khan@example.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td>2024-07-28</td>
+                <td class="cell-status"><span class="status-badge status-badge--active">Active</span></td>
+                <td class="cell-actions">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" type="button" aria-label="More actions for Aisha Khan"><svg class="icon"><use href="#icon-more-vertical"></use></svg></button>
+                    <div class="action-menu__dropdown" role="menu">
+                      <button class="action-menu__item" role="menuitem">View Profile</button>
+                      <button class="action-menu__item action-menu__item--danger" role="menuitem">Ban User</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4">
+                  <nav class="pagination" aria-label="pagination">
+                    <a href="#" class="pagination__link pagination__item--disabled"><svg class="icon"><use href="#icon-chevron-left"></use></svg></a>
+                    <ul class="pagination__list">
+                      <li class="pagination__item pagination__item--active"><a href="#" class="pagination__link" aria-current="page">1</a></li>
+                    </ul>
+                    <a href="#" class="pagination__link pagination__item--disabled"><svg class="icon"><use href="#icon-chevron-right"></use></svg></a>
+                  </nav>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>     
+		
+      <div>
+	 </div>
+	 </div>
+	 </div>
+	</body>
+</html>

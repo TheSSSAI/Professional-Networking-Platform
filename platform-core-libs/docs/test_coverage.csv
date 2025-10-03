@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Identity & Access Management (IAM) Service","Critical","High","Low","[""Unit"",""Integration"",""E2E"",""Security"",""Performance""]","95","90","100","95","8","80","60","0.98","High","Low","Excellent","Good"
+"User Profile Service","High","Medium","Medium","[""Unit"",""Integration"",""E2E"",""Security"",""Accessibility""]","90","85","90","90","16","60","85","0.95","High","Medium","Excellent","Good"
+"Search Service","High","High","Medium","[""Unit"",""Integration"",""E2E"",""Performance"",""Security""]","85","90","75","80","24","70","50","0.9","Medium","Medium","Excellent","Medium"
+"Feed & Content Service","High","High","High","[""Unit"",""Integration"",""E2E"",""Performance""]","85","80","85","85","20","90","110","0.92","High","High","Excellent","Good"

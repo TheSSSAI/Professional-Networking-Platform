@@ -1,0 +1,57 @@
+# src/graphql/audit.graphql
+
+# ==========================================
+# TYPES
+# ==========================================
+scalar DateTime
+scalar JSONObject
+
+type PageInfo {
+  currentPage: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type AuditLog {
+  id: ID!
+  adminUserId: ID!
+  adminUserName: String!
+  action: String!
+  targetId: String
+  targetType: String
+  details: JSONObject
+  createdAt: DateTime!
+}
+
+type AuditLogPayload {
+  logs: [AuditLog!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+}
+
+# ==========================================
+# QUERIES
+# ==========================================
+
+query GetAuditLogs($page: Int = 1, $limit: Int = 50, $sortBy: String = "createdAt", $sortOrder: String = "DESC") {
+  auditLogs(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder) {
+    logs {
+      id
+      adminUserId
+      adminUserName
+      action
+      targetId
+      targetType
+      details
+      createdAt
+    }
+    totalCount
+    pageInfo {
+      currentPage
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}

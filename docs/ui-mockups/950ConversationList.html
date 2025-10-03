@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism Component: ConversationList</title>
+    <style>
+        /* 1. CSS Reset & Base Styles */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+        }
+        h1, h2, h3, h4, p { margin: 0; }
+        
+        /* 2. Design System Tokens */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-primary-900: #0D47A1;
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-600: #6C757D;
+            --color-neutral-900: #212529;
+            --color-white: #FFFFFF;
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            /* Typography */
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            /* Borders & Shadows */
+            --border-radius-sm: 4px;
+            --border-radius-md: 8px;
+        }
+
+        /* 3. Showcase Layout Styles */
+        .showcase {
+            display: flex;
+            height: 100vh;
+            background-color: var(--color-neutral-200);
+        }
+        .sidebar {
+            width: 340px;
+            flex-shrink: 0;
+            background-color: var(--color-white);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar__header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--color-neutral-200);
+        }
+        .sidebar__header h2 {
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-bold);
+        }
+        .sidebar__content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: var(--spacing-xl);
+        }
+        .main-content h1 {
+            margin-bottom: var(--spacing-sm);
+        }
+        .main-content p {
+            color: var(--color-neutral-600);
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* 4. Dependency Component Styles */
+        /* UserBadge */
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .user-badge__avatar {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--color-neutral-200);
+            color: var(--color-neutral-600);
+            font-weight: var(--font-weight-semibold);
+            object-fit: cover;
+            width: 48px;
+            height: 48px;
+            font-size: var(--font-size-md);
+        }
+        .user-badge__info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+        .user-badge__name {
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-md);
+            color: var(--color-neutral-900);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* SkeletonLoader */
+        .skeleton {
+            background-color: var(--color-neutral-200);
+            position: relative;
+            overflow: hidden;
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--color-neutral-100), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        .skeleton--circle { border-radius: 50%; }
+        .skeleton--text { height: 1em; border-radius: var(--border-radius-sm); }
+        @keyframes shimmer { 100% { left: 150%; } }
+
+        /* 5. ConversationList Component CSS */
+        .conversation-list {
+            list-style: none;
+            margin: 0;
+            padding: var(--spacing-sm) 0;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .conversation-list__item a {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-decoration: none;
+            color: inherit;
+            border-radius: var(--border-radius-md);
+            margin: 0 var(--spacing-sm);
+            transition: background-color 150ms ease;
+        }
+        .conversation-list__item a:hover {
+            background-color: var(--color-neutral-100);
+        }
+        .conversation-list__item a:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: -2px;
+        }
+        .conversation-list__item--active a {
+            background-color: var(--color-primary-50);
+            color: var(--color-primary-900);
+        }
+        .conversation-list__item--active a .user-badge__name {
+            color: var(--color-primary-900);
+        }
+
+        .conversation-list__details {
+            flex-grow: 1;
+            min-width: 0; /* For flexbox truncation */
+        }
+        .conversation-list__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: var(--spacing-xs);
+        }
+        .conversation-list__timestamp {
+            font-size: 12px;
+            color: var(--color-neutral-600);
+            flex-shrink: 0;
+        }
+        .conversation-list__last-message {
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-600);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .conversation-list__unread-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-primary-700);
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: var(--spacing-md);
+        }
+        
+        /* Loading State */
+        .conversation-list--loading {
+            padding: var(--spacing-md) calc(var(--spacing-md) + var(--spacing-sm));
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+        .skeleton-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        /* Empty State */
+        .conversation-list--empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-neutral-600);
+        }
+        .conversation-list--empty .icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: var(--spacing-md);
+        }
+        .conversation-list--empty h3 {
+            font-size: var(--font-size-md);
+            color: var(--color-neutral-900);
+            margin: 0 0 var(--spacing-xs) 0;
+        }
+        .conversation-list--empty p {
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="showcase">
+    <aside class="sidebar">
+        <header class="sidebar__header">
+            <h2>Messages</h2>
+        </header>
+        <div class="sidebar__content">
+            <!-- This is where the ConversationList organism will live -->
+            <nav aria-label="Conversations">
+                <ul class="conversation-list" id="conversation-list-loaded">
+                    <!-- State: Loaded with conversations -->
+                    <li class="conversation-list__item">
+                        <a href="#">
+                            <div class="user-badge">
+                                <img src="https://i.pravatar.cc/48?u=user1" alt="Profile picture of Sarah Jenkins" class="user-badge__avatar"/>
+                            </div>
+                            <div class="conversation-list__details">
+                                <div class="conversation-list__header">
+                                    <span class="user-badge__name">Sarah Jenkins</span>
+                                    <span class="conversation-list__timestamp">5m</span>
+                                </div>
+                                <div class="conversation-list__last-message">
+                                    <span>That's great news! Let's sync up tomorrow morning.</span>
+                                    <span class="conversation-list__unread-dot" aria-hidden="true"></span>
+                                    <span class="sr-only">Unread message</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="conversation-list__item conversation-list__item--active" aria-current="page">
+                        <a href="#">
+                            <div class="user-badge">
+                                <img src="https://i.pravatar.cc/48?u=user2" alt="Profile picture of Michael Chen" class="user-badge__avatar"/>
+                            </div>
+                            <div class="conversation-list__details">
+                                <div class="conversation-list__header">
+                                    <span class="user-badge__name">Michael Chen</span>
+                                    <span class="conversation-list__timestamp">1h</span>
+                                </div>
+                                <div class="conversation-list__last-message">
+                                    <span>You: Yes, I've attached the latest project brief.</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="conversation-list__item">
+                        <a href="#">
+                            <div class="user-badge">
+                                <img src="https://i.pravatar.cc/48?u=user3" alt="Profile picture of Emily Rodriguez" class="user-badge__avatar"/>
+                            </div>
+                            <div class="conversation-list__details">
+                                <div class="conversation-list__header">
+                                    <span class="user-badge__name">Emily Rodriguez</span>
+                                    <span class="conversation-list__timestamp">Tue</span>
+                                </div>
+                                <div class="conversation-list__last-message">
+                                    <span>Thanks for the introduction!</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="conversation-list__item">
+                        <a href="#">
+                            <div class="user-badge">
+                                <div class="user-badge__avatar">DB</div>
+                            </div>
+                            <div class="conversation-list__details">
+                                <div class="conversation-list__header">
+                                    <span class="user-badge__name">David Butler</span>
+                                    <span class="conversation-list__timestamp">Jan 12</span>
+                                </div>
+                                <div class="conversation-list__last-message">
+                                    <span>Let me know what you think of the proposal.</span>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <h1>ConversationList Component Showcase</h1>
+        <p>This page demonstrates the different states of the `ConversationList` organism.</p>
+        
+        <h2 style="margin-top: 2rem;">Loaded State</h2>
+        <p>The list on the left shows the component with several conversations, including an active item and an item with an unread indicator.</p>
+        
+        <h2 style="margin-top: 2rem;">Loading State</h2>
+        <p>This is how the list appears while conversations are being fetched from the server.</p>
+        <div style="background: white; border-radius: 8px; width: 340px; margin-top: 1rem;">
+            <div class="conversation-list--loading" aria-busy="true" aria-label="Loading conversations">
+                <div class="skeleton-item">
+                    <div class="skeleton skeleton--circle" style="width: 48px; height: 48px;"></div>
+                    <div style="flex-grow: 1;">
+                        <div class="skeleton skeleton--text" style="width: 60%; margin-bottom: 8px;"></div>
+                        <div class="skeleton skeleton--text" style="width: 90%;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-item">
+                    <div class="skeleton skeleton--circle" style="width: 48px; height: 48px;"></div>
+                    <div style="flex-grow: 1;">
+                        <div class="skeleton skeleton--text" style="width: 50%; margin-bottom: 8px;"></div>
+                        <div class="skeleton skeleton--text" style="width: 80%;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-item">
+                    <div class="skeleton skeleton--circle" style="width: 48px; height: 48px;"></div>
+                    <div style="flex-grow: 1;">
+                        <div class="skeleton skeleton--text" style="width: 70%; margin-bottom: 8px;"></div>
+                        <div class="skeleton skeleton--text" style="width: 60%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 2rem;">Empty State</h2>
+        <p>This is displayed when a user has no active conversations.</p>
+        <div style="background: white; border-radius: 8px; width: 340px; height: 300px; margin-top: 1rem;">
+            <div class="conversation-list--empty">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <h3>No conversations yet</h3>
+                <p>Start a conversation with one of your connections.</p>
+            </div>
+        </div>
+
+    </main>
+</div>
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>
+		<!--description--><normal> The standard conversation list used in the messaging interface. </normal>
+		<!-- vrient 1 html -->
+        <nav aria-label="Conversations">
+            <ul class="conversation-list">
+                <li class="conversation-list__item">
+                    <a href="#">
+                        <div class="user-badge">
+                            <img src="https://i.pravatar.cc/48?u=user1" alt="Profile picture of Sarah Jenkins" class="user-badge__avatar">
+                        </div>
+                        <div class="conversation-list__details">
+                            <div class="conversation-list__header">
+                                <span class="user-badge__name">Sarah Jenkins</span>
+                                <span class="conversation-list__timestamp">5m</span>
+                            </div>
+                            <div class="conversation-list__last-message">
+                                <span>That's great news! Let's sync up tomorrow morning.</span>
+                                <span class="conversation-list__unread-dot" aria-hidden="true"></span>
+                                <span class="sr-only">Unread message</span>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </nav>     
+		
+      <div>
+	 </div>
+	 </div>
+      
+	
+	</body>
+</html>

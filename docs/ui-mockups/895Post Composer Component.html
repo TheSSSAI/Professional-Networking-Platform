@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Composer Component</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
+    ul, ol { list-style: none; padding: 0; margin: 0; }
+    button { background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
+    input, button, textarea, select { font: inherit; }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-size-h3: 28px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+
+      /* Color Palette */
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-primary-900: #0D47A1;
+      --color-primary-100: #BBDEFB;
+      --color-primary-50: #E3F2FD;
+
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-100: #F1F3F5;
+      --color-neutral-gray-200: #E9ECEF;
+      --color-neutral-gray-300: #DEE2E6;
+      --color-neutral-gray-500: #ADB5BD;
+      --color-neutral-gray-600: #6C757D;
+      --color-neutral-gray-700: #495057;
+      --color-neutral-gray-900: #212529;
+
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    
+      /* Border Radius */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+    
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-gray-100);
+      color: var(--color-neutral-gray-900);
+      line-height: 1.5;
+      padding: var(--spacing-xl);
+    }
+
+    h2, h3 {
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* Screen/Component Container */
+    .screen-container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .variation-group {
+      margin-top: var(--spacing-xl);
+      padding: var(--spacing-lg);
+      background-color: var(--color-neutral-gray-200);
+      border-radius: var(--border-radius-lg);
+    }
+    .variation-group h3 {
+      font-size: 1.2rem;
+      color: var(--color-neutral-gray-700);
+      border-bottom: 1px solid var(--color-neutral-gray-300);
+      padding-bottom: var(--spacing-sm);
+    }
+    .variation-group p {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-600);
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* ATOMIC COMPONENTS */
+    /* Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-caption);
+      line-height: 1.5;
+      transition: all 150ms ease-out;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 2px;
+    }
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-neutral-white);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+    }
+    .btn--primary:active {
+      background-color: var(--color-primary-900);
+      transform: scale(0.98);
+    }
+    .btn--primary:disabled {
+      background-color: var(--color-neutral-gray-200);
+      color: var(--color-neutral-gray-500);
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn--icon {
+      padding: var(--spacing-sm);
+      border-radius: 50%;
+      background-color: transparent;
+      color: var(--color-neutral-gray-600);
+    }
+    .btn--icon:hover {
+      background-color: var(--color-neutral-gray-100);
+      color: var(--color-neutral-gray-900);
+    }
+
+    /* Card */
+    .card {
+      background-color: var(--color-neutral-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-neutral-gray-200);
+      padding: var(--spacing-md);
+    }
+
+    /* Avatar */
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: var(--color-neutral-gray-300);
+    }
+    .avatar--sm {
+      width: 40px;
+      height: 40px;
+    }
+    
+    /* Alert */
+    .alert {
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-caption);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    .alert--error {
+      background-color: var(--color-semantic-error-bg);
+      color: var(--color-semantic-error);
+      border: 1px solid var(--color-semantic-error);
+    }
+    
+    /* POST COMPOSER STYLES */
+
+    /* Inline Variant (Trigger) */
+    .post-composer--inline {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+    .post-composer--inline .trigger-input {
+      flex-grow: 1;
+      padding: 12px var(--spacing-md);
+      border: 1px solid var(--color-neutral-gray-300);
+      border-radius: 24px;
+      background-color: var(--color-neutral-gray-50);
+      color: var(--color-neutral-gray-600);
+      cursor: pointer;
+      transition: background-color 150ms ease;
+    }
+    .post-composer--inline .trigger-input:hover {
+      background-color: var(--color-neutral-gray-100);
+    }
+
+    /* Modal Variant */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 5vh;
+      z-index: 1000;
+    }
+    .post-composer--modal {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .post-composer__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .post-composer__user-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    .post-composer__user-name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-gray-900);
+    }
+
+    .post-composer__content {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .post-composer__textarea {
+      width: 100%;
+      min-height: 120px;
+      border: none;
+      resize: vertical;
+      font-size: 1.1rem;
+      padding: var(--spacing-sm);
+      font-family: var(--font-family-primary);
+    }
+    .post-composer__textarea:focus {
+      outline: none;
+    }
+
+    .post-composer__image-previews {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm);
+    }
+    .image-preview {
+      position: relative;
+      padding-top: 100%; /* 1:1 Aspect Ratio */
+    }
+    .image-preview img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--border-radius-md);
+    }
+    .image-preview__remove-btn {
+      position: absolute;
+      top: var(--spacing-xs);
+      right: var(--spacing-xs);
+      background-color: rgba(0,0,0,0.6);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-size: 1.2rem;
+    }
+
+    .post-composer__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--color-neutral-gray-200);
+      padding-top: var(--spacing-md);
+    }
+    .post-composer__actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+    .post-composer__char-counter {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-600);
+    }
+    .post-composer__char-counter--error {
+      color: var(--color-semantic-error);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* Submitting State */
+    .post-composer--submitting .post-composer__textarea,
+    .post-composer--submitting .post-composer__actions button,
+    .post-composer--submitting .btn--icon {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--color-neutral-white);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: var(--spacing-md);
+      }
+      .modal-overlay {
+        padding: 0;
+        align-items: stretch;
+      }
+      .post-composer--modal {
+        max-width: none;
+        height: 100%;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <h2>Post Composer Component Showcase</h2>
+    <p>This screen demonstrates the various states and variants of the Post Composer component.</p>
+  </div>
+  
+  <div class="screen-variations">
+    <h3>Variant: "Inline (Trigger)"</h3>
+    <p>This is the initial, compact state shown on a feed page. Clicking it would open the modal variant.</p>
+    <div class="card post-composer--inline">
+      <img src="https://i.pravatar.cc/48?u=user1" alt="User Avatar" class="avatar">
+      <div class="trigger-input" onclick="document.getElementById('modal-default').style.display='flex'">Start a post...</div>
+    </div>
+  </div>
+
+  <div class="screen-variations">
+    <h3>Variant: "Modal - Default State"</h3>
+    <p>The full composer interface, ready for user input. This would appear after clicking the inline trigger.</p>
+    <div class="modal-overlay" id="modal-default" style="display:none;">
+      <div class="card post-composer post-composer--modal">
+        <header class="post-composer__header">
+          <div class="post-composer__user-info">
+            <img src="https://i.pravatar.cc/40?u=user1" alt="Jane Doe" class="avatar avatar--sm">
+            <span class="post-composer__user-name">Jane Doe</span>
+          </div>
+          <button class="btn btn--icon" aria-label="Close" onclick="this.closest('.modal-overlay').style.display='none'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </header>
+        <div class="post-composer__content">
+          <textarea class="post-composer__textarea" placeholder="What's on your mind?"></textarea>
+        </div>
+        <footer class="post-composer__footer">
+          <div class="post-composer__actions">
+            <button class="btn btn--icon" aria-label="Add Image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+          </div>
+          <button class="btn btn--primary" disabled>Post</button>
+        </footer>
+      </div>
+    </div>
+    <button class="btn" onclick="document.getElementById('modal-default').style.display='flex'">Show Default Modal</button>
+  </div>
+  
+  <div class="screen-variations">
+    <h3>State: "With Text & Images"</h3>
+    <p>Demonstrates the composer with user-entered text and image previews.</p>
+    <div class="modal-overlay" id="modal-content" style="display:none;">
+      <div class="card post-composer post-composer--modal">
+        <header class="post-composer__header">
+          <div class="post-composer__user-info">
+            <img src="https://i.pravatar.cc/40?u=user1" alt="Jane Doe" class="avatar avatar--sm">
+            <span class="post-composer__user-name">Jane Doe</span>
+          </div>
+          <button class="btn btn--icon" aria-label="Close" onclick="this.closest('.modal-overlay').style.display='none'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </header>
+        <div class="post-composer__content">
+          <textarea class="post-composer__textarea">Excited to share some highlights from our latest project kickoff! The team is energized and ready to build something amazing.</textarea>
+          <div class="post-composer__image-previews">
+            <div class="image-preview">
+              <img src="https://picsum.photos/seed/proj1/200" alt="Preview 1">
+              <button class="image-preview__remove-btn" aria-label="Remove image 1">&times;</button>
+            </div>
+            <div class="image-preview">
+              <img src="https://picsum.photos/seed/proj2/200" alt="Preview 2">
+              <button class="image-preview__remove-btn" aria-label="Remove image 2">&times;</button>
+            </div>
+          </div>
+        </div>
+        <footer class="post-composer__footer">
+          <div class="post-composer__actions">
+            <button class="btn btn--icon" aria-label="Add Image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+          </div>
+          <div style="display:flex; align-items:center; gap: 16px;">
+            <span class="post-composer__char-counter">115/3000</span>
+            <button class="btn btn--primary">Post</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <button class="btn" onclick="document.getElementById('modal-content').style.display='flex'">Show Modal with Content</button>
+  </div>
+  
+  <div class="screen-variations">
+    <h3>State: "Submitting"</h3>
+    <p>Shows the UI in a loading state after the user clicks 'Post'. Inputs are disabled.</p>
+    <div class="modal-overlay" id="modal-submitting" style="display:none;">
+      <div class="card post-composer post-composer--modal post-composer--submitting">
+        <header class="post-composer__header">
+          <div class="post-composer__user-info">
+            <img src="https://i.pravatar.cc/40?u=user1" alt="Jane Doe" class="avatar avatar--sm">
+            <span class="post-composer__user-name">Jane Doe</span>
+          </div>
+           <button class="btn btn--icon" aria-label="Close" onclick="this.closest('.modal-overlay').style.display='none'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </header>
+        <div class="post-composer__content">
+          <textarea class="post-composer__textarea" disabled>Submitting this post...</textarea>
+        </div>
+        <footer class="post-composer__footer">
+          <div class="post-composer__actions">
+            <button class="btn btn--icon" aria-label="Add Image" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+          </div>
+          <button class="btn btn--primary" disabled><div class="spinner"></div></button>
+        </footer>
+      </div>
+    </div>
+    <button class="btn" onclick="document.getElementById('modal-submitting').style.display='flex'">Show Submitting Modal</button>
+  </div>
+  
+  <div class="screen-variations">
+    <h3>State: "Error"</h3>
+    <p>Displays a validation error, for example, when the character limit is exceeded.</p>
+    <div class="modal-overlay" id="modal-error" style="display:none;">
+      <div class="card post-composer post-composer--modal">
+        <header class="post-composer__header">
+          <div class="post-composer__user-info">
+            <img src="https://i.pravatar.cc/40?u=user1" alt="Jane Doe" class="avatar avatar--sm">
+            <span class="post-composer__user-name">Jane Doe</span>
+          </div>
+           <button class="btn btn--icon" aria-label="Close" onclick="this.closest('.modal-overlay').style.display='none'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </header>
+        <div class="post-composer__content">
+          <textarea class="post-composer__textarea">This text is far too long and has exceeded the character limit, which is why the system is now showing an error state. This text is far too long and has exceeded the character limit, which is why the system is now showing an error state. This text is far too long and has exceeded the character limit, which is why the system is now showing an error state. ...</textarea>
+          <div class="alert alert--error" style="margin-top: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Post content cannot exceed 3000 characters.</span>
+          </div>
+        </div>
+        <footer class="post-composer__footer">
+          <div class="post-composer__actions">
+             <button class="btn btn--icon" aria-label="Add Image">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+          </div>
+           <div style="display:flex; align-items:center; gap: 16px;">
+            <span class="post-composer__char-counter post-composer__char-counter--error">3051/3000</span>
+            <button class="btn btn--primary" disabled>Post</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <button class="btn" onclick="document.getElementById('modal-error').style.display='flex'">Show Error Modal</button>
+  </div>
+  
+  <script>
+    // Simple script for modal demonstration
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+          modal.style.display = 'none';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

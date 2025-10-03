@@ -1,0 +1,61 @@
+.json
+{
+  // --- General Settings ---
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n",
+
+  // --- Terraform / HCL Settings ---
+  // These settings leverage the HashiCorp Terraform extension.
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+  // --- TFLint Settings ---
+  // Configuration for the TFLint extension.
+  "tflint.enable": true,
+  "tflint.autoEnable": true,
+  "tflint.run": "onSave", // Run linter every time a file is saved
+
+  // --- TFSec Settings ---
+  // Configuration for the TFSec extension.
+  "tfsec.enable": true,
+  "tfsec.run": "onSave",
+
+  // --- YAML Settings ---
+  // Settings for the Red Hat YAML extension.
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.autoIndent": "advanced"
+  },
+  "yaml.format.enable": true,
+  "yaml.validate": true,
+
+  // --- Search Settings ---
+  // Exclude common Terraform and build directories from search results
+  // to improve performance and relevance.
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.terraform": true,
+    "**/.terragrunt-cache": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.terraform/**": true
+  }
+}

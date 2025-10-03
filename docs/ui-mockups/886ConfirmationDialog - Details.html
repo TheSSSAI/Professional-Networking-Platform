@@ -1,0 +1,542 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConfirmationDialog - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ConfirmationDialog</h1>
+            <div class="component-type-badge">organism Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">15</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">5</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Component Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Component Id</h4>
+                    <p>MU-ORGA-004</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Name</h4>
+                    <p>ConfirmationDialog</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Type</h4>
+                    <p>organism</p>
+                </div>
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>A modal dialog that interrupts the user's workflow to ask for confirmation before proceeding with an action. It includes variants for standard and destructive actions, ensuring the user understands the consequence of their choice.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Design System Alignment</h4>
+                    <p>This component is built upon the atomic 'Modal' and 'Button' components. It uses design system tokens for typography (headings, body), colors (primary, semantic error, neutrals), spacing, shadows, and border-radius to ensure a consistent and integrated user experience.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Design Tokens Used</h2>
+            <div class="tokens-grid"><div class="token">--color-primary-100</div><div class="token">--color-primary-700</div><div class="token">--color-semantic-error</div><div class="token">--color-semantic-error-bg</div><div class="token">--color-neutrals-white</div><div class="token">--color-neutrals-gray-600</div><div class="token">--color-neutrals-gray-900</div><div class="token">--font-size-h4</div><div class="token">--font-size-body</div><div class="token">--font-weight-semibold</div><div class="token">--space-3</div><div class="token">--space-4</div><div class="token">--space-5</div><div class="token">--border-radius-lg</div><div class="token">--shadow-md</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Responsive Specifications</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Mobile Adaptations</h4>
+                    <ul><li>The dialog itself adapts to the viewport width with padding.</li><li>The action buttons stack vertically to be more touch-friendly and prevent accidental clicks.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Tablet Adaptations</h4>
+                    <ul><li>Maintains the desktop layout with side-by-side action buttons.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Desktop Enhancements</h4>
+                    <ul><li>Centered modal with a backdrop overlay, providing clear focus on the confirmation task.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Accessibility Features</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Keyboard Support</h4><p>In a JS implementation, focus must be trapped within the modal. All buttons are focusable and activatable via keyboard. The modal can be dismissed with the 'Escape' key.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Screen Reader Support</h4><p>The dialog uses `role="dialog"`, `aria-modal="true"`, `aria-labelledby` to point to the title, and `aria-describedby` to point to the description. This provides a complete and accessible context to screen reader users.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Focus Management</h4><p>Upon opening, focus should be moved to the first focusable element inside the dialog (typically the 'Cancel' or 'Confirm' button). Upon closing, focus should return to the element that triggered the dialog.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Aria Attributes</h4><ul><li>role="dialog"</li><li>aria-modal="true"</li><li>aria-labelledby</li><li>aria-describedby</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Color Contrast</h4><p>All text and button contrasts meet WCAG 2.1 AA standards. The icons for standard and destructive variants also provide a non-color-based distinction.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CSS Implementation</h2>
+            <div class="code-block">/* --- Modal &amp; Confirmation Dialog CSS --- */
+
+/* Modal Overlay: The backdrop */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(33, 37, 41, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+  z-index: 1000;
+}
+
+/* Open state for the modal, controlled by :target for this CSS-only demo */
+.modal-overlay:target {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s 0s;
+}
+
+/* Confirmation Dialog: The content box */
+.confirmation-dialog {
+  background: var(--color-neutrals-white);
+  padding: var(--space-5);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  max-width: 450px;
+  width: 100%;
+  text-align: center;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay:target .confirmation-dialog {
+  transform: scale(1);
+}
+
+.confirmation-dialog__header {
+  margin-bottom: var(--space-3);
+}
+
+.confirmation-dialog__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-bottom: var(--space-3);
+}
+
+.confirmation-dialog__icon--standard {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.confirmation-dialog__icon--destructive {
+  background-color: var(--color-semantic-error-bg);
+  color: var(--color-semantic-error);
+}
+
+.confirmation-dialog__icon .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.confirmation-dialog__title {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutrals-gray-900);
+  margin: 0;
+}
+
+.confirmation-dialog__body {
+  margin-bottom: var(--space-5);
+}
+
+.confirmation-dialog__description {
+  font-size: var(--font-size-body);
+  color: var(--color-neutrals-gray-600);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.confirmation-dialog__actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* Responsive Adaptations */
+@media (max-width: 768px) {
+  .confirmation-dialog__actions {
+    flex-direction: column-reverse; /* Stack buttons on mobile, primary on bottom */
+  }
+  .confirmation-dialog__actions .btn {
+    width: 100%;
+  }
+}
+</div>
+        </div>
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Embedded Css Architecture</h4>
+                    <p>All CSS is embedded in a single `<style>` tag. Design system tokens are defined as CSS custom properties. A BEM naming convention (`.confirmation-dialog__element`) is used for clarity.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>The HTML is structured as a showcase with two main examples: a standard and a destructive confirmation. The modal dialogs themselves are placed at the end of the `<body>` and are activated using the `:target` CSS pseudo-class for this static demonstration.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>A mobile-first approach is used for the action buttons, stacking them vertically on smaller screens and moving to a horizontal layout on larger screens.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>The HTML structure is WCAG 2.1 AA compliant. While CSS handles the visual aspects, a full production component would require JavaScript for focus trapping and `aria-expanded` state management on the trigger.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Uses modern CSS properties like flexbox, custom properties, and transitions, ensuring compatibility with all evergreen browsers.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>When To Use</h4><p>Use before a user performs a significant or irreversible action, such as deleting an item, deactivating an account, or submitting a form that cannot be easily undone.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Content Guidelines</h4><p>The title should be a clear, direct question (e.g., 'Delete Post?'). The description should concisely explain the consequence of the action (e.g., 'This action cannot be undone.').</p>
+                </div>
+                <div class="info-card">
+                    <h4>Placement Rules</h4><p>Always triggered by a user action and displayed as a modal overlay, centering on the screen.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Customization Options</h4><ul><li style="list-style: disc; margin-left: 16px; padding-left: 0;">Use the default class for standard confirmations.</li><li style="list-style: disc; margin-left: 16px; padding-left: 0;">Add the `.confirmation-dialog__icon--destructive` class to the icon wrapper and a `.btn--danger` class to the confirmation button for destructive actions.</li></ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Testing Recommendations</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Browser Testing</h4><p>Test in Chrome, Firefox, Safari, Edge.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Device Testing</h4><p>Verify responsive behavior on mobile viewports, especially the stacking of action buttons.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Accessibility Testing</h4><ul><li>Keyboard navigation: ensure all buttons are focusable and the modal can be closed (with JS, via Escape key).</li><li>Screen reader testing: verify that the dialog role, title, and description are announced correctly upon opening.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Performance Testing</h4><p>The opening/closing animations should be smooth (target 60fps) and not cause layout shift.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

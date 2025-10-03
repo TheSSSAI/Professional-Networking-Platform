@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum defining the possible states of a connection request.
+// PENDING: The request has been sent but not yet actioned.
+// ACCEPTED: The request has been accepted, forming a connection.
+// DECLINED: The request has been declined by the recipient.
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+// Models the relationship between two users.
+// This entity is the aggregate root for the Connections bounded context.
+model Connection {
+  id          String   @id @default(uuid())
+  requesterId String // UUID of the user who sent the request.
+  addresseeId String // UUID of the user who received the request.
+
+  // The current status of the connection request.
+  // Fulfills REQ-1-016 by modeling the request lifecycle.
+  status ConnectionStatus
+
+  // An optional personalized message included with the request.
+  // Fulfills REQ-1-015. Max length of 300 characters is enforced at the application layer.
+  message String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Ensures that a user can only send one request to another user.
+  // Fulfills REQ-1-090 by preventing duplicate pending requests.
+  @@unique([requesterId, addresseeId])
+
+  // Indexes for performant querying of connections and requests.
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@index([status])
+  @@index([createdAt])
+}

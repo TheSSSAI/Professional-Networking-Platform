@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: MfaForm</title>
+  <style>
+    /* Design System Tokens */
+    :root {
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-700: #1976D2;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-600: #6C757D;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-white: #FFFFFF;
+      --color-error: #D32F2F;
+      --color-error-bg: #FFEBEE;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-h3: 24px;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-semibold: 600;
+      --font-weight-normal: 400;
+      --line-height-body: 1.5;
+      --border-radius-lg: 12px;
+      --border-radius-md: 8px;
+      --shadow-card: 0 4px 12px rgba(0,0,0,0.1);
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+
+    /* Showcase Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: var(--font-family-primary); line-height: 1.5; }
+    body {
+      margin: 0;
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: var(--spacing-lg);
+    }
+    .showcase-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+    .showcase-header h1 {
+      font-size: 32px;
+      color: var(--color-neutral-900);
+    }
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xl);
+    }
+    .state-container h2 {
+      text-align: center;
+      font-size: 18px;
+      color: var(--color-neutral-600);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    @media (min-width: 1200px) {
+        .showcase-grid {
+            grid-template-columns: repeat(3, 1fr);
+            align-items: start;
+        }
+    }
+
+    /* Base Styles */
+    .mfa-form-showcase__card {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: var(--spacing-xl);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      margin: 0 auto;
+    }
+
+    /* Organism: MfaForm */
+    .mfa-form__header {
+      margin-bottom: var(--spacing-lg);
+    }
+    .mfa-form__icon {
+      color: var(--color-primary-700);
+      width: 48px;
+      height: 48px;
+      margin-bottom: var(--spacing-md);
+    }
+    .mfa-form__title {
+      font-size: var(--font-size-h3);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      margin-bottom: var(--spacing-sm);
+    }
+    .mfa-form__instruction {
+      font-size: var(--font-size-body);
+      color: var(--color-neutral-600);
+      line-height: var(--line-height-body);
+      max-width: 320px;
+      margin: 0 auto var(--spacing-lg) auto;
+    }
+    .mfa-form__body {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    /* Dependencies Implementation */
+    /* FormGroup */
+    .form-group {
+      margin-bottom: var(--spacing-md);
+      text-align: left;
+    }
+    .form-group__label {
+      display: block;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-700);
+      margin-bottom: var(--spacing-sm);
+    }
+    .form-group__input {
+      width: 100%;
+      border: 1px solid var(--color-neutral-300);
+      background: var(--color-white);
+      padding: 12px 16px;
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-body);
+      min-height: 44px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group__input:focus-visible {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: var(--focus-ring);
+    }
+    .form-group__input[aria-invalid="true"] {
+      border-color: var(--color-error);
+    }
+    .form-group__input[aria-invalid="true"]:focus-visible {
+      box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.25);
+    }
+    .form-group__input:disabled {
+      background-color: var(--color-neutral-100);
+      cursor: not-allowed;
+    }
+
+    /* Alert */
+    .alert {
+      display: flex;
+      text-align: left;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-error-bg);
+      color: var(--color-error);
+      margin-bottom: var(--spacing-lg);
+    }
+    .alert__icon {
+      flex-shrink: 0;
+      margin-right: var(--spacing-sm);
+      width: 20px;
+      height: 20px;
+    }
+    .alert__message {
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
+    }
+    .alert--hidden {
+      display: none;
+    }
+
+    /* Button */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 22px;
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-semibold);
+      border: none;
+      cursor: pointer;
+      min-height: 44px;
+      transition: background-color 0.2s ease;
+    }
+    .btn--primary {
+      background: var(--color-primary-700);
+      color: var(--color-white);
+    }
+    .btn--primary:hover:not(:disabled) {
+      background: var(--color-primary-800, #1565C0);
+    }
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    .btn:disabled, .btn--loading {
+      background: var(--color-neutral-200);
+      color: var(--color-neutral-500);
+      cursor: not-allowed;
+    }
+    .btn--loading .btn__text {
+      visibility: hidden;
+    }
+    .btn--loading .spinner {
+      position: absolute;
+    }
+
+    /* Spinner for loading button */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-top-color: var(--color-neutral-600);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="showcase-header">
+    <h1>MfaForm Organism</h1>
+  </div>
+
+  <div class="showcase-grid">
+    <!-- Default State -->
+    <div class="state-container">
+      <h2>Default State</h2>
+      <div class="mfa-form-showcase__card">
+        <form class="mfa-form">
+          <header class="mfa-form__header">
+            <svg class="mfa-form__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.45-.194-3.568-.534a.75.75 0 0 1-.68-1.06l.45-1.59a.75.75 0 0 1 1.06-.68l1.758.62a7.479 7.479 0 0 0 5.058 0l1.758-.62a.75.75 0 0 1 1.06.68l.45 1.59a.75.75 0 0 1-.68 1.06c-1.118.34-2.313.534-3.568.534Z" />
+            </svg>
+            <h1 class="mfa-form__title">Two-Factor Authentication</h1>
+            <p class="mfa-form__instruction">Enter the 6-digit code from your authenticator app.</p>
+          </header>
+          <div class="alert alert--hidden" role="alert"></div>
+          <div class="mfa-form__body">
+            <div class="form-group">
+              <label for="mfa-code-default" class="form-group__label">Verification Code</label>
+              <input type="text" id="mfa-code-default" class="form-group__input" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+            </div>
+          </div>
+          <footer class="mfa-form__footer">
+            <button type="submit" class="btn btn--primary">
+              <span class="btn__text">Verify</span>
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+
+    <!-- Submitting State -->
+    <div class="state-container">
+      <h2>Submitting State</h2>
+      <div class="mfa-form-showcase__card">
+        <form class="mfa-form mfa-form--submitting">
+          <header class="mfa-form__header">
+            <svg class="mfa-form__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.45-.194-3.568-.534a.75.75 0 0 1-.68-1.06l.45-1.59a.75.75 0 0 1 1.06-.68l1.758.62a7.479 7.479 0 0 0 5.058 0l1.758-.62a.75.75 0 0 1 1.06.68l.45 1.59a.75.75 0 0 1-.68 1.06c-1.118.34-2.313.534-3.568.534Z" />
+            </svg>
+            <h1 class="mfa-form__title">Two-Factor Authentication</h1>
+            <p class="mfa-form__instruction">Enter the 6-digit code from your authenticator app.</p>
+          </header>
+          <div class="alert alert--hidden" role="alert"></div>
+          <div class="mfa-form__body">
+            <div class="form-group">
+              <label for="mfa-code-submitting" class="form-group__label">Verification Code</label>
+              <input type="text" id="mfa-code-submitting" class="form-group__input" value="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code" disabled>
+            </div>
+          </div>
+          <footer class="mfa-form__footer">
+            <button type="submit" class="btn btn--primary btn--loading" disabled>
+              <span class="spinner"></span>
+              <span class="btn__text">Verify</span>
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="state-container">
+      <h2>Error State</h2>
+      <div class="mfa-form-showcase__card">
+        <form class="mfa-form mfa-form--error">
+          <header class="mfa-form__header">
+            <svg class="mfa-form__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.45-.194-3.568-.534a.75.75 0 0 1-.68-1.06l.45-1.59a.75.75 0 0 1 1.06-.68l1.758.62a7.479 7.479 0 0 0 5.058 0l1.758-.62a.75.75 0 0 1 1.06.68l.45 1.59a.75.75 0 0 1-.68 1.06c-1.118.34-2.313.534-3.568.534Z" />
+            </svg>
+            <h1 class="mfa-form__title">Two-Factor Authentication</h1>
+            <p class="mfa-form__instruction">Enter the 6-digit code from your authenticator app.</p>
+          </header>
+          <div class="alert" role="alert">
+            <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            <p class="alert__message">Invalid verification code. Please try again.</p>
+          </div>
+          <div class="mfa-form__body">
+            <div class="form-group">
+              <label for="mfa-code-error" class="form-group__label">Verification Code</label>
+              <input type="text" id="mfa-code-error" class="form-group__input" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric" autocomplete="one-time-code" aria-invalid="true">
+            </div>
+          </div>
+          <footer class="mfa-form__footer">
+            <button type="submit" class="btn btn--primary">
+              <span class="btn__text">Verify</span>
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+  </div>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>
+		<!--description--><normal> The default state of the MFA form, ready for user input. </normal>
+		<!-- vrient 1 html -->
+        <div class="mfa-form-showcase__card">
+        <form class="mfa-form">
+          <header class="mfa-form__header">
+            <svg class="mfa-form__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.311a7.5 7.5 0 0 1-7.5 0c-1.255 0-2.45-.194-3.568-.534a.75.75 0 0 1-.68-1.06l.45-1.59a.75.75 0 0 1 1.06-.68l1.758.62a7.479 7.479 0 0 0 5.058 0l1.758-.62a.75.75 0 0 1 1.06.68l.45 1.59a.75.75 0 0 1-.68 1.06c-1.118.34-2.313.534-3.568.534Z" />
+            </svg>
+            <h1 class="mfa-form__title">Two-Factor Authentication</h1>
+            <p class="mfa-form__instruction">Enter the 6-digit code from your authenticator app.</p>
+          </header>
+          <div class="alert alert--hidden" role="alert"></div>
+          <div class="mfa-form__body">
+            <div class="form-group">
+              <label for="mfa-code-default-var" class="form-group__label">Verification Code</label>
+              <input type="text" id="mfa-code-default-var" class="form-group__input" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+            </div>
+          </div>
+          <footer class="mfa-form__footer">
+            <button type="submit" class="btn btn--primary">
+              <span class="btn__text">Verify</span>
+            </button>
+          </footer>
+        </form>
+      </div>     
+		
+      <div>
+	 </div>
+	</div>
+</body>
+</html>

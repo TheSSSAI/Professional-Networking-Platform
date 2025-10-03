@@ -1,0 +1,18 @@
+# buf.gen.yaml defines the code generation configuration for buf.
+# See https://buf.build/docs/configuration/v1/buf-gen-yaml
+version: v1
+plugins:
+  # This plugin generates TypeScript types and gRPC-JS client/server interfaces.
+  - plugin: buf.build/community/timostamm-ts-proto
+    # We output to a `ts` directory within each versioned folder of our `grpc` sources.
+    out: src/grpc/v1/ts
+    opt:
+      # These options configure the ts-proto plugin.
+      # See https://github.com/stephenh/ts-proto for all available options.
+      - env=node
+      - useDate=true # Map google.protobuf.Timestamp to JavaScript's Date object
+      - forceLong=long # Use the `long` library for 64-bit integers
+      - esModuleInterop=true
+      - outputServices=grpc-js # Generate code compatible with @grpc/grpc-js
+      - outputJsonMethods=true # Generate from/toJSON methods
+      - useExactTypes=false # Avoids verbose __exact types

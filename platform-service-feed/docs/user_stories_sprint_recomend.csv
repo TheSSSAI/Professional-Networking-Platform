@@ -1,0 +1,6 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""US-ID-001"",""US-ID-002""]","10","Enable new users to register for an account and log in securely to the platform.",""
+"2","[""US-ID-003"",""US-ID-004""]","6","Implement secure user logout with session invalidation and begin the account recovery flow by allowing users to request a password reset.","true"
+"3","[""US-ID-005""]","5","Complete the account recovery feature, allowing users to set a new password and ensuring all old sessions are terminated.","true"
+"4","[""US-ID-006""]","8","Deliver the full Multi-Factor Authentication setup flow, allowing security-conscious users to enable TOTP on their accounts.","true"
+"5","[""US-ID-007""]","5","Complete the MFA feature by enabling users with MFA to securely log in using their authenticator app code.","true"

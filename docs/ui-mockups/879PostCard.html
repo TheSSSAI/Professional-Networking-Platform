@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: PostCard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Reset --- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-font-smoothing: antialiased; }
+
+        /* --- Design System Tokens --- */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD; --color-primary-300: #64B5F6; --color-primary-700: #1976D2; --color-primary-800: #1565C0;
+            --color-danger-500: #D32F2F;
+            --color-neutrals-white: #FFFFFF; --color-neutrals-gray-50: #F8F9FA; --color-neutrals-gray-100: #F1F3F5; --color-neutrals-gray-200: #E9ECEF;
+            --color-neutrals-gray-400: #CED4DA; --color-neutrals-gray-600: #6C757D; --color-neutrals-gray-700: #495057; --color-neutrals-gray-900: #212529;
+            --color-semantic-error: #D32F2F; --color-semantic-error-bg: #FFEBEE;
+
+            /* Typography */
+            --font-family-primary: 'Inter', sans-serif;
+            --font-size-body: 1rem; --font-size-caption: 0.875rem;
+            --font-weight-regular: 400; --font-weight-semibold: 600;
+            --line-height-body: 1.5;
+
+            /* Spacing */
+            --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 32px;
+
+            /* Borders & Shadows */
+            --border-radius-sm: 4px; --border-radius-md: 8px; --border-radius-lg: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        /* --- Showcase Styles --- */
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutrals-gray-100);
+            padding: var(--space-5);
+        }
+        main {
+            display: grid;
+            gap: var(--space-5);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+        .showcase-header { text-align: center; margin-bottom: var(--space-4); }
+        .showcase-header h1 { font-size: 2rem; }
+        .showcase-header h2 { font-size: 1.2rem; color: var(--color-neutrals-gray-600); font-weight: var(--font-weight-regular); }
+        .variant-title { font-size: 1.1rem; font-weight: var(--font-weight-semibold); margin-bottom: var(--space-3); color: var(--color-primary-800); }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+        .icon { display: inline-block; width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; fill: none; stroke: currentColor; }
+
+        /* --- DEPENDENT COMPONENT CSS --- */
+
+        /* UserBadge (Molecular) */
+        .user-badge { display: inline-flex; align-items: center; gap: var(--space-3); text-decoration: none; color: inherit; border-radius: var(--border-radius-md); padding: var(--space-1); max-width: 280px; }
+        .user-badge:hover { background-color: var(--color-neutrals-gray-100); }
+        .user-badge:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+        .user-badge__text-wrapper { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .user-badge__name { font-weight: var(--font-weight-semibold); color: var(--color-neutrals-gray-900); font-size: var(--font-size-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-badge__headline { font-weight: var(--font-weight-regular); color: var(--color-neutrals-gray-600); font-size: var(--font-size-caption); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .avatar { display: inline-block; flex-shrink: 0; border-radius: 50%; object-fit: cover; background-color: var(--color-neutrals-gray-200); }
+        .avatar--md { width: 48px; height: 48px; }
+
+        /* ActionMenu (Molecular) */
+        .action-menu { position: relative; display: inline-block; }
+        .action-menu__trigger { display: inline-flex; align-items: center; justify-content: center; background-color: transparent; border: none; border-radius: 50%; padding: var(--space-2); color: var(--color-neutrals-gray-600); cursor: pointer; width: 40px; height: 40px; transition: background-color 0.2s ease; }
+        .action-menu__trigger:hover { background-color: var(--color-neutrals-gray-100); }
+        .action-menu__trigger:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+        .action-menu__dropdown { display: none; /* JS would handle visibility */ }
+        .action-menu:focus-within > .action-menu__dropdown { display: block; position: absolute; top: calc(100% + var(--space-1)); right: 0; min-width: 200px; background-color: var(--color-neutrals-white); border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); padding: var(--space-2) 0; z-index: 10; list-style: none; }
+        .action-menu__item { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: var(--space-2) var(--space-3); background: none; border: none; text-align: left; font-family: var(--font-family-primary); font-size: var(--font-size-body); color: var(--color-neutrals-gray-900); cursor: pointer; text-decoration: none; white-space: nowrap; }
+        .action-menu__item:hover, .action-menu__item:focus { background-color: var(--color-neutrals-gray-100); outline: none; }
+        .action-menu__item--danger { color: var(--color-semantic-error); }
+        .action-menu__item--danger:hover, .action-menu__item--danger:focus { background-color: var(--color-semantic-error-bg); }
+        .action-menu__separator { height: 1px; background-color: var(--color-neutrals-gray-200); margin: var(--space-2) 0; }
+
+        /* ReactionPicker (Molecular) */
+        .reaction-picker { position: relative; display: inline-flex; }
+        .reaction-picker__panel { display: none; }
+        .reaction-picker:hover .reaction-picker__panel { display: flex; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); align-items: center; gap: var(--space-2); background-color: var(--color-neutrals-white); padding: var(--space-2); border-radius: 50px; box-shadow: var(--shadow-md); z-index: 10; }
+        .reaction-picker__button { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: none; background-color: transparent; border-radius: 50%; font-size: 24px; cursor: pointer; transition: transform 0.15s ease; }
+        .reaction-picker__button:hover { transform: scale(1.2) translateY(-4px); }
+        .reaction-picker__button .tooltip { display: none; }
+        .reaction-picker__button:hover .tooltip { display: block; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background-color: var(--color-neutrals-gray-900); color: var(--color-neutrals-white); padding: var(--space-1) var(--space-2); border-radius: var(--border-radius-sm); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+        
+        /* --- PostCard Organism CSS --- */
+        .post-card {
+            background-color: var(--color-neutrals-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            font-family: var(--font-family-primary);
+        }
+        .post-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: var(--space-3) var(--space-4) 0;
+        }
+        .post-card__author-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .post-card__timestamp {
+            font-size: var(--font-size-caption);
+            color: var(--color-neutrals-gray-600);
+            margin-top: var(--space-1);
+        }
+        .post-card__content {
+            padding: var(--space-3) var(--space-4);
+        }
+        .post-card__text {
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            color: var(--color-neutrals-gray-900);
+            white-space: pre-wrap; /* Preserve line breaks */
+            word-wrap: break-word;
+        }
+
+        /* Image Gallery Variant */
+        .post-card__gallery {
+            display: grid;
+            gap: 2px;
+            margin-top: var(--space-3);
+            max-height: 500px;
+            cursor: pointer;
+        }
+        .post-card__gallery-item {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--color-neutrals-gray-100);
+        }
+        .post-card__gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .post-card__gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        .post-card__gallery--count-1 { grid-template-columns: 1fr; }
+        .post-card__gallery--count-2 { grid-template-columns: 1fr 1fr; }
+        .post-card__gallery--count-3 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+        .post-card__gallery--count-3 .post-card__gallery-item:first-child {
+            grid-row: span 2;
+        }
+        .post-card__gallery--count-4 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+        }
+
+        /* Link Preview Variant */
+        .post-card__link-preview {
+            display: block;
+            text-decoration: none;
+            margin-top: var(--space-3);
+            border: 1px solid var(--color-neutrals-gray-200);
+            border-radius: var(--border-radius-md);
+            background-color: var(--color-neutrals-gray-50);
+            overflow: hidden;
+            transition: background-color 0.2s ease;
+        }
+        .post-card__link-preview:hover {
+            background-color: var(--color-neutrals-gray-100);
+        }
+        .post-card__link-image {
+            width: 100%;
+            aspect-ratio: 1.91 / 1;
+            object-fit: cover;
+            background-color: var(--color-neutrals-gray-200);
+            border-bottom: 1px solid var(--color-neutrals-gray-200);
+        }
+        .post-card__link-text {
+            padding: var(--space-3);
+        }
+        .post-card__link-title {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutrals-gray-900);
+            font-size: var(--font-size-body);
+        }
+        .post-card__link-description {
+            font-size: var(--font-size-caption);
+            color: var(--color-neutrals-gray-600);
+            margin-top: var(--space-1);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Footer */
+        .post-card__footer {
+            padding: var(--space-2) var(--space-4) var(--space-3);
+        }
+        .post-card__stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--font-size-caption);
+            color: var(--color-neutrals-gray-600);
+            padding-bottom: var(--space-2);
+            margin-bottom: var(--space-2);
+            border-bottom: 1px solid var(--color-neutrals-gray-200);
+        }
+        .post-card__actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-2);
+        }
+        .post-card__action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            border: none;
+            background-color: transparent;
+            padding: var(--space-2);
+            border-radius: var(--border-radius-md);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutrals-gray-600);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: var(--font-size-caption);
+            min-height: 44px;
+        }
+        .post-card__action-button:hover {
+            background-color: var(--color-neutrals-gray-100);
+        }
+        .post-card__action-button:focus-visible {
+             outline: 2px solid var(--color-primary-300);
+             outline-offset: -2px;
+        }
+        .post-card__action-button .icon { font-size: 1.25rem; }
+
+        .post-card__action-button[data-selected="true"] {
+            color: var(--color-primary-700);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- SVG Icon Definitions -->
+    <svg width="0" height="0" style="position: absolute; overflow: hidden;">
+        <symbol id="icon-more-horizontal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></symbol>
+        <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></symbol>
+        <symbol id="icon-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></symbol>
+        <symbol id="icon-like" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></symbol>
+        <symbol id="icon-comment" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></symbol>
+        <symbol id="icon-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></symbol>
+    </svg>
+
+    <main>
+        <header class="showcase-header">
+            <h1>PostCard Organism</h1>
+            <h2>The primary component for displaying user-generated content in a feed.</h2>
+        </header>
+
+        <!-- Variant 1: Default (Text-only) -->
+        <div>
+            <h3 class="variant-title">Default (Text-only)</h3>
+            <article class="post-card">
+                <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=elena" alt="Profile picture of Elena Rodriguez">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Elena Rodriguez</span>
+                                <span class="user-badge__headline">Data Scientist | Machine Learning Enthusiast</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">2h ago</div>
+                    </div>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post">
+                            <svg class="icon"><use href="#icon-more-horizontal"/></svg>
+                        </button>
+                        <div class="action-menu__dropdown" role="menu">
+                             <a href="#" class="action-menu__item" role="menuitem"><svg class="icon"><use href="#icon-edit"/></svg><span>Edit Post</span></a>
+                             <a href="#" class="action-menu__item" role="menuitem"><svg class="icon"><use href="#icon-flag"/></svg><span>Report Post</span></a>
+                             <div class="action-menu__separator"></div>
+                             <button class="action-menu__item action-menu__item--danger" role="menuitem"><svg class="icon"><use href="#icon-trash"/></svg><span>Delete Post</span></button>
+                        </div>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">Excited to share that our latest paper on predictive modeling for supply chain optimization has been published! A huge thank you to the entire team for their hard work and dedication. Looking forward to discussing our findings at the upcoming data science conference.</p>
+                </div>
+                <footer class="post-card__footer">
+                    <div class="post-card__stats">
+                        <span>👍❤️ 142 reactions</span>
+                        <span>32 comments</span>
+                    </div>
+                    <div class="post-card__actions">
+                        <div class="reaction-picker">
+                            <button class="post-card__action-button" aria-label="React to post" aria-haspopup="true" aria-expanded="false" data-selected="true">
+                                <svg class="icon"><use href="#icon-like"/></svg> Like
+                            </button>
+                             <div class="reaction-picker__panel" role="toolbar" aria-label="Reactions">
+                                <button class="reaction-picker__button" aria-label="Like"><span class="tooltip">Like</span>👍</button>
+                                <button class="reaction-picker__button" aria-label="Celebrate"><span class="tooltip">Celebrate</span>🎉</button>
+                                <button class="reaction-picker__button" aria-label="Support"><span class="tooltip">Support</span>❤️</button>
+                            </div>
+                        </div>
+                        <button class="post-card__action-button" aria-label="Comment on post">
+                            <svg class="icon"><use href="#icon-comment"/></svg> Comment
+                        </button>
+                        <button class="post-card__action-button" aria-label="Share post">
+                            <svg class="icon"><use href="#icon-share"/></svg> Share
+                        </button>
+                    </div>
+                </footer>
+            </article>
+        </div>
+
+        <!-- Variant 2: With Images -->
+        <div>
+            <h3 class="variant-title">With Images</h3>
+            <article class="post-card">
+                <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=ben" alt="Profile picture of Ben Carter">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Ben Carter</span>
+                                <span class="user-badge__headline">Lead UX Designer @ Innovate Corp</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">1d ago</div>
+                    </div>
+                    <div class="action-menu">
+                         <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post"><svg class="icon"><use href="#icon-more-horizontal"/></svg></button>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">Some snapshots from our team's design sprint last week. Incredible collaboration and creativity on display!</p>
+                    <div class="post-card__gallery post-card__gallery--count-3">
+                        <div class="post-card__gallery-item"><img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=600&fit=crop" alt="Team brainstorming session"></div>
+                        <div class="post-card__gallery-item"><img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=300&fit=crop" alt="Sticky notes on a whiteboard"></div>
+                        <div class="post-card__gallery-item"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=300&fit=crop" alt="Presenting design mockups"></div>
+                    </div>
+                </div>
+                <footer class="post-card__footer">
+                     <div class="post-card__stats"><span>👍💡 45 reactions</span><span>8 comments</span></div>
+                     <div class="post-card__actions">
+                        <button class="post-card__action-button" aria-label="React to post"><svg class="icon"><use href="#icon-like"/></svg> Like</button>
+                        <button class="post-card__action-button" aria-label="Comment on post"><svg class="icon"><use href="#icon-comment"/></svg> Comment</button>
+                        <button class="post-card__action-button" aria-label="Share post"><svg class="icon"><use href="#icon-share"/></svg> Share</button>
+                    </div>
+                </footer>
+            </article>
+        </div>
+
+        <!-- Variant 3: With Link Preview -->
+        <div>
+            <h3 class="variant-title">With Link Preview</h3>
+            <article class="post-card">
+                 <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=sam" alt="Profile picture of Samantha Lee">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Samantha Lee</span>
+                                <span class="user-badge__headline">Marketing Director | Brand Strategy</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">3d ago</div>
+                    </div>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post"><svg class="icon"><use href="#icon-more-horizontal"/></svg></button>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">A fascinating read on the future of remote work and its impact on company culture. Highly recommend this article for any team leaders. https://www.example.com</p>
+                    <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" class="post-card__link-preview">
+                        <img class="post-card__link-image" src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=314&fit=crop" alt="Preview image for article">
+                        <div class="post-card__link-text">
+                            <div class="post-card__link-title">The Hybrid Workplace: Navigating the Future of Work</div>
+                            <div class="post-card__link-description">An in-depth analysis of emerging trends in remote and hybrid work models and what they mean for organizational structure and employee engagement.</div>
+                        </div>
+                    </a>
+                </div>
+                <footer class="post-card__footer">
+                    <div class="post-card__stats"><span>❤️💡 98 reactions</span><span>15 comments</span></div>
+                     <div class="post-card__actions">
+                        <button class="post-card__action-button" aria-label="React to post"><svg class="icon"><use href="#icon-like"/></svg> Like</button>
+                        <button class="post-card__action-button" aria-label="Comment on post"><svg class="icon"><use href="#icon-comment"/></svg> Comment</button>
+                        <button class="post-card__action-button" aria-label="Share post"><svg class="icon"><use href="#icon-share"/></svg> Share</button>
+                    </div>
+                </footer>
+            </article>
+        </div>
+    </main>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The standard text-only post, forming the baseline for all other variants. </normal>
+		<!-- vrient 1 html -->
+        <article class="post-card">
+                <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=elena" alt="Profile picture of Elena Rodriguez">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Elena Rodriguez</span>
+                                <span class="user-badge__headline">Data Scientist | Machine Learning Enthusiast</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">2h ago</div>
+                    </div>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post">
+                            <svg class="icon"><use href="#icon-more-horizontal"></use></svg>
+                        </button>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">Excited to share that our latest paper on predictive modeling for supply chain optimization has been published!</p>
+                </div>
+                <footer class="post-card__footer">
+                    <div class="post-card__stats">
+                        <span>142 reactions</span>
+                        <span>32 comments</span>
+                    </div>
+                    <div class="post-card__actions">
+                        <button class="post-card__action-button" aria-label="React to post"><svg class="icon"><use href="#icon-like"></use></svg> Like</button>
+                        <button class="post-card__action-button" aria-label="Comment on post"><svg class="icon"><use href="#icon-comment"></use></svg> Comment</button>
+                        <button class="post-card__action-button" aria-label="Share post"><svg class="icon"><use href="#icon-share"></use></svg> Share</button>
+                    </div>
+                </footer>
+            </article>     
+		
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : "with_images"<h3>
+		<!--description--><normal> A post that includes a gallery of one to four images. </normal>
+		<!-- vrient 1 html -->
+        <article class="post-card">
+                <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=ben" alt="Profile picture of Ben Carter">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Ben Carter</span>
+                                <span class="user-badge__headline">Lead UX Designer @ Innovate Corp</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">1d ago</div>
+                    </div>
+                    <div class="action-menu">
+                         <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post"><svg class="icon"><use href="#icon-more-horizontal"></use></svg></button>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">Some snapshots from our team's design sprint last week.</p>
+                    <div class="post-card__gallery post-card__gallery--count-2">
+                        <div class="post-card__gallery-item"><img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=600&fit=crop" alt="Team brainstorming session"></div>
+                        <div class="post-card__gallery-item"><img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=300&fit=crop" alt="Sticky notes on a whiteboard"></div>
+                    </div>
+                </div>
+                <footer class="post-card__footer">
+                     <div class="post-card__stats"><span>45 reactions</span><span>8 comments</span></div>
+                     <div class="post-card__actions">
+                        <button class="post-card__action-button" aria-label="React to post"><svg class="icon"><use href="#icon-like"></use></svg> Like</button>
+                        <button class="post-card__action-button" aria-label="Comment on post"><svg class="icon"><use href="#icon-comment"></use></svg> Comment</button>
+                        <button class="post-card__action-button" aria-label="Share post"><svg class="icon"><use href="#icon-share"></use></svg> Share</button>
+                    </div>
+                </footer>
+            </article>     
+		
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : "with_link_preview"<h3>
+		<!--description--><normal> A post that includes a rich preview card for an external URL. </normal>
+		<!-- vrient 1 html -->
+        <article class="post-card">
+                 <header class="post-card__header">
+                    <div class="post-card__author">
+                        <a href="#" class="user-badge">
+                            <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=sam" alt="Profile picture of Samantha Lee">
+                            <div class="user-badge__text-wrapper">
+                                <span class="user-badge__name">Samantha Lee</span>
+                                <span class="user-badge__headline">Marketing Director | Brand Strategy</span>
+                            </div>
+                        </a>
+                        <div class="post-card__timestamp">3d ago</div>
+                    </div>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post"><svg class="icon"><use href="#icon-more-horizontal"></use></svg></button>
+                    </div>
+                </header>
+                <div class="post-card__content">
+                    <p class="post-card__text">A fascinating read on the future of remote work. https://www.example.com</p>
+                    <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" class="post-card__link-preview">
+                        <img class="post-card__link-image" src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=314&fit=crop" alt="Preview image for article">
+                        <div class="post-card__link-text">
+                            <div class="post-card__link-title">The Hybrid Workplace: Navigating the Future of Work</div>
+                            <div class="post-card__link-description">An in-depth analysis of emerging trends in remote and hybrid work models.</div>
+                        </div>
+                    </a>
+                </div>
+                <footer class="post-card__footer">
+                    <div class="post-card__stats"><span>98 reactions</span><span>15 comments</span></div>
+                     <div class="post-card__actions">
+                        <button class="post-card__action-button" aria-label="React to post"><svg class="icon"><use href="#icon-like"></use></svg> Like</button>
+                        <button class="post-card__action-button" aria-label="Comment on post"><svg class="icon"><use href="#icon-comment"></use></svg> Comment</button>
+                        <button class="post-card__action-button" aria-label="Share post"><svg class="icon"><use href="#icon-share"></use></svg> Share</button>
+                    </div>
+                </footer>
+            </article>     
+		
+      </div>
+	 </div>    
+	
+	</body>
+</html>

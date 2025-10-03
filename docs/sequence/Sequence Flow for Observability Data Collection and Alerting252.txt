@@ -1,0 +1,829 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-OP-002
+
+## 1.2 Name
+
+Observability Data Collection and Alerting
+
+## 1.3 Description
+
+Application services, instrumented with OpenTelemetry, continuously emit metrics, logs, and traces. This data is collected by an OpenTelemetry Collector, exported to the observability stack (Prometheus, Loki, Jaeger), and alerts are fired via Alertmanager for critical conditions.
+
+## 1.4 Type
+
+🔹 OperationalFlow
+
+## 1.5 Purpose
+
+To provide deep, unified visibility into the health and performance of the distributed system, fulfilling the requirements of SRS-001-NFR 2.9.
+
+## 1.6 Complexity
+
+Critical
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+Hourly
+
+## 1.9 Participants
+
+- REPO-SVC-*
+- REPO-TELEMETRY-COLLECTOR
+- REPO-OBSERVABILITY-STACK
+
+## 1.10 Key Interactions
+
+- A microservice, instrumented with the OpenTelemetry SDK, handles a request.
+- The SDK generates telemetry data (metrics, logs with trace context, trace spans).
+- Data is exported via OTLP to an OpenTelemetry Collector agent (running as a DaemonSet in K8s).
+- The collector processes the data and exports it to the appropriate backends: metrics to Prometheus, logs to Loki, and traces to Jaeger.
+- Prometheus scrapes metrics and evaluates alerting rules (e.g., P95 latency > 200ms).
+- If a rule threshold is breached, Prometheus fires an alert to Alertmanager.
+- Alertmanager deduplicates, groups, and routes the alert to the correct channel, such as PagerDuty for a critical incident.
+
+## 1.11 Triggers
+
+- Continuous operation and request handling of application services.
+
+## 1.12 Outcomes
+
+- Metrics, logs, and traces are available for querying and correlation in a unified dashboard (Grafana).
+- On-call engineers are automatically notified of production issues that breach SLAs.
+
+## 1.13 Business Rules
+
+- Alerts must be defined for key system health (CPU, latency, errors) and business metrics (sign-ups) (2.9.3).
+- All services MUST be instrumented using the OpenTelemetry standard (2.9.1).
+
+## 1.14 Error Scenarios
+
+- The OpenTelemetry Collector is unavailable, causing a temporary loss of telemetry data from the node.
+- Prometheus or Loki are down, preventing monitoring, querying, and alerting.
+- An alert fails to be delivered to PagerDuty due to misconfiguration.
+
+## 1.15 Integration Points
+
+- Prometheus, Grafana, Loki, Jaeger (2.9.2).
+- PagerDuty (2.9.3).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-OP-002-IMPL
+
+## 2.2 Name
+
+Implementation: Observability Telemetry Collection and Alerting Pipeline
+
+## 2.3 Description
+
+A comprehensive technical sequence detailing the flow of telemetry data (metrics, logs, traces) from a microservice instrumented with OpenTelemetry, through the OTEL Collector, to the observability backend stack (Prometheus, Loki, Jaeger). It concludes with Prometheus evaluating SLO-based alerting rules and firing critical alerts to PagerDuty via Alertmanager. This sequence directly implements the requirements of SRS-001-NFR 2.9.
+
+## 2.4 Participants
+
+### 2.4.1 Microservice
+
+#### 2.4.1.1 Repository Id
+
+REPO-SVC-USER-PROFILE
+
+#### 2.4.1.2 Display Name
+
+User Profile Service
+
+#### 2.4.1.3 Type
+
+🔹 Microservice
+
+#### 2.4.1.4 Technology
+
+Node.js, NestJS, OpenTelemetry SDK
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | Application Service |
+
+### 2.4.2.0 Agent
+
+#### 2.4.2.1 Repository Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.4.2.2 Display Name
+
+OTEL Collector
+
+#### 2.4.2.3 Type
+
+🔹 Agent
+
+#### 2.4.2.4 Technology
+
+OpenTelemetry Collector Contrib
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF8C00 |
+| Stereotype | Telemetry Agent |
+
+### 2.4.3.0 Observability Backend
+
+#### 2.4.3.1 Repository Id
+
+REPO-OBSERVABILITY-JAEGER
+
+#### 2.4.3.2 Display Name
+
+Jaeger
+
+#### 2.4.3.3 Type
+
+🔹 Observability Backend
+
+#### 2.4.3.4 Technology
+
+Jaeger All-In-One/Production
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #32CD32 |
+| Stereotype | Distributed Tracing |
+
+### 2.4.4.0 Observability Backend
+
+#### 2.4.4.1 Repository Id
+
+REPO-OBSERVABILITY-LOKI
+
+#### 2.4.4.2 Display Name
+
+Loki
+
+#### 2.4.4.3 Type
+
+🔹 Observability Backend
+
+#### 2.4.4.4 Technology
+
+Grafana Loki
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #8A2BE2 |
+| Stereotype | Log Aggregation |
+
+### 2.4.5.0 Observability Backend
+
+#### 2.4.5.1 Repository Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.4.5.2 Display Name
+
+Prometheus
+
+#### 2.4.5.3 Type
+
+🔹 Observability Backend
+
+#### 2.4.5.4 Technology
+
+Prometheus Server
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #E34C26 |
+| Stereotype | Metrics & Monitoring |
+
+### 2.4.6.0 Alerting Engine
+
+#### 2.4.6.1 Repository Id
+
+REPO-OBSERVABILITY-ALERTMANAGER
+
+#### 2.4.6.2 Display Name
+
+Alertmanager
+
+#### 2.4.6.3 Type
+
+🔹 Alerting Engine
+
+#### 2.4.6.4 Technology
+
+Prometheus Alertmanager
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #DC143C |
+| Stereotype | Alert Routing |
+
+### 2.4.7.0 External Service
+
+#### 2.4.7.1 Repository Id
+
+REPO-EXTERNAL-PAGERDUTY
+
+#### 2.4.7.2 Display Name
+
+PagerDuty
+
+#### 2.4.7.3 Type
+
+🔹 External Service
+
+#### 2.4.7.4 Technology
+
+SaaS API
+
+#### 2.4.7.5 Order
+
+7
+
+#### 2.4.7.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | cloud |
+| Color | #008080 |
+| Stereotype | Incident Management |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Instrumentation
+
+#### 2.5.1.1 Source Id
+
+REPO-SVC-USER-PROFILE
+
+#### 2.5.1.2 Target Id
+
+REPO-SVC-USER-PROFILE
+
+#### 2.5.1.3 Message
+
+1. Handle incoming gRPC request; OTEL SDK creates root trace span.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Instrumentation
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Generates telemetry data.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | OpenTelemetry Auto-Instrumentation Hook |
+| Parameters | Request headers containing W3C TraceContext. |
+| Authentication | N/A |
+| Error Handling | SDK errors are logged internally; failure does not... |
+| Performance | Negligible overhead (<1ms) per request. |
+
+### 2.5.2.0 TelemetryExport
+
+#### 2.5.2.1 Source Id
+
+REPO-SVC-USER-PROFILE
+
+#### 2.5.2.2 Target Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.5.2.3 Message
+
+2. Export batched telemetry data (metrics, logs, traces).
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 TelemetryExport
+
+#### 2.5.2.6 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7 Return Message
+
+
+
+#### 2.5.2.8 Has Return
+
+❌ No
+
+#### 2.5.2.9 Is Activation
+
+❌ No
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | OTLP/gRPC |
+| Method | POST /otlp.v1.TraceService/Export, ...LogService/E... |
+| Parameters | Batched OTLP protobuf payload. Includes resource a... |
+| Authentication | mTLS recommended in production environments. |
+| Error Handling | SDK uses an in-memory buffer with an export timeou... |
+| Performance | Export interval: 5s. Timeout: 10s. |
+
+### 2.5.3.0 DataExport
+
+#### 2.5.3.1 Source Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.5.3.2 Target Id
+
+REPO-OBSERVABILITY-JAEGER
+
+#### 2.5.3.3 Message
+
+3a. Export processed trace data.
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 DataExport
+
+#### 2.5.3.6 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7 Return Message
+
+
+
+#### 2.5.3.8 Has Return
+
+❌ No
+
+#### 2.5.3.9 Is Activation
+
+❌ No
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | OTLP/gRPC or Jaeger gRPC |
+| Method | Collector-to-Jaeger gRPC call |
+| Parameters | Batch of trace spans. |
+| Authentication | N/A |
+| Error Handling | Collector uses a retry queue with exponential back... |
+| Performance | Low latency required for real-time trace visibilit... |
+
+### 2.5.4.0 DataExport
+
+#### 2.5.4.1 Source Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.5.4.2 Target Id
+
+REPO-OBSERVABILITY-LOKI
+
+#### 2.5.4.3 Message
+
+3b. Export processed log data.
+
+#### 2.5.4.4 Sequence Number
+
+4
+
+#### 2.5.4.5 Type
+
+🔹 DataExport
+
+#### 2.5.4.6 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7 Return Message
+
+
+
+#### 2.5.4.8 Has Return
+
+❌ No
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Loki gRPC |
+| Method | POST /loki.v1.Pusher/Push |
+| Parameters | Batch of log streams with labels (e.g., service, p... |
+| Authentication | N/A |
+| Error Handling | Collector uses a retry queue. Persistent failure w... |
+| Performance | High throughput to handle log volume from all serv... |
+
+### 2.5.5.0 Scrape
+
+#### 2.5.5.1 Source Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.5.5.2 Target Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.5.5.3 Message
+
+4. Scrape metrics endpoint.
+
+#### 2.5.5.4 Sequence Number
+
+5
+
+#### 2.5.5.5 Type
+
+🔹 Scrape
+
+#### 2.5.5.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7 Return Message
+
+Prometheus exposition format text.
+
+#### 2.5.5.8 Has Return
+
+✅ Yes
+
+#### 2.5.5.9 Is Activation
+
+❌ No
+
+#### 2.5.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTP/S |
+| Method | GET /metrics |
+| Parameters | None |
+| Authentication | mTLS or token-based auth can be configured in Prom... |
+| Error Handling | Prometheus marks the target as 'DOWN' after scrape... |
+| Performance | Scrape Interval: 30s. Scrape Timeout: 10s. |
+
+### 2.5.6.0 RuleEvaluation
+
+#### 2.5.6.1 Source Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.5.6.2 Target Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.5.6.3 Message
+
+5. Evaluate alerting rules against collected metrics.
+
+#### 2.5.6.4 Sequence Number
+
+6
+
+#### 2.5.6.5 Type
+
+🔹 RuleEvaluation
+
+#### 2.5.6.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7 Return Message
+
+Alert state (Pending/Firing).
+
+#### 2.5.6.8 Has Return
+
+✅ Yes
+
+#### 2.5.6.9 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | PromQL Query Execution |
+| Parameters | Rule: `histogram_quantile(0.95, sum(rate(http_serv... |
+| Authentication | N/A |
+| Error Handling | Errors in rule evaluation are logged internally by... |
+| Performance | Evaluation interval: 30s. `FOR` clause prevents al... |
+
+### 2.5.7.0 Alert
+
+#### 2.5.7.1 Source Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.5.7.2 Target Id
+
+REPO-OBSERVABILITY-ALERTMANAGER
+
+#### 2.5.7.3 Message
+
+6. Fire alert for breached SLO.
+
+#### 2.5.7.4 Sequence Number
+
+7
+
+#### 2.5.7.5 Type
+
+🔹 Alert
+
+#### 2.5.7.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7 Return Message
+
+200 OK
+
+#### 2.5.7.8 Has Return
+
+✅ Yes
+
+#### 2.5.7.9 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTP/S |
+| Method | POST /api/v2/alerts |
+| Parameters | JSON payload containing alert labels (e.g., `alert... |
+| Authentication | N/A (relies on private network security). |
+| Error Handling | Prometheus retries sending alerts if Alertmanager ... |
+| Performance | Alerts should be delivered to Alertmanager within ... |
+
+### 2.5.8.0 AlertProcessing
+
+#### 2.5.8.1 Source Id
+
+REPO-OBSERVABILITY-ALERTMANAGER
+
+#### 2.5.8.2 Target Id
+
+REPO-OBSERVABILITY-ALERTMANAGER
+
+#### 2.5.8.3 Message
+
+7. Process alert: deduplicate, group, and match route.
+
+#### 2.5.8.4 Sequence Number
+
+8
+
+#### 2.5.8.5 Type
+
+🔹 AlertProcessing
+
+#### 2.5.8.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7 Return Message
+
+Route matched to PagerDuty receiver.
+
+#### 2.5.8.8 Has Return
+
+✅ Yes
+
+#### 2.5.8.9 Is Activation
+
+❌ No
+
+#### 2.5.8.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | Configuration-based Routing Tree |
+| Parameters | alertmanager.yml configuration: `group_by: ['alert... |
+| Authentication | N/A |
+| Error Handling | Misconfigurations are logged at startup. Routing f... |
+| Performance | Processing is near-instantaneous. |
+
+### 2.5.9.0 Notification
+
+#### 2.5.9.1 Source Id
+
+REPO-OBSERVABILITY-ALERTMANAGER
+
+#### 2.5.9.2 Target Id
+
+REPO-EXTERNAL-PAGERDUTY
+
+#### 2.5.9.3 Message
+
+8. Send notification to create incident.
+
+#### 2.5.9.4 Sequence Number
+
+9
+
+#### 2.5.9.5 Type
+
+🔹 Notification
+
+#### 2.5.9.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.9.7 Return Message
+
+202 Accepted
+
+#### 2.5.9.8 Has Return
+
+✅ Yes
+
+#### 2.5.9.9 Is Activation
+
+❌ No
+
+#### 2.5.9.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTP/S |
+| Method | POST /v2/enqueue (PagerDuty Events API v2) |
+| Parameters | JSON payload with `routing_key`, `event_action: tr... |
+| Authentication | The `routing_key` (integration key) acts as the au... |
+| Error Handling | Alertmanager retries on non-2xx responses. Failure... |
+| Performance | External API call; timeout configured to 15s. |
+
+## 2.6.0.0 Notes
+
+### 2.6.1.0 Content
+
+#### 2.6.1.1 Content
+
+REQ-1-083: The entire pipeline from service instrumentation (1) to backend storage (3a, 3b) is standardized on OpenTelemetry.
+
+#### 2.6.1.2 Position
+
+top
+
+#### 2.6.1.3 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4 Sequence Number
+
+1
+
+### 2.6.2.0 Content
+
+#### 2.6.2.1 Content
+
+REQ-1-084 & REQ-1-051: The alerting rule in step 5 is a direct implementation of monitoring key system health indicators (P95 latency) against defined performance targets.
+
+#### 2.6.2.2 Position
+
+bottom
+
+#### 2.6.2.3 Participant Id
+
+REPO-OBSERVABILITY-PROMETHEUS
+
+#### 2.6.2.4 Sequence Number
+
+6
+
+### 2.6.3.0 Content
+
+#### 2.6.3.1 Content
+
+The OTEL Collector is deployed as a Kubernetes DaemonSet, ensuring one collector instance per node for efficient, decentralized telemetry collection and resource management.
+
+#### 2.6.3.2 Position
+
+right
+
+#### 2.6.3.3 Participant Id
+
+REPO-TELEMETRY-COLLECTOR
+
+#### 2.6.3.4 Sequence Number
+
+2
+
+### 2.6.4.0 Content
+
+#### 2.6.4.1 Content
+
+All alerting and monitoring configurations (Prometheus rules, Alertmanager routing) are managed via Infrastructure as Code (e.g., Terraform/GitOps) for versioning and auditability.
+
+#### 2.6.4.2 Position
+
+bottom
+
+#### 2.6.4.3 Participant Id
+
+*Not specified*
+
+#### 2.6.4.4 Sequence Number
+
+9
+
+## 2.7.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Access to all observability UIs (Grafana, Jaeger) ... |
+| Performance Targets | End-to-end telemetry pipeline latency (from genera... |
+| Error Handling Strategy | The observability pipeline prioritizes the availab... |
+| Testing Considerations | The pipeline must be tested for data correctness a... |
+| Monitoring Requirements | A 'meta-monitoring' strategy is required. The obse... |
+| Deployment Considerations | The entire observability stack should be deployed ... |
+

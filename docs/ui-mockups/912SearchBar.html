@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: SearchBar</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: var(--color-neutral-50); color: var(--color-neutral-900); padding: 2rem; }
+    h1, h2, h3, h4, p { margin: 0 0 1rem 0; }
+    h1 { font-size: 2.5rem; } h2 { font-size: 2rem; } h3 { font-size: 1.5rem; } h4 { font-size: 1.1rem; color: var(--color-neutral-600); }
+    hr { border: 0; border-top: 1px solid #e9ecef; margin: 2rem 0; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD; --color-primary-100: #BBDEFB; --color-primary-500: #2196F3; --color-primary-700: #1976D2; --color-primary-900: #0D47A1;
+      --color-neutral-50: #F8F9FA; --color-neutral-100: #F1F3F5; --color-neutral-200: #E9ECEF; --color-neutral-400: #CED4DA; --color-neutral-600: #6C757D; --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-sm: 8px; --spacing-md: 16px; --spacing-lg: 24px;
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-md: 16px;
+      --font-weight-semibold: 600;
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase { max-width: 800px; margin: 0 auto; }
+    .showcase__header { text-align: center; margin-bottom: 2rem; }
+    .component-section { margin-bottom: 2rem; padding: 2rem; background: var(--color-white); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .component-group { margin-bottom: 2rem; }
+    .component-group:last-child { margin-bottom: 0; }
+    .state-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+    .mobile-header-preview { display: none; background: #343a40; padding: 1rem; border-radius: 8px; color: white; align-items: center; justify-content: space-between; }
+    .mobile-header-preview h4 { color: white; }
+
+    /* 4. Helper & Atomic Component Styles (Dependencies) */
+    /* Icon-only Button */
+    .btn--icon-only { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: var(--spacing-sm); border: 1px solid transparent; border-radius: 50%; background: transparent; color: var(--color-neutral-400); cursor: pointer; transition: all 150ms ease; }
+    .btn--icon-only:hover { background: rgba(255, 255, 255, 0.1); color: var(--color-white); }
+    .btn--icon-only:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+    .btn--icon-only svg { width: 24px; height: 24px; }
+
+    /* Loading Spinner */
+    .spinner { border: 2px solid var(--color-neutral-200); border-top-color: var(--color-primary-700); border-radius: 50%; animation: spin 1s linear infinite; }
+    .spinner--sm { width: 20px; height: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* 5. Main Component: SearchBar */
+    .search-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 450px;
+      font-family: var(--font-family-primary);
+    }
+
+    .search-bar__icon {
+      position: absolute;
+      left: var(--spacing-md);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-neutral-600);
+      pointer-events: none; /* Allows clicks to pass through to the input */
+      width: 20px;
+      height: 20px;
+      transition: color 150ms ease;
+    }
+
+    .search-bar__input {
+      width: 100%;
+      height: 44px; /* Touch-friendly size */
+      padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 44px; /* Left padding for icon */
+      border: 1px solid var(--color-neutral-400);
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-neutral-100);
+      font-size: var(--font-size-md);
+      color: var(--color-neutral-900);
+      transition: all 150ms ease-in-out;
+    }
+
+    .search-bar__input::placeholder {
+      color: var(--color-neutral-600);
+    }
+
+    .search-bar__input:focus {
+      outline: none;
+    }
+    
+    .search-bar__spinner {
+      position: absolute;
+      right: var(--spacing-md);
+      top: 50%;
+      transform: translateY(-50%);
+      display: none; /* Hidden by default */
+    }
+
+    /* States */
+    .search-bar:focus-within .search-bar__icon {
+      color: var(--color-primary-700);
+    }
+
+    .search-bar:focus-within .search-bar__input {
+      border-color: var(--color-primary-700);
+      background-color: var(--color-white);
+      box-shadow: 0 0 0 2px var(--color-primary-100);
+    }
+
+    /* To visually demonstrate focus state without interaction */
+    .search-bar.pseudo-focus-within .search-bar__icon {
+      color: var(--color-primary-700);
+    }
+
+    .search-bar.pseudo-focus-within .search-bar__input {
+      border-color: var(--color-primary-700);
+      background-color: var(--color-white);
+      box-shadow: 0 0 0 2px var(--color-primary-100);
+    }
+    
+    .search-bar--loading .search-bar__spinner {
+      display: block;
+    }
+
+    /* Variants */
+    /* Global Header Variant */
+    .search-bar--global .search-bar__input {
+      border-radius: 99px; /* Pill shape */
+      background-color: var(--color-neutral-200);
+      border-color: transparent;
+    }
+
+    .search-bar--global:focus-within .search-bar__input {
+      background-color: var(--color-white);
+      border-color: var(--color-primary-700);
+    }
+    
+    .search-bar--global.pseudo-focus-within .search-bar__input {
+      background-color: var(--color-white);
+      border-color: var(--color-primary-700);
+    }
+
+    /* Page-Specific Variant (Default styles are sufficient) */
+    .search-bar--page {
+      /* Uses base styles */
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+      /* Hide the full search bar in the global context on mobile */
+      .search-bar--global {
+        display: none;
+      }
+      
+      /* Show the icon-only button and mobile header preview instead */
+      .mobile-header-preview {
+        display: flex;
+      }
+
+      /* Page-specific search bars take full width */
+      .search-bar--page {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="showcase">
+    <header class="showcase__header">
+      <h1>Molecular Component: SearchBar</h1>
+      <p>A composite input for initiating searches, with variants for global and page-specific contexts.</p>
+    </header>
+
+    <main>
+      <section class="component-section">
+        <h2>Variants & States</h2>
+
+        <div class="component-group">
+          <h3>Global Header Variant</h3>
+          <p>Used in the main application header for site-wide search. Features a pill shape.</p>
+          <div class="state-grid">
+            <div>
+              <h4>Default State</h4>
+              <form class="search-bar search-bar--global" role="search">
+                <label for="global-search-default" class="sr-only">Search</label>
+                <div class="search-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input class="search-bar__input" type="search" id="global-search-default" placeholder="Search...">
+              </form>
+            </div>
+            <div>
+              <h4>Focused State</h4>
+              <form class="search-bar search-bar--global pseudo-focus-within" role="search">
+                <label for="global-search-focus" class="sr-only">Search</label>
+                <div class="search-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input class="search-bar__input" type="search" id="global-search-focus" placeholder="Search...">
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="component-group">
+          <h3>Page-Specific Variant</h3>
+          <p>Used for contextual search within a specific page, like filtering a user list. Features a standard input shape.</p>
+          <div class="state-grid">
+            <div>
+              <h4>Default State</h4>
+              <form class="search-bar search-bar--page" role="search">
+                <label for="page-search-default" class="sr-only">Search Users</label>
+                <div class="search-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input class="search-bar__input" type="search" id="page-search-default" placeholder="Search users by name...">
+              </form>
+            </div>
+            <div>
+              <h4>Loading State</h4>
+              <form class="search-bar search-bar--page search-bar--loading" role="search">
+                <label for="page-search-loading" class="sr-only">Searching Users</label>
+                <div class="search-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input class="search-bar__input" type="search" id="page-search-loading" value="Software Engineer" disabled>
+                <div class="search-bar__spinner">
+                  <div class="spinner spinner--sm"></div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+        
+        <div class="component-group">
+          <h3>Responsive Behavior (Mobile Header)</h3>
+          <p>On viewports narrower than 768px, the 'Global Header' variant collapses to an icon button.</p>
+          <div class="mobile-header-preview">
+            <h4>Logo</h4>
+            <button class="btn--icon-only mobile-header-search" aria-label="Open search">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+          </div>
+          <p style="margin-top: 1rem; font-size: 14px; color: var(--color-neutral-600);"><em>(This preview becomes visible on smaller screens.)</em></p>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

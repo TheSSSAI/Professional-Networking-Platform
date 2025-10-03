@@ -1,0 +1,82 @@
+# Represents a post created by a user.
+# Corresponds to REQ-1-019.
+type Post {
+  # The unique identifier for the post.
+  id: ID!
+
+  # The text content of the post.
+  content: String!
+
+  # The user who authored the post.
+  author: User!
+
+  # A list of URLs for images attached to the post.
+  imageUrls: [String!]
+
+  # A preview of an external link included in the post.
+  linkPreview: LinkPreview
+
+  # The timestamp when the post was created.
+  createdAt: String!
+
+  # The timestamp when the post was last updated.
+  updatedAt: String
+
+  # The number of reactions on the post.
+  reactionCount: Int!
+
+  # The number of comments on the post.
+  commentCount: Int!
+
+  # Paginated list of comments on the post.
+  comments(pagination: PaginationInput): CommentConnection!
+
+  # Paginated list of reactions on the post.
+  reactions(pagination: PaginationInput): ReactionConnection!
+}
+
+# Represents a preview of an external link.
+# Corresponds to REQ-1-019.
+type LinkPreview {
+  # The original URL.
+  url: String!
+  # The title of the linked page.
+  title: String
+  # The description of the linked page.
+  description: String
+  # The URL of the preview image.
+  imageUrl: String
+}
+
+# Represents a reaction to a post.
+# Corresponds to REQ-1-021.
+type Reaction {
+  # The user who made the reaction.
+  user: User!
+  # The type of reaction (e.g., "LIKE", "CELEBRATE").
+  type: String!
+}
+
+# Represents a paginated list of posts.
+type PostConnection {
+  edges: [PostEdge!]!
+  pageInfo: PageInfo!
+}
+
+# Represents a post in a connection.
+type PostEdge {
+  cursor: String!
+  node: Post!
+}
+
+# Represents a paginated list of reactions.
+type ReactionConnection {
+  edges: [ReactionEdge!]!
+  pageInfo: PageInfo!
+}
+
+# Represents a reaction in a connection.
+type ReactionEdge {
+  cursor: String!
+  node: Reaction!
+}

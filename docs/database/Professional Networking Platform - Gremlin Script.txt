@@ -1,0 +1,23 @@
+// Gremlin script for creating the Professional Networking Platform graph structure in AWS Neptune
+
+// --- Create User Vertices (UserNode) ---
+// The schema specifies 'User' as the label and a 'nodeId' (Guid) as the primary key.
+// In Gremlin, we use the vertex label 'User' and set the custom ID.
+
+g.addV('User').property(id, 'a1b2c3d4-e5f6-7890-1234-567890abcdef').iterate()
+g.addV('User').property(id, 'b2c3d4e5-f6a7-8901-2345-67890abcdef0').iterate()
+g.addV('User').property(id, 'c3d4e5f6-a7b8-9012-3456-7890abcdef01').iterate()
+
+// --- Create Connection Edges (ConnectedToEdge) ---
+// The schema defines a 'CONNECTED_TO' edge with a 'connectedAt' property.
+// A bidirectional connection is represented by two directed edges.
+
+// Create a one-way connection from User 1 to User 3
+g.V('a1b2c3d4-e5f6-7890-1234-567890abcdef').addE('CONNECTED_TO').to(V('c3d4e5f6-a7b8-9012-3456-7890abcdef01')).property('connectedAt', '2023-10-27T10:00:00Z').iterate()
+
+// Create a bidirectional connection between User 1 and User 2
+// Edge from User 1 to User 2
+g.V('a1b2c3d4-e5f6-7890-1234-567890abcdef').addE('CONNECTED_TO').to(V('b2c3d4e5-f6a7-8901-2345-67890abcdef0')).property('connectedAt', '2023-10-26T09:30:00Z').iterate()
+
+// Edge from User 2 to User 1
+g.V('b2c3d4e5-f6a7-8901-2345-67890abcdef0').addE('CONNECTED_TO').to(V('a1b2c3d4-e5f6-7890-1234-567890abcdef')).property('connectedAt', '2023-10-26T09:30:00Z').iterate()

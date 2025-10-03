@@ -1,0 +1,11 @@
+erDiagram
+    UserFeed {
+        String key PK "Format: feed:{userId}"
+        SortedSet value "Member: postId, Score: timestamp"
+    }
+    PostCache {
+        String key PK "Format: post:{postId}"
+        String_JSON value "TTL: 24 hours"
+    }
+
+    UserFeed ||--o{ PostCache : "references"

@@ -1,0 +1,57 @@
+# src/graphql/auth.graphql
+
+# ==========================================
+# INPUTS
+# ==========================================
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input VerifyMfaInput {
+  mfaSessionToken: String!
+  totpCode: String!
+}
+
+# ==========================================
+# PAYLOADS / RESPONSES
+# ==========================================
+
+type LoginResponse {
+  mfaRequired: Boolean!
+  mfaSessionToken: String
+}
+
+type MfaResponse {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type LogoutResponse {
+  success: Boolean!
+}
+
+# ==========================================
+# MUTATIONS
+# ==========================================
+
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    mfaRequired
+    mfaSessionToken
+  }
+}
+
+mutation VerifyMfa($input: VerifyMfaInput!) {
+  verifyMfa(input: $input) {
+    accessToken
+    refreshToken
+  }
+}
+
+mutation Logout {
+  logout {
+    success
+  }
+}

@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Identity Service" as IdentityService
+    participant "Redis Blocklist" as RedisBlocklist
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 2. 2. POST /v1/auth/logout
+    APIGateway-->>ClientSPA: 9. HTTP/1.1 204 No Content
+    activate IdentityService
+    APIGateway->>IdentityService: 3. 3. [gRPC] AuthService.logout(LogoutRequest)
+    IdentityService-->>APIGateway: 8. LogoutResponse(success=true)
+    ClientSPA->>ClientSPA: 10. 10. Clear tokens from secure storage
+    ClientSPA->>ClientSPA: 11. 11. Redirect to login page
+
+    note over APIGateway: Defense-in-Depth: The API Gateway's custom authorizer MUST check the Redis blocklist for the JTI ...
+    note over ClientSPA: User-initiated action, e.g., clicking a 'Logout' button. This is the trigger for the sequence.
+
+    deactivate IdentityService
+    deactivate APIGateway

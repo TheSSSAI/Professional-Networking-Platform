@@ -1,0 +1,882 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-FF-001
+
+## 1.2 Name
+
+User Likes a Post
+
+## 1.3 Description
+
+A user clicks the 'like' button on a post. The interaction is recorded, the UI updates, and a notification is sent to the post's author.
+
+## 1.4 Type
+
+🔹 FeatureFlow
+
+## 1.5 Purpose
+
+To allow users to react to content, fulfilling SRS-001-F4 (1.4.3).
+
+## 1.6 Complexity
+
+Low
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-ENGAGEMENT
+- REPO-EVENT-BUS
+- REPO-SVC-NOTIFICATIONS
+
+## 1.10 Key Interactions
+
+- User clicks 'Like' on a post.
+- Client optimistically updates the UI to show the liked state.
+- Client sends a request to the API Gateway, which routes to the Engagement Service.
+- Engagement Service records the 'like' in its database and publishes a 'PostReacted' event.
+- Notifications Service consumes the event and sends a notification to the post author.
+
+## 1.11 Triggers
+
+- User clicks the 'Like' button.
+
+## 1.12 Outcomes
+
+- The like is recorded.
+- The post author is notified.
+
+## 1.13 Business Rules
+
+- A user can only like a post once.
+
+## 1.14 Error Scenarios
+
+- The backend request fails, and the optimistic UI update must be reverted.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-FF-001
+
+## 2.2 Name
+
+Feature Flow: User Likes a Post on the Platform
+
+## 2.3 Description
+
+This sequence details the end-to-end technical flow initiated when a user likes a post. It covers the optimistic UI update on the client, the synchronous API call to record the interaction, and the subsequent asynchronous, event-driven workflow to notify the post's author. This flow directly implements the 'Reactions' feature specified in SRS-001-F4 (1.4.3).
+
+## 2.4 Participants
+
+### 2.4.1 Client SPA
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client Application
+
+#### 2.4.1.3 Type
+
+🔹 Client SPA
+
+#### 2.4.1.4 Technology
+
+Next.js, React, Apollo Client, Socket.IO Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | «Client» |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway, GraphQL
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF7F50 |
+| Stereotype | «Gateway» |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.4.3.2 Display Name
+
+Engagement Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, TypeScript, gRPC, PostgreSQL
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #32CD32 |
+| Stereotype | «Service» |
+
+### 2.4.4.0 Messaging System
+
+#### 2.4.4.1 Repository Id
+
+REPO-EVENT-BUS
+
+#### 2.4.4.2 Display Name
+
+Event Bus
+
+#### 2.4.4.3 Type
+
+🔹 Messaging System
+
+#### 2.4.4.4 Technology
+
+AWS SNS/SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #9370DB |
+| Stereotype | «Bus» |
+
+### 2.4.5.0 Microservice
+
+#### 2.4.5.1 Repository Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.4.5.2 Display Name
+
+Notifications Service
+
+#### 2.4.5.3 Type
+
+🔹 Microservice
+
+#### 2.4.5.4 Technology
+
+NestJS, TypeScript, gRPC, Socket.IO
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | control |
+| Color | #32CD32 |
+| Stereotype | «Service» |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 State Management
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.3 Message
+
+Optimistically update UI state for postId
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 State Management
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A (Client-side) |
+| Method | stateManager.updatePostLikeState({ postId, isLiked... |
+| Parameters | postId: string, isLiked: boolean, newCount: number |
+| Authentication | N/A |
+| Error Handling | The state update must be reverted if the subsequen... |
+| Performance | Immediate (< 16ms) to ensure fluid user experience... |
+
+### 2.5.2.0 API Request
+
+#### 2.5.2.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.2.3 Message
+
+POST /graphql - addReaction(postId, reactionType: 'LIKE')
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 API Request
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+HTTP 200 OK | 4xx/5xx Error
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/POST |
+| Method | GraphQL Mutation: `mutation AddReaction($postId: I... |
+| Parameters | GraphQL variables: { postId: string } |
+| Authentication | Bearer token (JWT Access Token) in 'Authorization'... |
+| Error Handling | Client handles HTTP status codes (e.g., 401, 403, ... |
+| Performance | P95 latency should be < 200ms as per REQ-1-051. |
+
+### 2.5.3.0 RPC Call
+
+#### 2.5.3.1 Source Id
+
+REPO-GW-API
+
+#### 2.5.3.2 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.3.3 Message
+
+Invoke EngagementService.addReaction
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 RPC Call
+
+#### 2.5.3.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7 Return Message
+
+gRPC Status OK | Error Code
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | addReaction(request: AddReactionRequest): AddReact... |
+| Parameters | AddReactionRequest { postId: string, userId: strin... |
+| Authentication | Internal service authentication (e.g., mTLS). |
+| Error Handling | Handles gRPC status codes like `ALREADY_EXISTS`, `... |
+| Performance | Internal P95 latency should be < 100ms. |
+
+#### 2.5.3.11 Nested Interactions
+
+##### 2.5.3.11.1 Database Query
+
+###### 2.5.3.11.1.1 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+###### 2.5.3.11.1.2 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+###### 2.5.3.11.1.3 Message
+
+DB TX: Validate user has not already liked post
+
+###### 2.5.3.11.1.4 Sequence Number
+
+3.1
+
+###### 2.5.3.11.1.5 Type
+
+🔹 Database Query
+
+###### 2.5.3.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.1.7 Return Message
+
+Existing record found / not found
+
+###### 2.5.3.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.1.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | SELECT 1 FROM "PostReaction" WHERE "userId" = $1 A... |
+| Parameters | userId, postId |
+| Authentication | Database credentials. |
+| Error Handling | If a record exists, the transaction is rolled back... |
+| Performance | Query must be on indexed columns (userId, postId) ... |
+
+##### 2.5.3.11.2.0 Database Write
+
+###### 2.5.3.11.2.1 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+###### 2.5.3.11.2.2 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+###### 2.5.3.11.2.3 Message
+
+DB TX: Persist the 'LIKE' reaction
+
+###### 2.5.3.11.2.4 Sequence Number
+
+3.2
+
+###### 2.5.3.11.2.5 Type
+
+🔹 Database Write
+
+###### 2.5.3.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.2.7 Return Message
+
+Write success
+
+###### 2.5.3.11.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | INSERT INTO "PostReaction" ("userId", "postId", "r... |
+| Parameters | userId, postId |
+| Authentication | Database credentials. |
+| Error Handling | Handles potential database errors (e.g., connectio... |
+| Performance | Write operation should be very fast. |
+
+##### 2.5.3.11.3.0 Event Publication
+
+###### 2.5.3.11.3.1 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+###### 2.5.3.11.3.2 Target Id
+
+REPO-EVENT-BUS
+
+###### 2.5.3.11.3.3 Message
+
+Publish PostReactedEvent
+
+###### 2.5.3.11.3.4 Sequence Number
+
+3.3
+
+###### 2.5.3.11.3.5 Type
+
+🔹 Event Publication
+
+###### 2.5.3.11.3.6 Is Synchronous
+
+❌ No
+
+###### 2.5.3.11.3.7 Return Message
+
+
+
+###### 2.5.3.11.3.8 Has Return
+
+❌ No
+
+###### 2.5.3.11.3.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK (SNS) |
+| Method | sns.publish() |
+| Parameters | TopicArn: 'engagement-events-topic', Message: JSON... |
+| Authentication | IAM Role with SNS publish permissions. |
+| Error Handling | Publish failures are logged. For critical events, ... |
+| Performance | Async operation, should not block the response to ... |
+
+### 2.5.4.0.0.0 Event Consumption
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.5.4.3.0.0 Message
+
+Delivers PostReactedEvent message
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Event Consumption
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK (SQS) |
+| Method | SQS Polling receives the message from a queue subs... |
+| Parameters | Message body contains the PostReactedEvent payload... |
+| Authentication | IAM Role with SQS read/delete permissions. |
+| Error Handling | The consumer must be idempotent. If processing fai... |
+| Performance | Event should be delivered and processed with a P95... |
+
+### 2.5.5.0.0.0 Business Logic
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.5.5.3.0.0 Message
+
+Process notification for post author
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 Business Logic
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | handlePostReaction(event: PostReactedEvent) |
+| Parameters | Event payload |
+| Authentication | N/A |
+| Error Handling | Any failure in this block will prevent the SQS mes... |
+| Performance | Processing should be efficient to keep queue backl... |
+
+#### 2.5.5.11.0.0 Nested Interactions
+
+##### 2.5.5.11.1.0 Database Query
+
+###### 2.5.5.11.1.1 Source Id
+
+REPO-SVC-NOTIFICATIONS
+
+###### 2.5.5.11.1.2 Target Id
+
+REPO-SVC-NOTIFICATIONS
+
+###### 2.5.5.11.1.3 Message
+
+Check user's notification preferences
+
+###### 2.5.5.11.1.4 Sequence Number
+
+5.1
+
+###### 2.5.5.11.1.5 Type
+
+🔹 Database Query
+
+###### 2.5.5.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.1.7 Return Message
+
+Preferences object
+
+###### 2.5.5.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.1.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL/Cache |
+| Method | SELECT * FROM "UserNotificationPreferences" WHERE ... |
+| Parameters | event.postAuthorId |
+| Authentication | Database credentials. |
+| Error Handling | If user has disabled 'like' notifications, process... |
+| Performance | Preferences should be cached in Redis to minimize ... |
+
+##### 2.5.5.11.2.0 Database Write
+
+###### 2.5.5.11.2.1 Source Id
+
+REPO-SVC-NOTIFICATIONS
+
+###### 2.5.5.11.2.2 Target Id
+
+REPO-SVC-NOTIFICATIONS
+
+###### 2.5.5.11.2.3 Message
+
+DB: Create/Aggregate and persist notification
+
+###### 2.5.5.11.2.4 Sequence Number
+
+5.2
+
+###### 2.5.5.11.2.5 Type
+
+🔹 Database Write
+
+###### 2.5.5.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.11.2.7 Return Message
+
+Notification object
+
+###### 2.5.5.11.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.11.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | UPSERT Notification based on postId and notificati... |
+| Parameters | actorId, recipientId (postAuthorId), postId |
+| Authentication | Database credentials. |
+| Error Handling | Database errors will cause the handler to fail, tr... |
+| Performance | Includes logic for notification batching (e.g., 'U... |
+
+##### 2.5.5.11.3.0 Real-time Push
+
+###### 2.5.5.11.3.1 Source Id
+
+REPO-SVC-NOTIFICATIONS
+
+###### 2.5.5.11.3.2 Target Id
+
+REPO-APP-CLIENT
+
+###### 2.5.5.11.3.3 Message
+
+Push real-time notification via WebSocket
+
+###### 2.5.5.11.3.4 Sequence Number
+
+5.3
+
+###### 2.5.5.11.3.5 Type
+
+🔹 Real-time Push
+
+###### 2.5.5.11.3.6 Is Synchronous
+
+❌ No
+
+###### 2.5.5.11.3.7 Return Message
+
+
+
+###### 2.5.5.11.3.8 Has Return
+
+❌ No
+
+###### 2.5.5.11.3.9 Is Activation
+
+❌ No
+
+###### 2.5.5.11.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | WebSocket (Socket.IO) |
+| Method | socket.to(room: `user-${postAuthorId}`).emit('new_... |
+| Parameters | Notification payload |
+| Authentication | WebSocket connection is authenticated on establish... |
+| Error Handling | If user is not connected, this is a no-op. Failure... |
+| Performance | Near real-time delivery. |
+
+### 2.5.6.0.0.0 Message Acknowledgement
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.6.3.0.0 Message
+
+Acknowledge and delete message from queue
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Message Acknowledgement
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.6.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK (SQS) |
+| Method | sqs.deleteMessage() |
+| Parameters | QueueUrl, ReceiptHandle |
+| Authentication | IAM Role. |
+| Error Handling | If deletion fails, message may be re-processed. Ha... |
+| Performance | N/A |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+User Action: A user on the client application clicks the 'Like' button on a post, initiating the entire sequence.
+
+#### 2.6.1.2.0.0 Position
+
+TopLeft
+
+#### 2.6.1.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0.0 Sequence Number
+
+0
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Optimistic UI: The client immediately updates the UI to provide instant feedback. This is a crucial UX pattern but requires robust error handling to revert the change if the backend call fails.
+
+#### 2.6.2.2.0.0 Position
+
+RightOf
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+1
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Asynchronous Decoupling: The publication of the PostReactedEvent decouples the core action of 'liking' from side-effects like 'notifying'. This improves the resilience and scalability of the system.
+
+#### 2.6.3.2.0.0 Position
+
+RightOf
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-EVENT-BUS
+
+#### 2.6.3.4.0.0 Sequence Number
+
+3.3
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The API Gateway must validate the JWT on every inc... |
+| Performance Targets | End-to-end user-perceived latency for the synchron... |
+| Error Handling Strategy | The client must implement a try/catch/finally bloc... |
+| Testing Considerations | 1. E2E Test: Simulate user click, verify optimisti... |
+| Monitoring Requirements | A counter metric `app_reactions_total` should be i... |
+| Deployment Considerations | A feature flag (`enable-reactions`) could be imple... |
+

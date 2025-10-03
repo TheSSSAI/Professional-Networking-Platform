@@ -1,0 +1,57 @@
+# Represents a single message within a conversation.
+# Corresponds to REQ-1-026 and REQ-1-027.
+type Message {
+  # The unique identifier for the message.
+  id: ID!
+
+  # The text content of the message.
+  content: String!
+
+  # The user who sent the message.
+  sender: User!
+
+  # The timestamp when the message was sent.
+  createdAt: String!
+
+  # The delivery status of the message.
+  status: MessageStatus!
+}
+
+# Represents the delivery status of a message.
+enum MessageStatus {
+  SENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+# Represents a one-on-one conversation between two users.
+type Conversation {
+  # The unique identifier for the conversation.
+  id: ID!
+
+  # The participants in the conversation.
+  participants: [User!]!
+
+  # The most recent message in the conversation.
+  latestMessage: Message
+
+  # The timestamp of the last activity in the conversation.
+  updatedAt: String!
+
+  # Paginated list of messages in the conversation.
+  messages(pagination: PaginationInput): MessageConnection!
+}
+
+# Represents a paginated list of messages.
+type MessageConnection {
+  edges: [MessageEdge!]!
+  pageInfo: PageInfo!
+}
+
+# Represents a message in a connection.
+type MessageEdge {
+  cursor: String!
+  node: Message!
+}

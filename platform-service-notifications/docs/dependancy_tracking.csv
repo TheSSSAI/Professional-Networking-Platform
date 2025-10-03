@@ -1,0 +1,5 @@
+"dependency_id","from_task","to_task","dependency_type","description","critical_path","lead_time_days","responsible_team","coordination_required","risk_level","mitigation_plan","status","resolution_date","impact_if_delayed","escalation_required"
+"DEP-001","TSK-ID-002","TSK-ID-003","Technical","Service logic is called by the controller.","true","","Backend Team","","Low","None needed.","Active","","Blocks core registration logic.",""
+"DEP-002","TSK-ID-009","TSK-ID-011","Technical","Logout requires JWTs with `jti` claims to be generated first.","true","","Backend Team","","Low","None needed.","Active","","Blocks session invalidation feature.",""
+"DEP-003","TSK-ID-012","TSK-ID-013","Validation","Security review must happen after implementation of session invalidation.","true","","Backend Team","true","Medium","Schedule review time in advance.","Active","","Blocks merge of the session invalidation feature.",""
+"DEP-004","TSK-ID-021","TSK-ID-022","Technical","Deployment to EKS happens after the image is pushed to ECR.","true","","DevOps Team","","High","Ensure ECR push is reliable and versioning is correct.","Active","","Blocks all deployments.",""

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UserMenu Component</title>
+    <style>
+        /* 1. CSS Reset & Base Styles */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+            padding: 2rem;
+        }
+        h1, h2, h3, h4, p { margin: 0 0 1rem 0; }
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 1.5rem; }
+        hr { border: 0; border-top: 1px solid #e9ecef; margin: 1rem 0; }
+
+        /* 2. Design System Tokens */
+        :root {
+            /* Colors */
+            --color-primary-100: #BBDEFB;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-600: #6C757D;
+            --color-neutral-900: #212529;
+            --color-semantic-error: #D32F2F;
+            --color-semantic-error-bg: #FFEBEE;
+            --color-white: #FFFFFF;
+            /* Spacing */
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            /* Typography */
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            /* Borders & Shadows */
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        /* 3. Showcase Layout Styles */
+        .showcase { max-width: 900px; margin: 0 auto; }
+        .showcase__header { text-align: center; margin-bottom: 3rem; }
+        .showcase__header p { color: var(--color-neutral-600); max-width: 60ch; margin: 0 auto; }
+        .component-section {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: var(--color-white);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--color-neutral-200);
+        }
+        .component-display {
+            display: flex;
+            justify-content: flex-end; /* Align to the right to simulate header placement */
+            padding: 2rem;
+            background: var(--color-neutral-100);
+            border-radius: var(--border-radius-md);
+        }
+
+        /* 4. Atomic Dependencies (from atomic-components-showcase.html) */
+        .avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--color-neutral-200);
+            color: var(--color-neutral-600);
+            font-weight: var(--font-weight-semibold);
+            object-fit: cover;
+        }
+        .avatar--sm { width: 32px; height: 32px; font-size: var(--font-size-sm); }
+        .avatar--md { width: 48px; height: 48px; font-size: var(--font-size-md); }
+
+        /* 5. UserMenu Component CSS */
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu__toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 150ms ease-out;
+        }
+
+        .user-menu__toggle:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+
+        .user-menu__toggle .user-menu__avatar {
+            transition: transform 150ms ease-out;
+        }
+
+        .user-menu__toggle:hover .user-menu__avatar {
+            transform: scale(1.1);
+        }
+
+        /* Dropdown Panel */
+        .user-menu__dropdown {
+            position: absolute;
+            top: calc(100% + var(--spacing-sm));
+            right: 0;
+            width: 280px;
+            background-color: var(--color-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-neutral-200);
+            opacity: 0;
+            transform: translateY(-10px);
+            visibility: hidden;
+            transition: opacity 200ms ease, transform 200ms ease, visibility 200ms;
+            z-index: 100;
+            padding: var(--spacing-sm) 0;
+        }
+
+        /* Open State */
+        .user-menu.is-open .user-menu__toggle {
+            box-shadow: 0 0 0 4px var(--color-primary-100);
+        }
+
+        .user-menu.is-open .user-menu__dropdown {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        /* Dropdown Header */
+        .user-menu__header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+        }
+
+        .user-menu__user-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .user-menu__name {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-neutral-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-menu__headline {
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-600);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Dropdown Items & Divider */
+        .user-menu__divider {
+            border: none;
+            border-top: 1px solid var(--color-neutral-100);
+            margin: var(--spacing-sm) 0;
+        }
+
+        .user-menu__item {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-neutral-900);
+            text-decoration: none;
+            font-size: var(--font-size-md);
+            font-weight: var(--font-weight-semibold);
+            border-radius: var(--border-radius-md);
+            margin: 0 var(--spacing-sm);
+            transition: background-color 150ms ease;
+        }
+
+        .user-menu__item:hover, .user-menu__item:focus-visible {
+            background-color: var(--color-neutral-100);
+            outline: none;
+        }
+
+        .user-menu__item--danger {
+            color: var(--color-semantic-error);
+        }
+
+        .user-menu__item--danger:hover, .user-menu__item--danger:focus-visible {
+            background-color: var(--color-semantic-error-bg);
+            color: var(--color-semantic-error);
+        }
+
+    </style>
+</head>
+<body>
+
+    <main class="showcase">
+        <header class="showcase__header">
+            <h1>UserMenu Component</h1>
+            <p>Provides users with a consistent entry point to access their profile, settings, and logout functionality. The component combines an Avatar with a dropdown menu.</p>
+        </header>
+
+        <section class="component-section">
+            <h2>Default (Closed) State</h2>
+            <p>This is the default appearance of the UserMenu, typically seen in the application header. The dropdown is hidden.</p>
+            <div class="component-display">
+                <div class="user-menu">
+                    <button class="user-menu__toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu">
+                        <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar avatar--sm user-menu__avatar"/>
+                    </button>
+                    <div class="user-menu__dropdown" role="menu" aria-orientation="vertical">
+                        <div class="user-menu__header">
+                            <img src="https://i.pravatar.cc/48?u=jane-doe" alt="" class="avatar avatar--md"/>
+                            <div class="user-menu__user-info">
+                                <span class="user-menu__name">Jane Doe</span>
+                                <span class="user-menu__headline">Senior Software Engineer at Innovate Corp</span>
+                            </div>
+                        </div>
+                        <hr class="user-menu__divider">
+                        <a href="#" class="user-menu__item" role="menuitem">View Profile</a>
+                        <a href="#" class="user-menu__item" role="menuitem">Account Settings</a>
+                        <hr class="user-menu__divider">
+                        <a href="#" class="user-menu__item user-menu__item--danger" role="menuitem">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="component-section">
+            <h2>Open State</h2>
+            <p>When the user clicks the toggle button, the dropdown menu appears. This state is simulated by adding the <code>.is-open</code> class to the main <code>.user-menu</code> container.</p>
+            <div class="component-display" style="padding-bottom: 18rem;"> <!-- Extra padding to ensure dropdown is visible -->
+                <div class="user-menu is-open">
+                    <button class="user-menu__toggle" type="button" aria-haspopup="true" aria-expanded="true" aria-label="Close user menu">
+                        <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar avatar--sm user-menu__avatar"/>
+                    </button>
+                    <div class="user-menu__dropdown" role="menu" aria-orientation="vertical">
+                        <div class="user-menu__header">
+                            <img src="https://i.pravatar.cc/48?u=jane-doe" alt="" class="avatar avatar--md"/>
+                            <div class="user-menu__user-info">
+                                <span class="user-menu__name">Jane Doe</span>
+                                <span class="user-menu__headline">Senior Software Engineer at Innovate Corp</span>
+                            </div>
+                        </div>
+                        <hr class="user-menu__divider">
+                        <a href="#" class="user-menu__item" role="menuitem">View Profile</a>
+                        <a href="#" class="user-menu__item" role="menuitem">Account Settings</a>
+                        <hr class="user-menu__divider">
+                        <a href="#" class="user-menu__item user-menu__item--danger" role="menuitem">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+	<div>
+	  <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default</h3>
+		<p>Standard user menu with an avatar toggle and dropdown for navigation.</p>
+		<div class="component-display">
+            <div class="user-menu is-open">
+                <button class="user-menu__toggle" type="button" aria-haspopup="true" aria-expanded="true" aria-label="Close user menu">
+                    <img src="https://i.pravatar.cc/48?u=john-smith" alt="John Smith" class="avatar avatar--sm user-menu__avatar"/>
+                </button>
+                <div class="user-menu__dropdown" role="menu" aria-orientation="vertical">
+                    <div class="user-menu__header">
+                        <img src="https://i.pravatar.cc/48?u=john-smith" alt="" class="avatar avatar--md"/>
+                        <div class="user-menu__user-info">
+                            <span class="user-menu__name">John Smith</span>
+                            <span class="user-menu__headline">Product Manager</span>
+                        </div>
+                    </div>
+                    <hr class="user-menu__divider">
+                    <a href="#" class="user-menu__item" role="menuitem">View Profile</a>
+                    <a href="#" class="user-menu__item" role="menuitem">Account Settings</a>
+                    <hr class="user-menu__divider">
+                    <a href="#" class="user-menu__item user-menu__item--danger" role="menuitem">Logout</a>
+                </div>
+            </div>
+        </div>
+      </div>
+	</div>
+</body>
+</html>

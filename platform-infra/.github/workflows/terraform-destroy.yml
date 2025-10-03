@@ -1,0 +1,78 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the environment to destroy. Must be a non-production environment.'
+        required: true
+        type: choice
+        options:
+          - dev
+      confirm_destroy:
+        description: 'To confirm, type the exact name of the environment you wish to destroy.'
+        required: true
+        type: string
+
+permissions:
+  id-token: write # Required for AWS OIDC authentication
+  contents: read # Required to checkout the code
+
+jobs:
+  destroy:
+    name: 'Destroy Environment'
+    runs-on: ubuntu-latest
+    
+    # Safety check: Prevent accidental destruction of critical environments
+    if: |
+      (github.event.inputs.environment == 'dev') &&
+      (github.event.inputs.confirm_destroy == github.event.inputs.environment)
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.8.0'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # This assumes a single role for non-prod environments. Adjust if needed.
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN_DEV }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Terraform Init for Destruction
+        run: terraform init
+        working-directory: ./environments/${{ github.event.inputs.environment }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: ./environments/${{ github.event.inputs.environment }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Post-destruction notification
+        if: success()
+        run: echo "✅ Environment '${{ github.event.inputs.environment }}' destroyed successfully."
+
+      - name: Destruction failure notification
+        if: failure()
+        run: echo "❌ Failed to destroy environment '${{ github.event.inputs.environment }}'."
+
+  safety_net:
+    name: 'Destruction Blocked'
+    runs-on: ubuntu-latest
+    if: |
+      (github.event.inputs.environment != 'dev') ||
+      (github.event.inputs.confirm_destroy != github.event.inputs.environment)
+    steps:
+      - name: Fail workflow due to safety checks
+        run: |
+          echo "❌ Destruction of environment '${{ github.event.inputs.environment }}' was blocked."
+          echo "Reason: Either the confirmation string did not match, or you attempted to destroy a protected environment (e.g., staging, prod)."
+          exit 1

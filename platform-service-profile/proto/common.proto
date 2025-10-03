@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package common;
+
+// A generic empty message, often used for RPCs that take no parameters.
+message Empty {}
+
+// A generic request message that uses a single string ID.
+message IdRequest {
+  string id = 1;
+}
+
+// Represents a request for a paginated list of resources.
+message PaginationRequest {
+  // The number of items to return per page. Must be positive.
+  int32 page_size = 1;
+  // The token of the page to retrieve. For the first page, this can be empty.
+  string page_token = 2;
+}
+
+// Represents a response for a paginated list of resources.
+message PaginationResponse {
+  // A token to retrieve the next page of results. If empty, there are no more results.
+  string next_page_token = 1;
+  // The total number of items in the collection, if available.
+  int64 total_size = 2;
+}

@@ -1,0 +1,279 @@
+syntax = "proto3";
+
+package platform.contracts.users.v1;
+
+import "google/protobuf/timestamp.proto";
+import "grpc/v1/common/pagination.proto";
+
+// IdentityService manages user authentication, registration, and account lifecycle.
+service IdentityService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc DeactivateAccount(DeactivateAccountRequest) returns (DeactivateAccountResponse);
+  rpc RequestAccountDeletion(RequestAccountDeletionRequest) returns (RequestAccountDeletionResponse);
+  rpc CancelAccountDeletion(CancelAccountDeletionRequest) returns (CancelAccountDeletionResponse);
+  rpc EnableMfa(EnableMfaRequest) returns (EnableMfaResponse);
+  rpc VerifyMfa(VerifyMfaRequest) returns (LoginResponse); // Returns same as Login
+}
+
+// UserProfileService manages user profile data.
+service UserProfileService {
+  rpc GetUserProfile(GetUserProfileRequest) returns (UserProfile);
+  rpc UpdateBasicInfo(UpdateBasicInfoRequest) returns (UserProfile);
+  rpc AddWorkExperience(AddWorkExperienceRequest) returns (WorkExperience);
+  rpc UpdateWorkExperience(UpdateWorkExperienceRequest) returns (WorkExperience);
+  rpc RemoveWorkExperience(RemoveWorkExperienceRequest) returns (RemoveWorkExperienceResponse);
+  rpc AddEducation(AddEducationRequest) returns (Education);
+  rpc UpdateEducation(UpdateEducationRequest) returns (Education);
+  rpc RemoveEducation(RemoveEducationRequest) returns (RemoveEducationResponse);
+  rpc AddSkill(AddSkillRequest) returns (Skill);
+  rpc RemoveSkill(RemoveSkillRequest) returns (RemoveSkillResponse);
+  rpc UpdateProfileVisibility(UpdateProfileVisibilityRequest) returns (UserProfile);
+  rpc UpdateProfileImages(UpdateProfileImagesRequest) returns (UserProfile);
+  rpc UpdateCustomUrl(UpdateCustomUrlRequest) returns (UserProfile);
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  INACTIVE = 1; // Registered, not verified
+  ACTIVE = 2; // Verified and active
+  DEACTIVATED = 3; // User-initiated deactivation
+  PENDING_DELETION = 4; // In deletion grace period
+  BANNED = 5; // Admin-banned
+}
+
+message User {
+  string user_id = 1;
+  string email = 2;
+  UserStatus status = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message UserProfile {
+  string user_id = 1;
+  string name = 2;
+  string headline = 3;
+  string location = 4;
+  string contact_email = 5;
+  string phone = 6;
+  string profile_picture_url = 7;
+  string banner_url = 8;
+  string custom_url_slug = 9;
+  string visibility = 10; // "PUBLIC" or "PRIVATE"
+  repeated WorkExperience work_experience = 11;
+  repeated Education education = 12;
+  repeated Skill skills = 13;
+}
+
+message WorkExperience {
+  string experience_id = 1;
+  string company = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp start_date = 5;
+  optional google.protobuf.Timestamp end_date = 6;
+}
+
+message Education {
+  string education_id = 1;
+  string institution = 2;
+  string degree = 3;
+  string field_of_study = 4;
+  google.protobuf.Timestamp start_date = 5;
+  optional google.protobuf.Timestamp end_date = 6;
+}
+
+message Skill {
+  string skill_id = 1;
+  string name = 2;
+  int32 endorsement_count = 3;
+}
+
+// Identity Service Messages
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  google.protobuf.Timestamp date_of_birth = 3;
+}
+message RegisterResponse {
+  string user_id = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  bool mfa_required = 3;
+  optional string mfa_session_token = 4;
+}
+
+message LogoutRequest {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+message LogoutResponse {
+  bool success = 1;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+message RefreshTokenResponse {
+  string access_token = 1;
+}
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+message VerifyEmailResponse {
+  bool success = 1;
+}
+
+message RequestPasswordResetRequest {
+  string email = 1;
+}
+message RequestPasswordResetResponse {
+  bool success = 1; // Always returns true to prevent email enumeration
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string new_password = 2;
+}
+message ResetPasswordResponse {
+  bool success = 1;
+}
+
+message DeactivateAccountRequest {
+  string user_id = 1;
+}
+message DeactivateAccountResponse {
+  bool success = 1;
+}
+
+message RequestAccountDeletionRequest {
+  string user_id = 1;
+  string password = 2; // Re-authentication
+}
+message RequestAccountDeletionResponse {
+  bool success = 1;
+}
+
+message CancelAccountDeletionRequest {
+  string user_id = 1;
+}
+message CancelAccountDeletionResponse {
+  bool success = 1;
+}
+
+message EnableMfaRequest {
+  string user_id = 1;
+  string token = 2; // TOTP code to verify setup
+}
+message EnableMfaResponse {
+  repeated string recovery_codes = 1;
+}
+
+message VerifyMfaRequest {
+  string mfa_session_token = 1;
+  string token = 2; // TOTP code
+}
+
+// User Profile Service Messages
+message GetUserProfileRequest {
+  string user_id = 1;
+  string viewer_id = 2; // For visibility checks
+}
+
+message UpdateBasicInfoRequest {
+  string user_id = 1;
+  string name = 2;
+  string headline = 3;
+  string location = 4;
+  string contact_email = 5;
+  string phone = 6;
+}
+
+message AddWorkExperienceRequest {
+  string user_id = 1;
+  string company = 2;
+  string title = 3;
+  string description = 4;
+  google.protobuf.Timestamp start_date = 5;
+  optional google.protobuf.Timestamp end_date = 6;
+}
+message UpdateWorkExperienceRequest {
+  string experience_id = 1;
+  string user_id = 2;
+  string company = 3;
+  string title = 4;
+  string description = 5;
+  google.protobuf.Timestamp start_date = 6;
+  optional google.protobuf.Timestamp end_date = 7;
+}
+message RemoveWorkExperienceRequest {
+  string experience_id = 1;
+  string user_id = 2;
+}
+message RemoveWorkExperienceResponse {
+  bool success = 1;
+}
+
+message AddEducationRequest {
+  string user_id = 1;
+  string institution = 2;
+  string degree = 3;
+  string field_of_study = 4;
+  google.protobuf.Timestamp start_date = 5;
+  optional google.protobuf.Timestamp end_date = 6;
+}
+message UpdateEducationRequest {
+  string education_id = 1;
+  string user_id = 2;
+  string institution = 3;
+  string degree = 4;
+  string field_of_study = 5;
+  google.protobuf.Timestamp start_date = 6;
+  optional google.protobuf.Timestamp end_date = 7;
+}
+message RemoveEducationRequest {
+  string education_id = 1;
+  string user_id = 2;
+}
+message RemoveEducationResponse {
+  bool success = 1;
+}
+
+message AddSkillRequest {
+  string user_id = 1;
+  string name = 2;
+}
+message RemoveSkillRequest {
+  string user_id = 1;
+  string skill_id = 2;
+}
+message RemoveSkillResponse {
+  bool success = 1;
+}
+
+message UpdateProfileVisibilityRequest {
+  string user_id = 1;
+  string visibility = 2;
+}
+message UpdateProfileImagesRequest {
+  string user_id = 1;
+  optional string profile_picture_object_key = 2;
+  optional string banner_object_key = 3;
+}
+message UpdateCustomUrlRequest {
+  string user_id = 1;
+  string custom_url_slug = 2;
+}

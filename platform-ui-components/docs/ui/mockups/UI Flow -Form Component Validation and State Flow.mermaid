@@ -1,0 +1,50 @@
+flowchart TD
+    subgraph User Interaction
+        A[User interacts with form <br/>(e.g., typing)] --> B[Form state: 'Dirty']
+        B --> C{User clicks 'Submit'}
+    end
+
+    subgraph Client-Side Process
+        C --> D{Client-side validation <br/>(e.g., check required, format, length)}
+        D -- "Invalid" --> E[Show inline validation errors <br/> (e.g., 'Password is too short')]
+        E --> F[Form state: 'Client Error']
+        F --> A
+    end
+
+    subgraph Submission & Server-Side Process
+        D -- "Valid" --> G[Set UI to 'Submitting' state <br/> (Disable button, show spinner)]
+        G --> H[Send validated data to Server API]
+        H --> I{Server API receives request}
+        I --> J{Server-side validation <br/> (e.g., check for unique email)}
+        J -- "Invalid" --> K[Return 4xx error with field details <br/>(e.g., 'Email already exists')]
+        J -- "Valid" --> L[Execute business logic <br/> (e.g., create user, save profile)]
+        L -- "Error" --> M[Return 5xx Server Error]
+        L -- "Success" --> N[Return 2xx Success response]
+    end
+
+    subgraph Final UI State
+        K --> O[Set UI to 'Server Error' state]
+        O --> P[Display server-side validation errors]
+        P --> A
+
+        M --> Q[Set UI to 'Server Error' state]
+        Q --> R[Display generic error message <br/> ('An unexpected error occurred')]
+        R --> A
+
+        N --> S[Set UI to 'Success' state]
+        S --> T[Display success message (e.g., toast)]
+        T --> U[Reset form or redirect user]
+    end
+
+    %% Styling
+    classDef userAction fill:#f3e5f5,stroke:#8e24aa,color:#000
+    classDef clientProcess fill:#e3f2fd,stroke:#1976d2,color:#000
+    classDef serverProcess fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef successState fill:#dcedc8,stroke:#689f38,color:#000
+    classDef errorState fill:#ffebee,stroke:#c62828,color:#000
+
+    class A,B,C userAction
+    class D,E,F clientProcess
+    class G,H,I,J,L,M,N serverProcess
+    class S,T,U successState
+    class K,O,P,Q,R errorState

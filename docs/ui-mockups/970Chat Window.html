@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Window Component</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        /* Design System Tokens */
+        :root {
+            --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            
+            --color-primary-700: #1976D2;
+            --color-primary-900: #0D47A1;
+            
+            --color-neutral-white: #FFFFFF;
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-400: #CED4DA;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-600: #6C757D;
+            --color-neutral-800: #343A40;
+            --color-neutral-900: #212529;
+
+            --color-semantic-error: #D32F2F;
+            --color-semantic-error-bg: #FFEBEE;
+
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            
+            --border-radius-sm: 4px;
+            --border-radius-md: 8px;
+            --border-radius-lg: 16px;
+
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Base Body Styles */
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+            display: grid;
+            place-items: center;
+            padding: var(--spacing-lg);
+        }
+
+        /* Main Container for demonstration */
+        .demo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Component: Chat Window */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            background-color: var(--color-neutral-white);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Component: Chat Header (UserBadge) */
+        .chat-window__header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--color-neutral-200);
+            flex-shrink: 0;
+        }
+
+        .user-badge__avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-badge__info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-badge__name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--color-neutral-900);
+        }
+
+        .user-badge__status {
+            font-size: 0.8rem;
+            color: var(--color-neutral-600);
+        }
+
+        /* Component: Chat Messages Area */
+        .chat-window__messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        /* Component: Message Bubble */
+        .message-bubble {
+            max-width: 80%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-lg);
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message-bubble--received {
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-800);
+            align-self: flex-start;
+            border-bottom-left-radius: var(--border-radius-sm);
+        }
+
+        .message-bubble--sent {
+            background-color: var(--color-primary-700);
+            color: var(--color-neutral-white);
+            align-self: flex-end;
+            border-bottom-right-radius: var(--border-radius-sm);
+        }
+        
+        /* Component: Chat Footer (MessageInput) */
+        .chat-window__footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--color-neutral-200);
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: flex-start;
+            flex-shrink: 0;
+        }
+        
+        .message-input__textarea {
+            flex-grow: 1;
+            border: 1px solid var(--color-neutral-400);
+            border-radius: var(--border-radius-md);
+            padding: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            line-height: 1.4;
+            max-height: 120px;
+        }
+
+        .message-input__textarea:focus {
+            outline: none;
+            border-color: var(--color-primary-700);
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .message-input__send-btn {
+            background-color: var(--color-primary-700);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .message-input__send-btn:hover {
+            background-color: var(--color-primary-900);
+        }
+
+        .message-input__send-btn:disabled {
+            background-color: var(--color-neutral-200);
+            cursor: not-allowed;
+        }
+
+        .message-input__send-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* State Overlays */
+        .state-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            padding: var(--spacing-lg);
+            text-align: center;
+        }
+        
+        /* Loading State */
+        .state--loading .state-overlay--loading {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Disconnected State */
+        .state--disconnected .state-overlay--disconnected {
+            display: flex;
+            background-color: var(--color-semantic-error-bg);
+        }
+        .state--disconnected .chat-window__footer {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .disconnected-message {
+            color: var(--color-semantic-error);
+            font-weight: 600;
+        }
+
+        /* Component: Loading Spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--color-neutral-200);
+            border-top-color: var(--color-primary-700);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Screen Variations Section */
+        .screen-variations {
+            margin-top: 2rem;
+            width: 100%;
+        }
+        .screen-variations h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--color-neutral-600);
+        }
+        .variation-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .variation-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .variation-group h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .variation-group p {
+            font-size: 0.9rem;
+            color: var(--color-neutral-600);
+            max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="demo-container">
+        <!-- The main demonstration of the active chat window -->
+        <div class="variation-group">
+             <h3>Active State</h3>
+             <p>The standard, fully functional chat interface where users can read and send messages.</p>
+            <div class="chat-window" role="log" aria-live="polite">
+                <!-- Header -->
+                <header class="chat-window__header">
+                    <img src="https://i.pravatar.cc/150?u=jane-doe" alt="Jane Doe's profile picture" class="user-badge__avatar">
+                    <div class="user-badge__info">
+                        <h2 class="user-badge__name">Jane Doe</h2>
+                        <span class="user-badge__status">Online</span>
+                    </div>
+                </header>
+
+                <!-- Message List -->
+                <div class="chat-window__messages">
+                    <div class="message-bubble message-bubble--received">Hey John, did you get a chance to look at the latest project brief?</div>
+                    <div class="message-bubble message-bubble--sent">Hi Jane! Yes, just finished reading it. It looks great. I have a few questions about the timeline.</div>
+                    <div class="message-bubble message-bubble--received">Sure, ask away! I'm free now.</div>
+                    <div class="message-bubble message-bubble--received">Also, this is a much longer message to demonstrate how the text wrapping works within the bubble. The container should expand vertically to accommodate all the content without breaking the layout.</div>
+                    <div class="message-bubble message-bubble--sent">Perfect. My main question is about the Q3 deadline. Do we have any flexibility there? It seems a bit tight given the scope.</div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="chat-window__footer">
+                    <textarea class="message-input__textarea" placeholder="Type a message..." rows="1" aria-label="Message Input"></textarea>
+                    <button class="message-input__send-btn" aria-label="Send Message" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                    </button>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Variations Section -->
+        <div class="screen-variations">
+            <h2>Screen Variations</h2>
+            <div class="variation-container">
+
+                <!-- Loading State Variant -->
+                <div class="variation-group">
+                    <h3>Loading State</h3>
+                    <p>Shown when the chat window is first opened and message history is being fetched from the server.</p>
+                    <div class="chat-window state--loading">
+                        <header class="chat-window__header">
+                            <img src="https://i.pravatar.cc/150?u=jane-doe" alt="Jane Doe's profile picture" class="user-badge__avatar">
+                            <div class="user-badge__info">
+                                <h2 class="user-badge__name">Jane Doe</h2>
+                                <span class="user-badge__status">Online</span>
+                            </div>
+                        </header>
+                        <div class="chat-window__messages">
+                            <!-- Message content is hidden -->
+                        </div>
+                        <footer class="chat-window__footer">
+                            <textarea class="message-input__textarea" placeholder="Type a message..." rows="1" aria-label="Message Input" disabled></textarea>
+                            <button class="message-input__send-btn" aria-label="Send Message" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                            </button>
+                        </footer>
+                        <div class="state-overlay state-overlay--loading" aria-busy="true" aria-live="assertive">
+                            <div class="loading-spinner"></div>
+                            <p>Loading messages...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Disconnected State Variant -->
+                <div class="variation-group">
+                    <h3>Disconnected State</h3>
+                    <p>Indicates a loss of connection to the real-time messaging server, preventing new messages from being sent.</p>
+                    <div class="chat-window state--disconnected">
+                        <header class="chat-window__header">
+                             <img src="https://i.pravatar.cc/150?u=jane-doe" alt="Jane Doe's profile picture" class="user-badge__avatar">
+                            <div class="user-badge__info">
+                                <h2 class="user-badge__name">Jane Doe</h2>
+                                <span class="user-badge__status">Offline</span>
+                            </div>
+                        </header>
+                        <div class="chat-window__messages">
+                             <div class="message-bubble message-bubble--received">Hey John, did you get a chance to look at the latest project brief?</div>
+                            <div class="message-bubble message-bubble--sent">Hi Jane! Yes, just finished reading it...</div>
+                        </div>
+                        <footer class="chat-window__footer">
+                           <textarea class="message-input__textarea" placeholder="Cannot send messages" rows="1" aria-label="Message Input" disabled></textarea>
+                            <button class="message-input__send-btn" aria-label="Send Message" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                            </button>
+                        </footer>
+                        <div class="state-overlay state-overlay--disconnected" role="alert">
+                            <p class="disconnected-message">You are currently offline. Please check your connection.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeTextarea = document.querySelector('.variation-group:first-of-type .message-input__textarea');
+            const activeSendBtn = document.querySelector('.variation-group:first-of-type .message-input__send-btn');
+            
+            if (activeTextarea && activeSendBtn) {
+                activeTextarea.addEventListener('input', () => {
+                    // Auto-resize textarea
+                    activeTextarea.style.height = 'auto';
+                    activeTextarea.style.height = (activeTextarea.scrollHeight) + 'px';
+                    
+                    // Enable/disable send button
+                    if (activeTextarea.value.trim().length > 0) {
+                        activeSendBtn.disabled = false;
+                    } else {
+                        activeSendBtn.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

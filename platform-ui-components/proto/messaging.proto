@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package messaging;
+
+// The gRPC service definition for fetching message history.
+// This is typically consumed by the API Gateway.
+service MessagingService {
+  // Retrieves a paginated history of messages for a given conversation.
+  rpc GetMessageHistory(GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+// Request message for GetMessageHistory RPC.
+message GetHistoryRequest {
+  // The UUID of the conversation to fetch history for.
+  string conversation_id = 1;
+
+  // An optional cursor for pagination. This should be the ID of the last
+  // message received in the previous page.
+  optional string cursor = 2;
+
+  // The number of messages to retrieve per page.
+  int32 page_size = 3;
+}
+
+// A single message structure.
+message Message {
+  // The unique identifier for the message.
+  string id = 1;
+
+  // The text content of the message.
+  string content = 2;
+
+  // The UUID of the user who authored the message.
+  string author_id = 3;
+
+  // The ISO 8601 timestamp when the message was created.
+  string created_at = 4;
+
+  // The status of the message (e.g., 'sent', 'delivered', 'read').
+  string status = 5;
+}
+
+// Response message for GetMessageHistory RPC.
+message GetHistoryResponse {
+  // A list of messages for the requested page.
+  repeated Message messages = 1;
+
+  // The cursor to use for fetching the next page of results.
+  // If not present, there are no more pages.
+  optional string next_cursor = 2;
+}

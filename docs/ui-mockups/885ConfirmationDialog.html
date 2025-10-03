@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: Confirmation Dialog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Reset & Base --- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-font-smoothing: antialiased; }
+
+        /* --- Design System Tokens --- */
+        :root {
+            /* Colors */
+            --color-primary-100: #BBDEFB;
+            --color-primary-300: #64B5F6;
+            --color-primary-700: #1976D2;
+            --color-primary-800: #1565C0;
+            --color-primary-900: #0D47A1;
+            --color-neutrals-white: #FFFFFF;
+            --color-neutrals-gray-50: #F8F9FA;
+            --color-neutrals-gray-200: #E9ECEF;
+            --color-neutrals-gray-500: #ADB5BD;
+            --color-neutrals-gray-600: #6C757D;
+            --color-neutrals-gray-900: #212529;
+            --color-semantic-error: #D32F2F;
+            --color-semantic-error-dark: #C62828;
+            --color-semantic-error-bg: #FFEBEE;
+            
+            /* Typography */
+            --font-family-primary: 'Inter', sans-serif;
+            --font-size-h4: 1.25rem;
+            --font-size-body: 1rem;
+            --font-weight-semibold: 600;
+
+            /* Spacing */
+            --space-3: 16px;
+            --space-4: 24px;
+            --space-5: 32px;
+            
+            /* Borders & Shadows */
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        /* --- Showcase Styles --- */
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutrals-gray-50);
+            padding: var(--space-5);
+        }
+        main {
+            max-width: 800px;
+            margin: auto;
+            background-color: var(--color-neutrals-white);
+            padding: var(--space-5);
+            border-radius: var(--border-radius-lg);
+        }
+        h1 { font-size: 2rem; margin-bottom: var(--space-3); }
+        .variant-section { margin-top: var(--space-5); }
+        .variant-section h2 { font-size: 1.5rem; margin-bottom: var(--space-3); }
+        .variant-section p { color: var(--color-neutrals-gray-600); margin-bottom: var(--space-4); }
+
+        /* --- Atomic Dependencies: Button --- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 10px 22px; border-radius: var(--border-radius-md);
+            font-weight: var(--font-weight-semibold); text-decoration: none;
+            cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
+            min-height: 44px; font-size: var(--font-size-body);
+        }
+        .btn:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+        
+        .btn--primary { background-color: var(--color-primary-700); color: var(--color-neutrals-white); }
+        .btn--primary:hover { background-color: var(--color-primary-800); }
+        .btn--primary:active { background-color: var(--color-primary-900); }
+        
+        .btn--secondary { background-color: var(--color-neutrals-gray-200); color: var(--color-neutrals-gray-900); }
+        .btn--secondary:hover { background-color: var(--color-neutrals-gray-500); color: var(--color-neutrals-white); }
+        
+        .btn--danger { background-color: var(--color-semantic-error); color: var(--color-neutrals-white); }
+        .btn--danger:hover { background-color: var(--color-semantic-error-dark); }
+        
+        .icon { width: 1.25em; height: 1.25em; stroke-width: 2; fill: none; stroke: currentColor; }
+
+        /* --- Modal & Confirmation Dialog CSS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(33, 37, 41, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-4);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+            z-index: 1000;
+        }
+
+        .modal-overlay:target {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s 0s;
+        }
+        
+        .confirmation-dialog {
+            background: var(--color-neutrals-white);
+            padding: var(--space-5);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .modal-overlay:target .confirmation-dialog {
+            transform: scale(1);
+        }
+        
+        .modal-close-btn {
+            position: absolute;
+            top: var(--space-3);
+            right: var(--space-3);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-neutrals-gray-500);
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+        .modal-close-btn:hover {
+            background-color: var(--color-neutrals-gray-200);
+            color: var(--color-neutrals-gray-900);
+        }
+         .modal-close-btn:focus-visible { 
+            outline: 2px solid var(--color-primary-300); 
+            outline-offset: 2px;
+         }
+
+
+        .confirmation-dialog__header {
+            margin-bottom: var(--space-3);
+        }
+        
+        .confirmation-dialog__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-bottom: var(--space-3);
+        }
+
+        .confirmation-dialog__icon--standard {
+            background-color: var(--color-primary-100);
+            color: var(--color-primary-700);
+        }
+        
+        .confirmation-dialog__icon--destructive {
+            background-color: var(--color-semantic-error-bg);
+            color: var(--color-semantic-error);
+        }
+
+        .confirmation-dialog__icon .icon {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .confirmation-dialog__title {
+            font-size: var(--font-size-h4);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutrals-gray-900);
+            margin: 0;
+        }
+        
+        .confirmation-dialog__body {
+            margin-bottom: var(--space-5);
+        }
+        
+        .confirmation-dialog__description {
+            font-size: var(--font-size-body);
+            color: var(--color-neutrals-gray-600);
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .confirmation-dialog__actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+        }
+        
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            .confirmation-dialog__actions {
+                grid-template-columns: 1fr;
+            }
+            .confirmation-dialog__actions .btn--secondary {
+                 /* Reverse order for mobile */
+                grid-row: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SVG Icon Definitions -->
+    <svg width="0" height="0" style="display:none;">
+        <symbol id="icon-alert-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+        <symbol id="icon-help-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></symbol>
+    </svg>
+
+    <main>
+        <h1>Confirmation Dialog</h1>
+        
+        <div class="variant-section">
+            <h2>Standard Confirmation</h2>
+            <p>Used for confirming a standard, non-destructive action. The primary action is styled as a primary button.</p>
+            <a href="#standard-dialog" class="btn btn--primary">Open Standard Dialog</a>
+        </div>
+        
+        <div class="variant-section">
+            <h2>Destructive Confirmation</h2>
+            <p>Used for confirming a permanent or destructive action, such as deleting data. The primary action is styled as a danger button to draw attention to the consequence.</p>
+            <a href="#destructive-dialog" class="btn btn--secondary">Open Destructive Dialog</a>
+        </div>
+    </main>
+
+    <!-- Modal HTML (placed at the end of the body) -->
+
+    <!-- Standard Dialog -->
+    <div id="standard-dialog" class="modal-overlay">
+        <div class="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="standard-title" aria-describedby="standard-desc">
+            <a href="#" class="modal-close-btn" aria-label="Close dialog">
+                <svg class="icon"><use href="#icon-x"/></svg>
+            </a>
+            <div class="confirmation-dialog__header">
+                <div class="confirmation-dialog__icon confirmation-dialog__icon--standard">
+                    <svg class="icon"><use href="#icon-help-circle"/></svg>
+                </div>
+                <h2 id="standard-title" class="confirmation-dialog__title">Submit Application?</h2>
+            </div>
+            <div class="confirmation-dialog__body">
+                <p id="standard-desc" class="confirmation-dialog__description">
+                    Once submitted, you will not be able to make any further changes to your application. Are you sure you want to proceed?
+                </p>
+            </div>
+            <div class="confirmation-dialog__actions">
+                <a href="#" class="btn btn--secondary">Cancel</a>
+                <a href="#" class="btn btn--primary">Yes, Submit</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Destructive Dialog -->
+    <div id="destructive-dialog" class="modal-overlay">
+        <div class="confirmation-dialog" role="dialog" aria-modal="true" aria-labelledby="destructive-title" aria-describedby="destructive-desc">
+             <a href="#" class="modal-close-btn" aria-label="Close dialog">
+                <svg class="icon"><use href="#icon-x"/></svg>
+            </a>
+            <div class="confirmation-dialog__header">
+                <div class="confirmation-dialog__icon confirmation-dialog__icon--destructive">
+                    <svg class="icon"><use href="#icon-alert-triangle"/></svg>
+                </div>
+                <h2 id="destructive-title" class="confirmation-dialog__title">Delete this Post?</h2>
+            </div>
+            <div class="confirmation-dialog__body">
+                <p id="destructive-desc" class="confirmation-dialog__description">
+                    This action is permanent and cannot be undone. All associated comments and reactions will also be deleted.
+                </p>
+            </div>
+            <div class="confirmation-dialog__actions">
+                <a href="#" class="btn btn--secondary">Cancel</a>
+                <a href="#" class="btn btn--danger">Delete Post</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

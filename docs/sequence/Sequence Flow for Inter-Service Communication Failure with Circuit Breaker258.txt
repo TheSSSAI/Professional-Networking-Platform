@@ -1,0 +1,699 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-EH-001
+
+## 1.2 Name
+
+Inter-Service Communication Failure with Circuit Breaker
+
+## 1.3 Description
+
+Service A makes a gRPC call to Service B, which is unavailable or failing. A circuit breaker in Service A detects the repeated failures, opens the circuit to prevent further calls, and returns an immediate error.
+
+## 1.4 Type
+
+🔹 ErrorHandling
+
+## 1.5 Purpose
+
+To prevent cascading failures in a microservices architecture by isolating failing services and allowing them time to recover.
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SVC-A
+- REPO-SVC-B
+
+## 1.10 Key Interactions
+
+- Service A attempts a gRPC call to Service B, which times out.
+- The circuit breaker wrapper notes the failure.
+- Subsequent calls also fail, exceeding the failure threshold (e.g., 50% of requests in 30s).
+- The circuit breaker transitions to the 'Open' state.
+- The next call from Service A to Service B is immediately rejected by the local circuit breaker without a network call.
+- After a timeout, the breaker moves to 'Half-Open' and allows one test call through. If it succeeds, the circuit closes; otherwise, it remains open.
+
+## 1.11 Triggers
+
+- A downstream service becomes unhealthy, leading to repeated call failures.
+
+## 1.12 Outcomes
+
+- The calling service (A) fails fast instead of waiting for timeouts.
+- The failing service (B) is protected from being overwhelmed by requests.
+- The overall system remains more stable.
+
+## 1.13 Business Rules
+
+- Circuit breaker state changes must be logged and monitored.
+
+## 1.14 Error Scenarios
+
+- This entire sequence is an error scenario.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-EH-001
+
+## 2.2 Name
+
+Inter-Service gRPC Failure with Circuit Breaker Implementation
+
+## 2.3 Description
+
+A technical sequence diagram detailing the implementation of the Circuit Breaker pattern for a gRPC call from Service A to a failing Service B. The diagram illustrates the state transitions of the circuit breaker from CLOSED to OPEN, the fast-fail mechanism, and the recovery check via the HALF-OPEN state. This pattern is critical for preventing cascading failures and ensuring system resilience.
+
+## 2.4 Participants
+
+### 2.4.1 Microservice
+
+#### 2.4.1.1 Repository Id
+
+REPO-SVC-A
+
+#### 2.4.1.2 Display Name
+
+Service A
+
+#### 2.4.1.3 Type
+
+🔹 Microservice
+
+#### 2.4.1.4 Technology
+
+Node.js, NestJS, gRPC Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1f77b4 |
+| Stereotype | «Circuit Breaker Client» |
+
+### 2.4.2.0 Microservice
+
+#### 2.4.2.1 Repository Id
+
+REPO-SVC-B
+
+#### 2.4.2.2 Display Name
+
+Service B
+
+#### 2.4.2.3 Type
+
+🔹 Microservice
+
+#### 2.4.2.4 Technology
+
+Node.js, NestJS, gRPC Server
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #ff7f0e |
+| Stereotype | «Failing Service» |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Synchronous Request
+
+#### 2.5.1.1 Source Id
+
+REPO-SVC-A
+
+#### 2.5.1.2 Target Id
+
+REPO-SVC-B
+
+#### 2.5.1.3 Message
+
+[Circuit: CLOSED] Attempt gRPC call: performCriticalTask(request)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Synchronous Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+gRPC Error: DEADLINE_EXCEEDED
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+gRPC
+
+##### 2.5.1.10.2 Method
+
+ServiceB.performCriticalTask
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'request', 'type': 'PerformCriticalTaskRequest', 'schema': '{ taskId: string, payload: any }'}
+
+##### 2.5.1.10.4 Authentication
+
+Internal mTLS authentication required.
+
+##### 2.5.1.10.5 Error Handling
+
+Call timeout is set to 2000ms. Failure is determined by a gRPC status code indicating an error (e.g., UNAVAILABLE, DEADLINE_EXCEEDED, INTERNAL).
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency Sla
+
+p95 < 500ms
+
+###### 2.5.1.10.6.2 Timeout
+
+2000ms
+
+#### 2.5.1.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-A', 'targetId': 'REPO-SVC-A', 'message': 'Circuit Breaker records failure. Failure count: 1/10.', 'sequenceNumber': 2, 'type': 'Internal Logic', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'In-Memory', 'method': 'circuitBreaker.recordFailure()', 'parameters': [], 'authentication': 'N/A', 'errorHandling': 'N/A', 'performance': {'latencySla': '< 1ms'}}}
+
+### 2.5.2.0.0.0 Synchronous Request
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-SVC-A
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-SVC-B
+
+#### 2.5.2.3.0.0 Message
+
+[Loop] Subsequent gRPC calls continue to fail...
+
+#### 2.5.2.4.0.0 Sequence Number
+
+3
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Synchronous Request
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+gRPC Error: UNAVAILABLE
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.2.10.2.0 Method
+
+ServiceB.performCriticalTask
+
+##### 2.5.2.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.2.10.4.0 Authentication
+
+Internal mTLS authentication required.
+
+##### 2.5.2.10.5.0 Error Handling
+
+Failures increment the circuit breaker's internal counter.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Timeout
+
+2000ms
+
+### 2.5.3.0.0.0 State Transition
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-SVC-A
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-SVC-A
+
+#### 2.5.3.3.0.0 Message
+
+Failure threshold reached (>= 50% failures in 30s). Transition state to OPEN.
+
+#### 2.5.3.4.0.0 Sequence Number
+
+4
+
+#### 2.5.3.5.0.0 Type
+
+🔹 State Transition
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+In-Memory
+
+##### 2.5.3.10.2.0 Method
+
+circuitBreaker.trip()
+
+##### 2.5.3.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.3.10.4.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0 Error Handling
+
+Logs state change to ERROR level. Emits 'circuitbreaker_state' metric with value 1 (OPEN).
+
+##### 2.5.3.10.6.0 Performance
+
+###### 2.5.3.10.6.1 Latency Sla
+
+< 1ms
+
+### 2.5.4.0.0.0 Internal Logic
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-SVC-A
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-SVC-A
+
+#### 2.5.4.3.0.0 Message
+
+[Circuit: OPEN] Intercept call to performCriticalTask(request) locally.
+
+#### 2.5.4.4.0.0 Sequence Number
+
+5
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Internal Logic
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+Error: CircuitBreakerOpenException
+
+#### 2.5.4.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+In-Memory
+
+##### 2.5.4.10.2.0 Method
+
+circuitBreaker.call()
+
+##### 2.5.4.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.4.10.4.0 Authentication
+
+N/A
+
+##### 2.5.4.10.5.0 Error Handling
+
+Immediately rejects the call without a network request. The returned exception must be handled by the calling business logic, potentially triggering a fallback mechanism.
+
+##### 2.5.4.10.6.0 Performance
+
+###### 2.5.4.10.6.1 Latency Sla
+
+< 5ms (fast-fail)
+
+### 2.5.5.0.0.0 State Transition
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-SVC-A
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-SVC-A
+
+#### 2.5.5.3.0.0 Message
+
+[Circuit: HALF-OPEN] After open state duration (60s), transition state.
+
+#### 2.5.5.4.0.0 Sequence Number
+
+6
+
+#### 2.5.5.5.0.0 Type
+
+🔹 State Transition
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+In-Memory Timer
+
+##### 2.5.5.10.2.0 Method
+
+circuitBreaker.attemptReset()
+
+##### 2.5.5.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.5.10.4.0 Authentication
+
+N/A
+
+##### 2.5.5.10.5.0 Error Handling
+
+Logs state change to WARN level. Emits 'circuitbreaker_state' metric with value 2 (HALF-OPEN).
+
+##### 2.5.5.10.6.0 Performance
+
+###### 2.5.5.10.6.1 Latency Sla
+
+N/A
+
+### 2.5.6.0.0.0 Synchronous Request
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-SVC-A
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-SVC-B
+
+#### 2.5.6.3.0.0 Message
+
+[Circuit: HALF-OPEN] Allow a single gRPC 'trial' call: performCriticalTask(request).
+
+#### 2.5.6.4.0.0 Sequence Number
+
+7
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Synchronous Request
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+gRPC Success Response (Service B has recovered)
+
+#### 2.5.6.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.6.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.6.10.2.0 Method
+
+ServiceB.performCriticalTask
+
+##### 2.5.6.10.3.0 Parameters
+
+- {'name': 'request', 'type': 'PerformCriticalTaskRequest'}
+
+##### 2.5.6.10.4.0 Authentication
+
+Internal mTLS authentication required.
+
+##### 2.5.6.10.5.0 Error Handling
+
+If this call succeeds, the circuit breaker resets. If it fails, the circuit re-opens, and the open state timer restarts.
+
+##### 2.5.6.10.6.0 Performance
+
+###### 2.5.6.10.6.1 Timeout
+
+2000ms
+
+#### 2.5.6.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-A', 'targetId': 'REPO-SVC-A', 'message': 'Trial call successful. Reset failure counter and transition state to CLOSED.', 'sequenceNumber': 8, 'type': 'State Transition', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'In-Memory', 'method': 'circuitBreaker.reset()', 'parameters': [], 'authentication': 'N/A', 'errorHandling': "Logs state change to INFO level. Emits 'circuitbreaker_state' metric with value 0 (CLOSED).", 'performance': {'latencySla': '< 1ms'}}}
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Service B is considered unhealthy. This could be due to a crash loop, database connection failure, or deployment issue.
+
+#### 2.6.1.2.0.0 Position
+
+Top
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-SVC-B
+
+#### 2.6.1.4.0.0 Sequence Number
+
+1
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+
+
+```
+Circuit Breaker Config:
+- failureThreshold: 0.5 (50%)
+- monitoringTimeWindow: 30s
+- minimumRequests: 20
+- openStateDuration: 60s
+```
+
+#### 2.6.2.2.0.0 Position
+
+Left
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-SVC-A
+
+#### 2.6.2.4.0.0 Sequence Number
+
+4
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Alternative path for step 7: If the trial call fails, the circuit transitions back to OPEN and the 60s timer restarts. This prevents a flapping service from being overwhelmed.
+
+#### 2.6.3.2.0.0 Position
+
+Bottom
+
+#### 2.6.3.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.3.4.0.0 Sequence Number
+
+7
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+### 2.7.1.0.0.0 Security Requirements
+
+Error messages returned by the circuit breaker (CircuitBreakerOpenException) must not contain sensitive internal system details. Log sanitization must be in place to avoid logging sensitive request data during failure events.
+
+### 2.7.2.0.0.0 Performance Targets
+
+#### 2.7.2.1.0.0 Fast Fail Latency
+
+p99 < 10ms when circuit is open.
+
+#### 2.7.2.2.0.0 Recovery Time Objective
+
+The system should detect recovery within (openStateDuration + 1 request time), e.g., ~62 seconds, after the downstream service becomes healthy.
+
+### 2.7.3.0.0.0 Error Handling Strategy
+
+The calling code in Service A must have a try-catch block to handle the CircuitBreakerOpenException. A fallback mechanism, such as returning stale data from a cache or a default response, should be implemented within this catch block to provide graceful degradation of service.
+
+### 2.7.4.0.0.0 Testing Considerations
+
+Chaos engineering and fault injection must be used to validate the circuit breaker's behavior. A test environment should allow for forcefully making Service B unavailable to trigger and observe the state transitions in Service A. Test cases should verify all state transitions: CLOSED -> OPEN, OPEN -> HALF-OPEN, HALF-OPEN -> CLOSED, and HALF-OPEN -> OPEN.
+
+### 2.7.5.0.0.0 Monitoring Requirements
+
+#### 2.7.5.1.0.0 Metrics
+
+##### 2.7.5.1.1.0 circuitbreaker_state
+
+###### 2.7.5.1.1.1 Name
+
+circuitbreaker_state
+
+###### 2.7.5.1.1.2 Type
+
+🔹 gauge
+
+###### 2.7.5.1.1.3 Labels
+
+- service
+- target_service
+
+###### 2.7.5.1.1.4 Description
+
+Current state of the circuit breaker (0=CLOSED, 1=OPEN, 2=HALF-OPEN).
+
+##### 2.7.5.1.2.0 circuitbreaker_calls_total
+
+###### 2.7.5.1.2.1 Name
+
+circuitbreaker_calls_total
+
+###### 2.7.5.1.2.2 Type
+
+🔹 counter
+
+###### 2.7.5.1.2.3 Labels
+
+- service
+- target_service
+- result
+
+###### 2.7.5.1.2.4 Description
+
+Total calls handled by the breaker, labeled by result (success, failure, short_circuited).
+
+#### 2.7.5.2.0.0 Alerts
+
+- {'name': 'CircuitBreakerOpen', 'condition': 'circuitbreaker_state == 1 for 1m', 'severity': 'critical', 'description': 'Fires when a circuit breaker remains open, indicating a persistent downstream failure requiring immediate investigation.'}
+
+#### 2.7.5.3.0.0 Logging
+
+All state transitions of the circuit breaker MUST be logged with structured context, including the target service and the reason for the transition.
+
+### 2.7.6.0.0.0 Deployment Considerations
+
+Circuit breaker parameters should be managed via external configuration (e.g., ConfigMap in Kubernetes) to allow for tuning without requiring a full service redeployment.
+

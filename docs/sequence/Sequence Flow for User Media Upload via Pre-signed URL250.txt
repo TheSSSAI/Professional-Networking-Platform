@@ -1,0 +1,685 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-IF-001
+
+## 1.2 Name
+
+User Media Upload via Pre-signed URL
+
+## 1.3 Description
+
+A user uploads a media file (e.g., profile picture). The backend generates a secure, time-limited, pre-signed URL for a direct upload to AWS S3. The client performs the upload directly, and the asset is subsequently served globally via a CDN.
+
+## 1.4 Type
+
+🔹 IntegrationFlow
+
+## 1.5 Purpose
+
+To provide a secure and highly scalable mechanism for handling user-uploaded media, offloading bandwidth from the application servers and leveraging cloud-native services, as per architecture 2.6.8.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-PROFILE
+
+## 1.10 Key Interactions
+
+- User selects a file to upload in the client SPA.
+- The client sends a request to the Profile Service for a secure upload URL, specifying the file type and size.
+- The Profile Service validates the request and uses the AWS SDK to generate a pre-signed S3 PUT URL with specific constraints.
+- The service returns the pre-signed URL to the client.
+- The client performs an HTTP PUT request, uploading the file's binary data directly to the provided S3 URL.
+- Upon a successful 200 OK response from S3, the client notifies the Profile Service with the final object key.
+- The Profile Service saves the reference to the media file in its PostgreSQL database.
+- Subsequent requests for the image are served from the Cloudflare CDN.
+
+## 1.11 Triggers
+
+- User attempts to upload a profile picture, banner, or image in a post.
+
+## 1.12 Outcomes
+
+- The media file is securely stored in AWS S3.
+- The application database stores only a reference to the file, not the file itself.
+- Media is delivered to users with low latency and high availability via the CDN.
+
+## 1.13 Business Rules
+
+- Images must be in JPEG or PNG format and not exceed 5MB (1.2.1).
+- Pre-signed URLs must have a short expiration time (e.g., 5 minutes) to limit exposure.
+
+## 1.14 Error Scenarios
+
+- Upload fails due to network issues or S3 outage.
+- File does not meet the format or size constraints defined in the pre-signed URL policy.
+- The client fails to notify the backend after a successful upload, resulting in an orphaned S3 object.
+
+## 1.15 Integration Points
+
+- AWS S3 for object storage (2.6.8).
+- Cloudflare for CDN and WAF security (2.6.8).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-IF-001
+
+## 2.2 Name
+
+User Media Upload via Pre-signed URL Integration Flow
+
+## 2.3 Description
+
+Defines the secure and scalable process for user media uploads. The client application requests a secure, time-limited pre-signed URL from the backend. The file is then uploaded directly from the client to AWS S3, bypassing the application servers to offload bandwidth. A final confirmation call updates the application database with the media's reference, fulfilling the architecture specified in SRS 2.6.8.
+
+## 2.4 Participants
+
+### 2.4.1 Actor
+
+#### 2.4.1.1 Repository Id
+
+USER_BROWSER
+
+#### 2.4.1.2 Display Name
+
+User (Browser)
+
+#### 2.4.1.3 Type
+
+🔹 Actor
+
+#### 2.4.1.4 Technology
+
+Web Browser (Chrome, Firefox, etc.)
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #999999 |
+| Stereotype | <<Actor>> |
+
+### 2.4.2.0 Frontend Application
+
+#### 2.4.2.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.2.2 Display Name
+
+Client SPA
+
+#### 2.4.2.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.2.4 Technology
+
+Next.js, React, TypeScript, Apollo Client
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #1E90FF |
+| Stereotype | <<Next.js>> |
+
+### 2.4.3.0 API Gateway
+
+#### 2.4.3.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.3.2 Display Name
+
+API Gateway
+
+#### 2.4.3.3 Type
+
+🔹 API Gateway
+
+#### 2.4.3.4 Technology
+
+AWS API Gateway
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF8C00 |
+| Stereotype | <<Gateway>> |
+
+### 2.4.4.0 Microservice
+
+#### 2.4.4.1 Repository Id
+
+REPO-SVC-PROFILE
+
+#### 2.4.4.2 Display Name
+
+Profile Service
+
+#### 2.4.4.3 Type
+
+🔹 Microservice
+
+#### 2.4.4.4 Technology
+
+NestJS, TypeScript, gRPC, AWS SDK
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #32CD32 |
+| Stereotype | <<Service>> |
+
+### 2.4.5.0 External Cloud Service
+
+#### 2.4.5.1 Repository Id
+
+AWS_S3
+
+#### 2.4.5.2 Display Name
+
+AWS S3
+
+#### 2.4.5.3 Type
+
+🔹 External Cloud Service
+
+#### 2.4.5.4 Technology
+
+AWS Simple Storage Service
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #CC0000 |
+| Stereotype | <<External System>> |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 User Interaction
+
+#### 2.5.1.1 Source Id
+
+USER_BROWSER
+
+#### 2.5.1.2 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.3 Message
+
+1. Selects file to upload (e.g., profile.jpg)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 User Interaction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+DOM Event
+
+##### 2.5.1.10.2 Method
+
+onChange
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'event.target.files[0]', 'type': 'File Object', 'description': 'The user-selected file, contains metadata like name, size, type.'}
+
+##### 2.5.1.10.4 Authentication
+
+N/A
+
+##### 2.5.1.10.5 Error Handling
+
+Client-side validation for file existence and initial type check.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+N/A
+
+### 2.5.2.0.0.0 GraphQL Mutation
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-GW-API
+
+#### 2.5.2.3.0.0 Message
+
+2. Request Upload URL: generateUploadUrl(fileInfo)
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 GraphQL Mutation
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+4. { data: { generateUploadUrl: { url, objectKey } } }
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+GraphQL over HTTPS
+
+##### 2.5.2.10.2.0 Method
+
+POST /graphql
+
+##### 2.5.2.10.3.0 Parameters
+
+###### 2.5.2.10.3.1 operationName
+
+####### 2.5.2.10.3.1.1 Name
+
+operationName
+
+####### 2.5.2.10.3.1.2 Value
+
+GenerateUploadUrl
+
+###### 2.5.2.10.3.2.0 variables
+
+####### 2.5.2.10.3.2.1 Name
+
+variables
+
+####### 2.5.2.10.3.2.2 Value
+
+{ fileInfo: { contentType: 'image/jpeg', contentLength: 4500000 } }
+
+##### 2.5.2.10.4.0.0 Authentication
+
+###### 2.5.2.10.4.1.0 Type
+
+🔹 JWT
+
+###### 2.5.2.10.4.2.0 Details
+
+Request includes 'Authorization: Bearer <accessToken>' header.
+
+##### 2.5.2.10.5.0.0 Error Handling
+
+Handle 401/403 for auth errors, 400 for invalid input, 5xx for server errors.
+
+##### 2.5.2.10.6.0.0 Performance
+
+###### 2.5.2.10.6.1.0 Latency
+
+P95 < 200ms (end-to-end)
+
+#### 2.5.2.11.0.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-GW-API', 'targetId': 'REPO-SVC-PROFILE', 'message': '3. generateUploadUrl(fileInfo, userId)', 'sequenceNumber': 3, 'type': 'gRPC Call', 'isSynchronous': True, 'returnMessage': 'Returns { url, objectKey }', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'gRPC', 'method': 'UserProfileService.GenerateUploadUrl', 'parameters': [{'name': 'request', 'type': 'GenerateUploadUrlRequest', 'description': 'Contains file metadata and authenticated userId from JWT claims.'}], 'authentication': {'type': 'mTLS (internal)', 'details': 'Secure communication within the cluster.'}, 'errorHandling': 'Propagates validation errors (INVALID_ARGUMENT), auth errors (PERMISSION_DENIED), or internal errors (INTERNAL).', 'performance': {'latency': 'P95 < 150ms'}}, 'nestedInteractions': [{'sourceId': 'REPO-SVC-PROFILE', 'targetId': 'AWS_S3', 'message': '3a. Generate Pre-signed PUT URL via AWS SDK', 'sequenceNumber': '3a', 'type': 'API Call', 'isSynchronous': True, 'returnMessage': 'Returns secure pre-signed URL', 'hasReturn': True, 'isActivation': False, 'technicalDetails': {'protocol': 'AWS SDK (HTTPS)', 'method': 'getSignedUrl(PutObjectCommand)', 'parameters': [{'name': 'Bucket', 'value': 'platform-user-media'}, {'name': 'Key', 'value': "'profiles/user-uuid/timestamp-filename.jpg'"}, {'name': 'ContentType', 'value': "'image/jpeg'"}, {'name': 'ContentLengthRange', 'value': '1-5242880'}, {'name': 'ExpiresIn', 'value': '300 (seconds)'}], 'authentication': {'type': 'IAM Role', 'details': 'Service uses an IAM Role for Service Accounts (IRSA) with s3:PutObject permissions.'}, 'errorHandling': 'Handle AWS SDK exceptions (e.g., credentials error, S3 throttling). Implement retry with exponential backoff.', 'performance': {'latency': 'P95 < 100ms'}}}]}
+
+### 2.5.3.0.0.0.0 HTTP PUT
+
+#### 2.5.3.1.0.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0.0 Target Id
+
+AWS_S3
+
+#### 2.5.3.3.0.0.0 Message
+
+5. Upload file directly to pre-signed URL
+
+#### 2.5.3.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.3.5.0.0.0 Type
+
+🔹 HTTP PUT
+
+#### 2.5.3.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0.0 Return Message
+
+6. HTTP 200 OK
+
+#### 2.5.3.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0.0 Technical Details
+
+##### 2.5.3.10.1.0.0 Protocol
+
+HTTPS
+
+##### 2.5.3.10.2.0.0 Method
+
+PUT
+
+##### 2.5.3.10.3.0.0 Parameters
+
+###### 2.5.3.10.3.1.0 URL
+
+####### 2.5.3.10.3.1.1 Name
+
+URL
+
+####### 2.5.3.10.3.1.2 Value
+
+The pre-signed URL received from the backend.
+
+###### 2.5.3.10.3.2.0 Headers
+
+####### 2.5.3.10.3.2.1 Name
+
+Headers
+
+####### 2.5.3.10.3.2.2 Value
+
+{ 'Content-Type': 'image/jpeg', 'Content-Length': '4500000' }
+
+###### 2.5.3.10.3.3.0 Body
+
+####### 2.5.3.10.3.3.1 Name
+
+Body
+
+####### 2.5.3.10.3.3.2 Type
+
+🔹 Binary Data
+
+####### 2.5.3.10.3.3.3 Description
+
+The raw binary content of the file.
+
+##### 2.5.3.10.4.0.0 Authentication
+
+###### 2.5.3.10.4.1.0 Type
+
+🔹 Pre-signed URL
+
+###### 2.5.3.10.4.2.0 Details
+
+Authentication and authorization are embedded in the URL query parameters generated by AWS.
+
+##### 2.5.3.10.5.0.0 Error Handling
+
+Client implements retry logic for transient network failures. Handles 403 Forbidden if headers don't match the signed policy.
+
+##### 2.5.3.10.6.0.0 Performance
+
+###### 2.5.3.10.6.1.0 Latency
+
+Variable, dependent on user's network connection and file size.
+
+### 2.5.4.0.0.0.0 GraphQL Mutation
+
+#### 2.5.4.1.0.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.2.0.0.0 Target Id
+
+REPO-GW-API
+
+#### 2.5.4.3.0.0.0 Message
+
+7. Confirm Upload Success: confirmMediaUpload(objectKey)
+
+#### 2.5.4.4.0.0.0 Sequence Number
+
+7
+
+#### 2.5.4.5.0.0.0 Type
+
+🔹 GraphQL Mutation
+
+#### 2.5.4.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0.0 Return Message
+
+9. { data: { confirmMediaUpload: { success: true, cdnUrl } } }
+
+#### 2.5.4.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0.0.0 Technical Details
+
+##### 2.5.4.10.1.0.0 Protocol
+
+GraphQL over HTTPS
+
+##### 2.5.4.10.2.0.0 Method
+
+POST /graphql
+
+##### 2.5.4.10.3.0.0 Parameters
+
+###### 2.5.4.10.3.1.0 operationName
+
+####### 2.5.4.10.3.1.1 Name
+
+operationName
+
+####### 2.5.4.10.3.1.2 Value
+
+ConfirmMediaUpload
+
+###### 2.5.4.10.3.2.0 variables
+
+####### 2.5.4.10.3.2.1 Name
+
+variables
+
+####### 2.5.4.10.3.2.2 Value
+
+{ objectKey: 'profiles/user-uuid/...' }
+
+##### 2.5.4.10.4.0.0 Authentication
+
+###### 2.5.4.10.4.1.0 Type
+
+🔹 JWT
+
+###### 2.5.4.10.4.2.0 Details
+
+Request includes 'Authorization: Bearer <accessToken>' header.
+
+##### 2.5.4.10.5.0.0 Error Handling
+
+Handle server-side errors if the confirmation fails.
+
+##### 2.5.4.10.6.0.0 Performance
+
+###### 2.5.4.10.6.1.0 Latency
+
+P95 < 200ms (end-to-end)
+
+#### 2.5.4.11.0.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-GW-API', 'targetId': 'REPO-SVC-PROFILE', 'message': '8. confirmMediaUpload(objectKey, userId)', 'sequenceNumber': 8, 'type': 'gRPC Call', 'isSynchronous': True, 'returnMessage': 'Returns { success, cdnUrl }', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'gRPC', 'method': 'UserProfileService.ConfirmMediaUpload', 'parameters': [{'name': 'request', 'type': 'ConfirmMediaUploadRequest', 'description': 'Contains S3 objectKey and authenticated userId.'}], 'authentication': {'type': 'mTLS (internal)'}, 'errorHandling': 'Handle database errors or cases where the objectKey is invalid.', 'performance': {'latency': 'P95 < 150ms'}}, 'nestedInteractions': [{'sourceId': 'REPO-SVC-PROFILE', 'targetId': 'REPO-SVC-PROFILE', 'message': '8a. Save media reference to PostgreSQL', 'sequenceNumber': '8a', 'type': 'Database Transaction', 'isSynchronous': True, 'returnMessage': 'Commit successful', 'hasReturn': True, 'isActivation': False, 'technicalDetails': {'protocol': 'SQL', 'method': 'UPDATE', 'parameters': [{'name': 'Query', 'value': 'UPDATE UserProfile SET profilePictureUrl = :cdnUrl WHERE userId = :userId'}], 'authentication': 'N/A (internal)', 'errorHandling': 'Transaction rollback on failure. Retry logic for transient connection errors.', 'performance': {'latency': 'P99 < 50ms'}}}]}
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+
+
+```
+Business Rule Enforcement (1.2.1):
+The Profile Service validates that the file's contentType is 'image/jpeg' or 'image/png' and contentLength is <= 5MB before generating the URL.
+```
+
+#### 2.6.1.2.0.0.0 Position
+
+topRight
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-SVC-PROFILE
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+3
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+
+
+```
+Security: Pre-signed URL Expiry
+The generated URL is valid for a short duration (e.g., 5 minutes) to minimize the risk of misuse.
+```
+
+#### 2.6.2.2.0.0.0 Position
+
+bottomRight
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+AWS_S3
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+5
+
+### 2.6.3.0.0.0.0 Content
+
+#### 2.6.3.1.0.0.0 Content
+
+
+
+```
+CDN Delivery (2.6.8):
+The `cdnUrl` returned upon confirmation points to the Cloudflare distribution. Subsequent GET requests for this media will be served globally via the CDN.
+```
+
+#### 2.6.3.2.0.0.0 Position
+
+bottomLeft
+
+#### 2.6.3.3.0.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.3.4.0.0.0 Sequence Number
+
+9
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. **API Gateway**: Enforce JWT authentication on ... |
+| Performance Targets | 1. **URL Generation**: The p95 latency for the `ge... |
+| Error Handling Strategy | 1. **Client-Side**: Implement a retry mechanism (e... |
+| Testing Considerations | 1. **Unit/Integration Tests**: The Profile Service... |
+| Monitoring Requirements | 1. **Metrics**: Instrument counters for `presigned... |
+| Deployment Considerations | The S3 bucket, its CORS policy, and the IAM role f... |
+

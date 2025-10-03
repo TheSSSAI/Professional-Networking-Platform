@@ -1,0 +1,19 @@
+# grafana/provisioning/datasources/jaeger.yml
+#
+# Declarative provisioning for the Jaeger datasource in Grafana.
+# Implements part of REQ-1-083.
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: Jaeger
+    orgId: 1
+
+datasources:
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    orgId: 1
+    # URL should point to the Kubernetes service for the Jaeger Query component.
+    url: http://jaeger-query.tracing.svc.cluster.local:16686
+    editable: false

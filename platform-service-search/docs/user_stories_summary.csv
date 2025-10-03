@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"13","86","12","1","0","[""Identity & Access Management UI"",""User Profile Management UI"",""Professional Networking UI"",""Content & Feed UI"",""Real-time Communication UI"",""Cross-Cutting Concerns & NFRs""]","7","[""Backend API Gateway (GraphQL)"",""Backend WebSocket Server"",""AWS S3 & Cloudflare CDN""]"

@@ -1,0 +1,75 @@
+# prometheus/alertmanager/alertmanager.yml
+#
+# Configuration for Alertmanager.
+# Defines alert routing, grouping, and notification receivers.
+# Implements the alerting strategy required by REQ-1-084.
+
+global:
+  # Default smarthost for email notifications.
+  smtp_smarthost: 'email-smtp.us-east-1.amazonaws.com:587'
+  smtp_from: 'alerts@your-verified-domain.com'
+  # Secrets for smtp_auth should be stored in Kubernetes Secrets and
+  # mounted into the Alertmanager container, not stored here.
+
+route:
+  # The root route. All alerts enter here.
+  group_by: ['alertname', 'service', 'cluster']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  
+  # Default receiver for all alerts that don't match a specific route.
+  receiver: 'default-receiver'
+
+  # Child routes for specific logic.
+  routes:
+    # Route for critical alerts. These go directly to PagerDuty.
+    - match:
+        severity: 'critical'
+      receiver: 'pagerduty-receiver'
+      continue: false # Stop processing further routes if this matches.
+
+    # Route for warning alerts. These might go to a different, less urgent channel.
+    - match:
+        severity: 'warning'
+      receiver: 'slack-receiver' # Example: send warnings to Slack
+      
+receivers:
+  # A default receiver that does nothing. This is a safe default to prevent
+  # un-routable alerts from causing errors.
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:9099' # A blackhole or logging endpoint
+
+  # The PagerDuty receiver for critical alerts, as required by REQ-1-084.
+  - name: 'pagerduty-receiver'
+    pagerduty_configs:
+      # CRITICAL: The routing_key should be loaded from a Kubernetes secret,
+      # not hardcoded in this file. The value below is a placeholder.
+      - routing_key: "<YOUR_PAGERDUTY_INTEGRATION_KEY>"
+        send_resolved: true
+        
+  # An example Slack receiver for non-critical alerts.
+  - name: 'slack-receiver'
+    slack_configs:
+      # CRITICAL: The api_url should also be loaded from a Kubernetes secret.
+      - api_url: "<YOUR_SLACK_WEBHOOK_URL>"
+        channel: '#platform-alerts'
+        send_resolved: true
+        title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}*Runbook:* <{{ .Annotations.runbook_url }}|Click here>{{ end }}
+          {{ end }}
+
+inhibit_rules:
+  # Example inhibit rule: If the entire cluster is down, don't fire
+  # individual service alerts.
+  - target_match:
+      severity: 'warning'
+    source_match:
+      severity: 'critical'
+      alertname: 'KubernetesNodeNotReady'
+    equal: ['cluster']

@@ -1,0 +1,52 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'chore/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage
+
+      - name: Build library
+        run: npm run build
+
+      - name: Build Storybook for accessibility tests
+        run: npm run build-storybook
+
+      # Placeholder for accessibility testing.
+      # This step would need a more robust setup, potentially using a tool like axe-storybook-testing
+      # For now, we just ensure storybook builds correctly.
+      - name: Verify Storybook build
+        run: ls storybook-static

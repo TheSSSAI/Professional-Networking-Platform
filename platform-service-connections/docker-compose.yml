@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  connections-service:
+    container_name: connections-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50052" # gRPC port
+      - "9230:9229" # Debug port
+    env_file:
+      - .env
+    environment:
+      # Override localhost for Docker networking
+      - DATABASE_URL=postgresql://user:password@postgres:5432/connectionsdb?schema=public
+      - REDIS_HOST=redis
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    command: npm run start:debug
+
+  postgres:
+    container_name: connections-postgres
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: connectionsdb
+    ports:
+      - "5433:5432" # Use a different host port to avoid conflicts
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    container_name: connections-redis
+    image: redis:7-alpine
+    ports:
+      - "6380:6379" # Use a different host port to avoid conflicts
+
+volumes:
+  postgres-data:

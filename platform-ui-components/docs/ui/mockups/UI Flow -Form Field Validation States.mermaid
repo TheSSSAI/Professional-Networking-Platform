@@ -1,0 +1,45 @@
+stateDiagram-v2
+    direction LR
+
+    state "Client-Side Errors" as Error_Client {
+        InvalidFormat: Invalid format
+        Required: Required field empty
+        ExceedsLimit: Exceeds character limit
+    }
+
+    state "Server-Side Error" as Error_Server {
+        ApiError: API error response
+    }
+
+    [*] --> Idle
+    Idle --> Editing: on focus
+    Editing --> Editing: on input
+    Editing --> Valid: on input/blur (passes validation)
+    Editing --> Error_Client: on input/blur (fails validation)
+    
+    Valid --> Editing: on focus (user changes valid input)
+    Valid --> Submitting: on form submit
+
+    Error_Client --> Editing: on input (user corrects error)
+
+    Submitting --> Success: API responds 200 OK
+    Submitting --> Error_Server: API responds 4xx/5xx
+    Success --> [*]
+
+    Error_Server --> Editing: on focus (user can correct)
+
+    note right of InvalidFormat
+        "Please enter a valid email."
+    end note
+
+    note right of Required
+        "This field is required."
+    end note
+
+    note right of ExceedsLimit
+        "Headline cannot exceed 220 characters."
+    end note
+
+    note right of ApiError
+        "This username is already taken."
+    end note

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autocomplete Input Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Design System Tokens (Subset) --- */
+    :root {
+      --color-primary-50: #E3F2FD; --color-primary-300: #64B5F6; --color-primary-700: #1976D2;
+      --color-danger-500: #D32F2F;
+      --color-neutrals-white: #FFFFFF; --color-neutrals-gray-50: #F8F9FA; --color-neutrals-gray-100: #F1F3F5; --color-neutrals-gray-200: #E9ECEF; --color-neutrals-gray-400: #CED4DA; --color-neutrals-gray-500: #ADB5BD; --color-neutrals-gray-600: #6C757D; --color-neutrals-gray-700: #495057; --color-neutrals-gray-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 1rem; --font-size-caption: 0.875rem;
+      --font-weight-regular: 400; --font-weight-semibold: 600;
+      --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px;
+      --border-radius-md: 8px;
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+    /* --- Base & Showcase Styles --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-family-primary); background-color: var(--color-neutrals-gray-50); color: var(--color-neutrals-gray-900); padding: var(--space-4); }
+    main { max-width: 800px; margin: 0 auto; }
+    h1 { margin-bottom: var(--space-2); }
+    h2 { margin-top: var(--space-4); margin-bottom: var(--space-3); border-bottom: 1px solid var(--color-neutrals-gray-200); padding-bottom: var(--space-2); }
+    .showcase { background-color: var(--color-neutrals-white); padding: var(--space-4); border-radius: var(--border-radius-md); }
+    .showcase__title { font-size: 1rem; font-weight: var(--font-weight-semibold); margin-bottom: var(--space-3); }
+    .showcase__description { font-size: var(--font-size-caption); color: var(--color-neutrals-gray-600); margin-bottom: var(--space-3); }
+    .showcase__grid { display: flex; flex-direction: column; gap: var(--space-4); }
+
+    /* --- Atomic Dependencies --- */
+
+    /* TextInput */
+    .form-field { display: flex; flex-direction: column; }
+    .form-field label { font-weight: var(--font-weight-semibold); margin-bottom: var(--space-2); font-size: var(--font-size-caption); }
+    .input { width: 100%; border: 1px solid var(--color-neutrals-gray-400); background-color: var(--color-neutrals-white); padding: 12px 16px; border-radius: var(--border-radius-md); font-size: var(--font-size-body); transition: all 0.2s ease; }
+    .input:focus { border: 2px solid var(--color-primary-700); padding: 11px 15px; outline: none; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
+    .input.is-error { border: 2px solid var(--color-semantic-error); padding: 11px 15px; }
+    .input.is-error:focus { box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
+    .error-message { color: var(--color-semantic-error); font-size: var(--font-size-caption); margin-top: var(--space-1); }
+
+    /* LoadingSpinner */
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .spinner { display: inline-block; border-style: solid; border-color: currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+    .spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+
+    /* Icon Styles */
+    .icon { display: inline-block; width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; fill: none; stroke: currentColor; }
+    
+    /* --- AutocompleteInput CSS --- */
+    .autocomplete {
+      position: relative;
+      max-width: 320px; /* Aligns with TextInput max-width */
+      width: 100%;
+    }
+
+    .autocomplete__input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Spinner for loading state */
+    .autocomplete .spinner {
+      position: absolute;
+      right: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-primary-700);
+      display: none; /* Hidden by default */
+    }
+
+    .autocomplete.is-loading .spinner {
+      display: inline-block;
+    }
+
+    /* Dropdown styles */
+    .autocomplete__dropdown {
+      position: absolute;
+      top: calc(100% + var(--space-1));
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background-color: var(--color-neutrals-white);
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-neutrals-gray-400);
+      box-shadow: var(--shadow-md);
+      max-height: 240px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    }
+
+    /* is-open is for JS control. :focus-within is for static CSS demo */
+    .autocomplete.is-open .autocomplete__dropdown,
+    .autocomplete:focus-within .autocomplete__dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .autocomplete__list {
+      list-style: none;
+      padding: var(--space-2) 0;
+    }
+
+    .autocomplete__option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      cursor: pointer;
+      font-size: var(--font-size-body);
+      color: var(--color-neutrals-gray-700);
+    }
+    
+    .autocomplete__option .icon {
+      font-size: 1.125rem;
+      color: var(--color-neutrals-gray-500);
+    }
+
+    .autocomplete__option:hover, 
+    .autocomplete__option--highlighted {
+      background-color: var(--color-primary-50);
+      color: var(--color-neutrals-gray-900);
+    }
+
+    .autocomplete__empty-state {
+      padding: var(--space-3);
+      text-align: center;
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-600);
+    }
+
+    /* Responsive Adaptations */
+    @media (max-width: 768px) {
+      .autocomplete__dropdown {
+        /* Dropdown becomes full-width on mobile. */
+        position: fixed;
+        left: var(--space-3);
+        right: var(--space-3);
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- SVG Icon Definitions -->
+  <svg width="0" height="0" style="display:none;">
+    <symbol id="icon-tag" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-map-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <main>
+    <h1>Autocomplete Input</h1>
+
+    <section class="showcase">
+      <h2>States</h2>
+      <div class="showcase__grid">
+
+        <!-- Default State -->
+        <div class="form-field">
+          <p class="showcase__title">Default State</p>
+          <p class="showcase__description">Standard input. The dropdown appears on focus for this demo.</p>
+          <div class="autocomplete" id="autocomplete-default">
+            <label for="ac-input-default">Select a Technology</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-default"
+                type="text" 
+                class="input" 
+                placeholder="e.g., React"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="ac-list-default"
+              >
+            </div>
+            <div class="autocomplete__dropdown" id="ac-list-default" role="listbox">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option" role="option" id="ac-opt-1">React</li>
+                <li class="autocomplete__option" role="option" id="ac-opt-2">Vue.js</li>
+                <li class="autocomplete__option" role="option" id="ac-opt-3">Angular</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Focused State -->
+        <div class="form-field">
+          <p class="showcase__title">Focused State</p>
+          <p class="showcase__description">Dropdown is open, and a suggestion is highlighted (simulating keyboard navigation).</p>
+          <div class="autocomplete is-open" id="autocomplete-focused">
+            <label for="ac-input-focused">Select a Technology</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-focused"
+                type="text" 
+                class="input" 
+                placeholder="e.g., React"
+                value="Rea"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="true"
+                aria-controls="ac-list-focused"
+                aria-activedescendant="ac-opt-focused-1"
+              >
+            </div>
+            <div class="autocomplete__dropdown" id="ac-list-focused" role="listbox">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option autocomplete__option--highlighted" role="option" id="ac-opt-focused-1"><strong>Rea</strong>ct</li>
+                <li class="autocomplete__option" role="option" id="ac-opt-focused-2"><strong>Rea</strong>ct Native</li>
+                <li class="autocomplete__option" role="option" id="ac-opt-focused-3"><strong>Rea</strong>dux</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="form-field">
+          <p class="showcase__title">Loading Suggestions State</p>
+          <p class="showcase__description">Shows a spinner while asynchronously fetching suggestions.</p>
+          <div class="autocomplete is-loading" id="autocomplete-loading">
+            <label for="ac-input-loading">Search for a user</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-loading"
+                type="text" 
+                class="input" 
+                placeholder="Type to search..."
+                value="John"
+              >
+              <span class="spinner spinner--sm"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="form-field">
+          <p class="showcase__title">Error State</p>
+          <p class="showcase__description">Indicates a validation or server error related to the input.</p>
+          <div class="autocomplete is-error" id="autocomplete-error">
+            <label for="ac-input-error">Select a project</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-error"
+                type="text" 
+                class="input is-error" 
+                placeholder="Type to search..."
+                value="Invalid Project"
+              >
+            </div>
+            <span class="error-message">This project is not valid.</span>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="form-field">
+          <p class="showcase__title">Empty Suggestions State</p>
+          <p class="showcase__description">When the search yields no results.</p>
+          <div class="autocomplete is-open" id="autocomplete-empty">
+            <label for="ac-input-empty">Search for a fruit</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-empty"
+                type="text" 
+                class="input" 
+                placeholder="e.g., Apple"
+                value="xyz"
+                role="combobox"
+                aria-expanded="true"
+              >
+            </div>
+            <div class="autocomplete__dropdown">
+              <div class="autocomplete__empty-state">No results found for "xyz"</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="showcase">
+      <h2>Variants</h2>
+      <div class="showcase__grid">
+
+        <!-- Skills Variant -->
+        <div class="form-field">
+          <p class="showcase__title">Skills Variant</p>
+          <p class="showcase__description">Used for adding skills to a profile, includes an icon.</p>
+          <div class="autocomplete is-open" id="autocomplete-skills">
+            <label for="ac-input-skills">Add a Skill</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-skills"
+                type="text" 
+                class="input" 
+                placeholder="e.g., Project Management"
+                value="Project"
+              >
+            </div>
+            <div class="autocomplete__dropdown">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-tag"/></svg>
+                  <span><strong>Project</strong> Management</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-tag"/></svg>
+                  <span>Agile <strong>Project</strong> Management</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Location Variant -->
+        <div class="form-field">
+          <p class="showcase__title">Location Variant</p>
+          <p class="showcase__description">Used for selecting geographic locations, includes an icon.</p>
+          <div class="autocomplete is-open" id="autocomplete-location">
+            <label for="ac-input-location">Add Location</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-location"
+                type="text" 
+                class="input" 
+                placeholder="e.g., San Francisco"
+                value="San"
+              >
+            </div>
+            <div class="autocomplete__dropdown">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Francisco, CA</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Diego, CA</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Jose, CA</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "skills"<h3>
+		<!--description--><p>Used for adding professional skills to a user's profile. Typically includes a tag icon to visually differentiate it.</p>
+		<!-- vrient 1 html -->
+        <div class="form-field" style="margin-top: 1rem;">
+          <div class="autocomplete is-open" id="autocomplete-skills-variant">
+            <label for="ac-input-skills-variant">Add a Skill</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-skills-variant"
+                type="text" 
+                class="input" 
+                placeholder="e.g., Project Management"
+                value="Project"
+              >
+            </div>
+            <div class="autocomplete__dropdown">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-tag"/></svg>
+                  <span><strong>Project</strong> Management</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-tag"/></svg>
+                  <span>Agile <strong>Project</strong> Management</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>  
+      </div>
+	 </div>
+      <div>
+        <h3>Variant Name : "location"<h3>
+		<!--description--><p>Used for selecting geographic locations in profile editing or search filters. Often includes a map-pin icon for context.</p>
+		<!-- vrient 1 html -->
+        <div class="form-field" style="margin-top: 1rem;">
+          <div class="autocomplete is-open" id="autocomplete-location-variant">
+            <label for="ac-input-location-variant">Add Location</label>
+            <div class="autocomplete__input-wrapper">
+              <input 
+                id="ac-input-location-variant"
+                type="text" 
+                class="input" 
+                placeholder="e.g., San Francisco"
+                value="San"
+              >
+            </div>
+            <div class="autocomplete__dropdown">
+              <ul class="autocomplete__list">
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Francisco, CA</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Diego, CA</span>
+                </li>
+                <li class="autocomplete__option">
+                  <svg class="icon"><use href="#icon-map-pin"/></svg>
+                  <span><strong>San</strong> Jose, CA</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+	 </div>    
+</body>
+</html>

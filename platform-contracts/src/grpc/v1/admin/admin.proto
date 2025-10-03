@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package platform.contracts.admin.v1;
+
+import "google/protobuf/timestamp.proto";
+import "grpc/v1/common/pagination.proto";
+import "grpc/v1/posts/post.proto";
+import "grpc/v1/users/user.proto";
+
+// AdminService provides RPCs for platform administrators to manage users and content.
+service AdminService {
+  // Retrieves the content moderation queue.
+  rpc GetModerationQueue(GetModerationQueueRequest) returns (GetModerationQueueResponse);
+  
+  // Allows an admin to take action on a reported item.
+  rpc TakeModerationAction(TakeModerationActionRequest) returns (TakeModerationActionResponse);
+
+  // Searches for and retrieves user account details.
+  rpc GetUserAccounts(GetUserAccountsRequest) returns (GetUserAccountsResponse);
+
+  // Triggers a password reset email for a specific user.
+  rpc TriggerPasswordReset(TriggerPasswordResetRequest) returns (TriggerPasswordResetResponse);
+
+  // Manages system-level feature flags.
+  rpc GetFeatureFlags(GetFeatureFlagsRequest) returns (GetFeatureFlagsResponse);
+  rpc UpdateFeatureFlag(UpdateFeatureFlagRequest) returns (UpdateFeatureFlagResponse);
+
+  // Retrieves the immutable audit log of all admin actions.
+  rpc GetAdminAuditLog(GetAdminAuditLogRequest) returns (GetAdminAuditLogResponse);
+}
+
+// ===================
+// Moderation Messages
+// ===================
+
+enum ReportStatus {
+  REPORT_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  DISMISSED = 2;
+  ACTION_TAKEN = 3;
+}
+
+message ReportedItem {
+  string report_id = 1;
+  oneof content {
+    platform.contracts.posts.v1.Post post = 2;
+    platform.contracts.posts.v1.Comment comment = 3;
+  }
+  string reporter_id = 4;
+  platform.contracts.users.v1.User reporter_details = 5;
+  string reason = 6;
+  google.protobuf.Timestamp reported_at = 7;
+  ReportStatus status = 8;
+  int32 report_count = 9;
+}
+
+message GetModerationQueueRequest {
+  platform.contracts.common.v1.PaginationRequest pagination = 1;
+}
+
+message GetModerationQueueResponse {
+  repeated ReportedItem items = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}
+
+enum ModerationActionType {
+  MODERATION_ACTION_TYPE_UNSPECIFIED = 0;
+  DISMISS_REPORT = 1;
+  REMOVE_CONTENT = 2;
+  ISSUE_WARNING = 3;
+  SUSPEND_USER = 4;
+  BAN_USER = 5;
+}
+
+message TakeModerationActionRequest {
+  string report_id = 1;
+  ModerationActionType action = 2;
+  string admin_id = 3;
+  optional string reason = 4; // For warnings
+  optional int64 suspension_duration_hours = 5; // For suspensions
+}
+
+message TakeModerationActionResponse {
+  bool success = 1;
+}
+
+// ===================
+// User Management Messages
+// ===================
+
+message GetUserAccountsRequest {
+  platform.contracts.common.v1.PaginationRequest pagination = 1;
+  optional string search_query = 2; // Can be email or name
+  optional platform.contracts.users.v1.UserStatus status_filter = 3;
+}
+
+message GetUserAccountsResponse {
+  repeated platform.contracts.users.v1.User users = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}
+
+message TriggerPasswordResetRequest {
+  string user_id = 1;
+  string admin_id = 2;
+}
+
+message TriggerPasswordResetResponse {
+  bool success = 1;
+}
+
+// ===================
+// Feature Flag Messages
+// ===================
+
+message FeatureFlag {
+  string key = 1;
+  string description = 2;
+  bool enabled = 3;
+}
+
+message GetFeatureFlagsRequest {}
+
+message GetFeatureFlagsResponse {
+  repeated FeatureFlag flags = 1;
+}
+
+message UpdateFeatureFlagRequest {
+  string key = 1;
+  bool enabled = 2;
+  string admin_id = 3;
+}
+
+message UpdateFeatureFlagResponse {
+  FeatureFlag flag = 1;
+}
+
+// ===================
+// Audit Log Messages
+// ===================
+
+message AdminAuditLogEntry {
+    string log_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+    string admin_id = 3;
+    string action = 4;
+    string target_id = 5; // e.g., user_id, post_id, report_id
+    string details = 6; // JSON string with extra context
+}
+
+message GetAdminAuditLogRequest {
+    platform.contracts.common.v1.PaginationRequest pagination = 1;
+    optional string admin_id_filter = 2;
+    optional string action_filter = 3;
+}
+
+message GetAdminAuditLogResponse {
+    repeated AdminAuditLogEntry entries = 1;
+    platform.contracts.common.v1.PaginationResponse pagination = 2;
+}

@@ -1,0 +1,4 @@
+// This file is intentionally left blank.
+// Based on the architectural analysis (SDS for REPO-APP-WEB), this repository is a pure client-side application.
+// It consumes a GraphQL API from a separate API Gateway and does not host its own backend API routes.
+// Therefore, creating files under `src/app/api` would violate the defined architectural boundaries and repository scope.

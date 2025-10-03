@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor "Client: Web SPA" as ClientWebSPA
+    participant "API Gateway" as APIGateway
+    participant "Search Service" as SearchService
+    participant "Connections Service" as ConnectionsService
+    participant "OpenSearch Cluster" as OpenSearchCluster
+
+    ClientWebSPA->>ClientWebSPA: 1. User types search query into SearchBar component and submits.
+    activate APIGateway
+    ClientWebSPA->>APIGateway: 2. Executes GraphQL query: SearchUsers(query, filters)
+    APIGateway-->>ClientWebSPA: Returns SearchUsersPayload or GraphQL error.
+    activate SearchService
+    APIGateway->>SearchService: 3. Forwards request to Search Service via gRPC call: searchUsers(request)
+    SearchService-->>APIGateway: Returns SearchUsersResponse or gRPC error status.
+    activate ConnectionsService
+    SearchService->>ConnectionsService: 4. Requests user's 1st-degree connections for relevance boosting via gRPC: getConnections(userId)
+    ConnectionsService-->>SearchService: Returns list of connection user IDs.
+    SearchService->>OpenSearchCluster: 5. Builds and executes complex OpenSearch query.
+    OpenSearchCluster-->>SearchService: Returns ranked list of matching user documents.
+    SearchService->>SearchService: 6. Formats OpenSearch results into gRPC response DTO.
+    ClientWebSPA->>ClientWebSPA: 7. Receives data or error. Updates UI state to render SearchResults component or an error message.
+
+    note over SearchService: Privacy Enforcement: The OpenSearch query in step 5 is critical for security. It MUST be construc...
+    note over ClientWebSPA: UI State Management: The client must manage at least four states: idle, loading (e.g., show a spi...
+    note over ConnectionsService: Connection Data Caching: The call to the Connections Service should be heavily cached (e.g., in R...
+
+    deactivate ConnectionsService
+    deactivate SearchService
+    deactivate APIGateway

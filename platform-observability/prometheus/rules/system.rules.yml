@@ -1,0 +1,62 @@
+# prometheus/rules/system.rules.yml
+#
+# Alerting rules for host-level and Kubernetes system metrics.
+# These rules monitor the fundamental health of the underlying infrastructure.
+# Corresponds to requirements in REQ-1-084.
+
+groups:
+  - name: system-alerts
+    rules:
+      - alert: HostHighCpuLoad
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU load on {{ $labels.instance }}"
+          description: "CPU load on instance {{ $labels.instance }} has been above 80% for the last 10 minutes. Current value is {{ $value | printf \"%.2f\" }}%."
+
+      - alert: HostHighMemoryUtilization
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory utilization on {{ $labels.instance }}"
+          description: "Memory utilization on instance {{ $labels.instance }} has been above 85% for the last 10 minutes. Current value is {{ $value | printf \"%.2f\" }}%."
+
+      - alert: HostLowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Root filesystem on instance {{ $labels.instance }} has less than 20% free space. Current value is {{ $value | printf \"%.2f\" }}%."
+      
+      - alert: HostCriticalDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Low disk space on {{ $labels.instance }}"
+          description: "Root filesystem on instance {{ $labels.instance }} has less than 10% free space. Immediate action required. Current value is {{ $value | printf \"%.2f\" }}%."
+
+      - alert: KubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kubernetes node {{ $labels.node }} is not ready"
+          description: "The Kubernetes node {{ $labels.node }} has been in a 'NotReady' state for more than 5 minutes."
+
+      - alert: KubernetesPodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crash-looping"
+          description: "The container {{ $labels.container }} in pod {{ $labels.pod }} is restarting frequently."

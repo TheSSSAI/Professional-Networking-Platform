@@ -1,0 +1,109 @@
+# Defines the input structure for registering a new user.
+# Corresponds to REQ-1-001 and REQ-1-092.
+input RegisterInput {
+  email: String!
+  password: String!
+  dateOfBirth: String! # ISO 8601 Date string e.g., "1990-12-31"
+}
+
+# Defines the input structure for user login.
+# Corresponds to REQ-1-002.
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+# Defines the input for requesting a password reset.
+# Corresponds to REQ-1-003.
+input RequestPasswordResetInput {
+  email: String!
+}
+
+# Defines the input for resetting a password using a token.
+input ResetPasswordInput {
+  token: String!
+  newPassword: String!
+}
+
+# Defines the input for enabling MFA.
+# Corresponds to REQ-1-055.
+input EnableMfaInput {
+  # The 6-digit TOTP code from the authenticator app to confirm setup.
+  token: String!
+}
+
+# Defines the input for verifying an MFA code during login.
+# Corresponds to REQ-1-055.
+input VerifyMfaInput {
+  # The temporary session token received after successful password validation.
+  mfaSessionToken: String!
+  # The 6-digit TOTP code from the authenticator app.
+  token: String!
+}
+
+# Defines the input for updating a user's basic profile information.
+# Corresponds to REQ-1-008.
+input UpdateBasicInfoInput {
+  name: String
+  headline: String
+  location: String
+  contactEmail: String
+  phone: String
+}
+
+# Defines the input for adding a work experience entry.
+# Corresponds to REQ-1-009.
+input AddWorkExperienceInput {
+  company: String!
+  title: String!
+  description: String
+  startDate: String! # ISO 8601 Date string
+  endDate: String # ISO 8601 Date string, null if current
+}
+
+# Defines the input for updating a work experience entry.
+input UpdateWorkExperienceInput {
+  experienceId: ID!
+  company: String
+  title: String
+  description: String
+  startDate: String
+  endDate: String
+}
+
+# Defines the input for adding an education entry.
+# Corresponds to REQ-1-010.
+input AddEducationInput {
+  institution: String!
+  degree: String!
+  fieldOfStudy: String
+  startDate: String! # ISO 8601 Date string
+  endDate: String # ISO 8601 Date string, null if current
+}
+
+# Defines the input for updating an education entry.
+input UpdateEducationInput {
+  educationId: ID!
+  institution: String
+  degree: String
+  fieldOfStudy: String
+  startDate: String
+  endDate: String
+}
+
+# Defines the input for adding a skill.
+# Corresponds to REQ-1-011.
+input AddSkillInput {
+  name: String!
+}
+
+# Defines the input for updating profile visibility.
+# Corresponds to REQ-1-014.
+input UpdateProfileVisibilityInput {
+  visibility: ProfileVisibility!
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+}

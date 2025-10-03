@@ -1,0 +1,56 @@
+sequenceDiagram
+    actor "Web Client (SPA)" as WebClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityAccessService
+    participant "Event Bus (SNS/SQS)" as EventBus
+    participant "Notifications Service" as NotificationsService
+
+    activate WebClientSPA
+    WebClientSPA->>WebClientSPA: 1. User submits registration form (email, password, DoB). Client-side validation runs.
+    
+    activate APIGateway
+    WebClientSPA->>APIGateway: 2. [GraphQL Mutation] registerUser(input)
+    
+    activate IdentityAccessService
+    APIGateway->>IdentityAccessService: 3. [gRPC] processRegistration(request)
+    
+    IdentityAccessService->>IdentityAccessService: 3a. Server-side validation (incl. age check REQ-1-092)
+    IdentityAccessService->>IdentityAccessService: 3b. Create User record (status: 'inactive') & generate verification token
+    
+    activate EventBus
+    IdentityAccessService->>EventBus: 4. Publish 'UserRegistered' event
+    deactivate IdentityAccessService
+    
+    APIGateway-->>WebClientSPA: 5. [200 OK] Registration submitted
+    deactivate APIGateway
+    
+    WebClientSPA->>WebClientSPA: 6. Display 'Please check your email' message
+
+    %% Asynchronous Email Flow
+    activate NotificationsService
+    EventBus->>NotificationsService: 7. Consume 'UserRegistered' event
+    NotificationsService->>NotificationsService: 7a. Call AWS SES to send verification email with token link
+    deactivate NotificationsService
+    deactivate EventBus
+
+    %% User Verification Flow
+    WebClientSPA->>WebClientSPA: 8. User clicks verification link from email
+    
+    activate APIGateway
+    WebClientSPA->>APIGateway: 9. [GraphQL Mutation] verifyAccount(token)
+    
+    activate IdentityAccessService
+    APIGateway->>IdentityAccessService: 10. [gRPC] processVerification(request)
+    
+    IdentityAccessService->>IdentityAccessService: 10a. Validate token (exists, not expired, not used)
+    IdentityAccessService->>IdentityAccessService: 10b. Update User record (status: 'active') & invalidate token
+    
+    APIGateway-->>WebClientSPA: 11. [200 OK] Verification successful
+    deactivate APIGateway
+    deactivate IdentityAccessService
+    
+    WebClientSPA->>WebClientSPA: 12. Display 'Verification complete. Please log in.' page
+    deactivate WebClientSPA
+
+    note over EventBus: Asynchronous email sending decouples the user registration API from email service latency and reliability.
+    note over IdentityAccessService: The verification token must be single-use and have a short expiry (e.g., 24 hours) to mitigate security risks.

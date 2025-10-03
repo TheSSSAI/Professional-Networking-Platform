@@ -1,0 +1,1217 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-BP-002
+
+## 1.2 Name
+
+Permanent Account Deletion Process
+
+## 1.3 Description
+
+A user requests permanent account deletion. The system initiates a 14-day grace period. If not cancelled, a fan-out event is published, instructing all relevant microservices to purge all data associated with the user.
+
+## 1.4 Type
+
+🔹 BusinessProcess
+
+## 1.5 Purpose
+
+To comply with data privacy regulations (e.g., GDPR's 'right to be forgotten') by providing a mechanism for permanent data erasure, as defined in SRS-001-F1 (1.1.5).
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-IDENTITY
+- REPO-EVENT-BUS
+- REPO-SVC-PROFILE
+- REPO-SVC-POSTS
+- REPO-SVC-CONNECTIONS
+- REPO-SVC-SEARCH
+
+## 1.10 Key Interactions
+
+- User requests account deletion via their account settings.
+- The Identity Service records the request, sets a 'deletionRequested' status, and starts the 14-day grace period timer.
+- After 14 days, a scheduled job checks for requests whose grace period has expired.
+- The job triggers the Identity Service to publish an 'AccountPurgeInitiated' event with the userId.
+- Multiple services (Profile, Posts, Connections, Search, etc.) have queues subscribed to this event.
+- Each service's consumer is responsible for deleting all data associated with that userId from its own database and any other data stores (e.g., S3, OpenSearch).
+- Identity Service sends a final warning email 24 hours before the purge.
+
+## 1.11 Triggers
+
+- A user confirms their request to permanently delete their account.
+
+## 1.12 Outcomes
+
+- All of the user's personal data is permanently removed from all live production systems.
+- A log of the deletion request and final purge timestamp is maintained for compliance.
+
+## 1.13 Business Rules
+
+- A 14-day grace period must be observed, during which the user can cancel (1.1.5).
+- A documented, automated process must exist to re-delete data from restored backups before the system is returned to service (1.1.5).
+
+## 1.14 Error Scenarios
+
+- One of the consumer services fails to purge the data, leading to orphaned PII. This must be caught by monitoring the DLQ for the purge event.
+- The scheduled job that triggers the purge fails to run.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-BP-002
+
+## 2.2 Name
+
+Implementation: Permanent Account Deletion Process (SAGA Pattern)
+
+## 2.3 Description
+
+A comprehensive, implementation-ready sequence diagram detailing the multi-step, asynchronous business process for permanent user account deletion. The process adheres to SRS-001-F1 (1.1.5) by implementing a 14-day grace period, followed by a fan-out event using a SAGA pattern to ensure data is purged across all distributed microservices. This process is designed for compliance with data privacy regulations like GDPR.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend SPA
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client Application
+
+#### 2.4.1.3 Type
+
+🔹 Frontend SPA
+
+#### 2.4.1.4 Technology
+
+Next.js, React
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #E0F7FA |
+| Stereotype | User Interface |
+
+### 2.4.2.0 Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #B2EBF2 |
+| Stereotype | GraphQL Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-IDENTITY
+
+#### 2.4.3.2 Display Name
+
+Identity Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, PostgreSQL
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #80DEEA |
+| Stereotype | Orchestrator |
+
+### 2.4.4.0 Message Broker
+
+#### 2.4.4.1 Repository Id
+
+REPO-EVENT-BUS
+
+#### 2.4.4.2 Display Name
+
+Event Bus
+
+#### 2.4.4.3 Type
+
+🔹 Message Broker
+
+#### 2.4.4.4 Technology
+
+AWS SNS/SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #4DD0E1 |
+| Stereotype | Messaging |
+
+### 2.4.5.0 Microservice
+
+#### 2.4.5.1 Repository Id
+
+REPO-SVC-PROFILE
+
+#### 2.4.5.2 Display Name
+
+Profile Service
+
+#### 2.4.5.3 Type
+
+🔹 Microservice
+
+#### 2.4.5.4 Technology
+
+NestJS, PostgreSQL, S3
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #26C6DA |
+| Stereotype | SAGA Participant |
+
+### 2.4.6.0 Microservice
+
+#### 2.4.6.1 Repository Id
+
+REPO-SVC-POSTS
+
+#### 2.4.6.2 Display Name
+
+Posts Service
+
+#### 2.4.6.3 Type
+
+🔹 Microservice
+
+#### 2.4.6.4 Technology
+
+NestJS, PostgreSQL
+
+#### 2.4.6.5 Order
+
+6
+
+#### 2.4.6.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #26C6DA |
+| Stereotype | SAGA Participant |
+
+### 2.4.7.0 Microservice
+
+#### 2.4.7.1 Repository Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.4.7.2 Display Name
+
+Connections Service
+
+#### 2.4.7.3 Type
+
+🔹 Microservice
+
+#### 2.4.7.4 Technology
+
+NestJS, PostgreSQL
+
+#### 2.4.7.5 Order
+
+7
+
+#### 2.4.7.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #26C6DA |
+| Stereotype | SAGA Participant |
+
+### 2.4.8.0 Microservice
+
+#### 2.4.8.1 Repository Id
+
+REPO-SVC-SEARCH
+
+#### 2.4.8.2 Display Name
+
+Search Service
+
+#### 2.4.8.3 Type
+
+🔹 Microservice
+
+#### 2.4.8.4 Technology
+
+NestJS, OpenSearch
+
+#### 2.4.8.5 Order
+
+8
+
+#### 2.4.8.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #26C6DA |
+| Stereotype | SAGA Participant |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+1. Request account deletion with confirmation.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+6. Acknowledge deletion request and grace period.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+GraphQL (HTTPS)
+
+##### 2.5.1.10.2 Method
+
+mutation requestAccountDeletion
+
+##### 2.5.1.10.3 Parameters
+
+{}
+
+##### 2.5.1.10.4 Authentication
+
+Required: Valid JWT Access Token (User Scope)
+
+##### 2.5.1.10.5 Error Handling
+
+Handle 401/403 errors if user is not authenticated/authorized. Handle 5xx errors with a generic failure message.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+< 500ms P95
+
+### 2.5.2.0.0.0 Request
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.2.3.0.0 Message
+
+2. Forward deletion request.
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Request
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+5. Return success acknowledgment.
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.2.10.2.0 Method
+
+IdentityService.RequestAccountDeletion
+
+##### 2.5.2.10.3.0 Parameters
+
+userId from JWT claims
+
+##### 2.5.2.10.4.0 Authentication
+
+Internal mTLS
+
+##### 2.5.2.10.5.0 Error Handling
+
+Propagate error code back to gateway (e.g., PERMISSION_DENIED, ALREADY_EXISTS). Implement retry for transient network errors.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+< 50ms P95
+
+### 2.5.3.0.0.0 Database
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.3.3.0.0 Message
+
+3. Create deletion request record with 14-day grace period.
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Database
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+4. Record created successfully.
+
+#### 2.5.3.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+SQL
+
+##### 2.5.3.10.2.0 Method
+
+```sql
+INSERT INTO AccountDeletionRequests (user_id, status, grace_period_ends_at) VALUES ($1, 'PENDING', NOW() + INTERVAL '14 days')
+```
+
+##### 2.5.3.10.3.0 Parameters
+
+userId
+
+##### 2.5.3.10.4.0 Authentication
+
+Database credentials from secret store.
+
+##### 2.5.3.10.5.0 Error Handling
+
+Catch unique constraint violation if a request already exists. Handle DB connection errors.
+
+##### 2.5.3.10.6.0 Performance
+
+###### 2.5.3.10.6.1 Latency
+
+< 10ms
+
+### 2.5.4.0.0.0 Internal
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.4.3.0.0 Message
+
+7. [Scheduled Job] Check for pending purges 24 hours before expiration.
+
+#### 2.5.4.4.0.0 Sequence Number
+
+7
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Internal
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+Cron Job / Scheduled Task
+
+##### 2.5.4.10.2.0 Method
+
+_runPrePurgeWarningJob()
+
+##### 2.5.4.10.3.0 Parameters
+
+SQL: SELECT user_id, email FROM users JOIN AccountDeletionRequests USING(user_id) WHERE status='PENDING' AND grace_period_ends_at BETWEEN NOW() + '23 hours' AND NOW() + '24 hours'
+
+##### 2.5.4.10.4.0 Authentication
+
+N/A
+
+##### 2.5.4.10.5.0 Error Handling
+
+Log job execution status. Alert on repeated job failures.
+
+##### 2.5.4.10.6.0 Performance
+
+###### 2.5.4.10.6.1 Latency
+
+N/A
+
+### 2.5.5.0.0.0 Event
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.5.3.0.0 Message
+
+8. Publish 'PrePurgeWarning' event for each found user.
+
+#### 2.5.5.4.0.0 Sequence Number
+
+8
+
+#### 2.5.5.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+AWS SNS
+
+##### 2.5.5.10.2.0 Method
+
+Publish
+
+##### 2.5.5.10.3.0 Parameters
+
+Topic: 'notification-events', Payload: { eventType: 'PrePurgeWarning', userId, email }
+
+##### 2.5.5.10.4.0 Authentication
+
+IAM Role for SNS Publish
+
+##### 2.5.5.10.5.0 Error Handling
+
+Retry on publish failure. Log and alert if event publishing fails persistently.
+
+##### 2.5.5.10.6.0 Performance
+
+###### 2.5.5.10.6.1 Latency
+
+< 20ms
+
+### 2.5.6.0.0.0 Internal
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.6.3.0.0 Message
+
+9. [Scheduled Job] Check for expired grace periods.
+
+#### 2.5.6.4.0.0 Sequence Number
+
+9
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Internal
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+Cron Job / Scheduled Task
+
+##### 2.5.6.10.2.0 Method
+
+_runFinalPurgeJob()
+
+##### 2.5.6.10.3.0 Parameters
+
+SQL: SELECT user_id FROM AccountDeletionRequests WHERE status='PENDING' AND grace_period_ends_at <= NOW()
+
+##### 2.5.6.10.4.0 Authentication
+
+N/A
+
+##### 2.5.6.10.5.0 Error Handling
+
+Job must be idempotent. Log job execution and alert on repeated failures.
+
+##### 2.5.6.10.6.0 Performance
+
+###### 2.5.6.10.6.1 Latency
+
+N/A
+
+### 2.5.7.0.0.0 Event
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.7.3.0.0 Message
+
+10. Publish 'AccountPurgeInitiated' event (SAGA Trigger).
+
+#### 2.5.7.4.0.0 Sequence Number
+
+10
+
+#### 2.5.7.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.7.7.0.0 Return Message
+
+
+
+#### 2.5.7.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.7.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.7.10.0.0 Technical Details
+
+##### 2.5.7.10.1.0 Protocol
+
+AWS SNS
+
+##### 2.5.7.10.2.0 Method
+
+Publish
+
+##### 2.5.7.10.3.0 Parameters
+
+Topic: 'user-events', Payload: { eventType: 'AccountPurgeInitiated', userId, purgeTimestamp: NOW() }
+
+##### 2.5.7.10.4.0 Authentication
+
+IAM Role for SNS Publish
+
+##### 2.5.7.10.5.0 Error Handling
+
+Critical path: must have robust retry logic. Alert immediately on persistent publish failure.
+
+##### 2.5.7.10.6.0 Performance
+
+###### 2.5.7.10.6.1 Latency
+
+< 20ms
+
+### 2.5.8.0.0.0 Event
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.8.2.0.0 Target Id
+
+REPO-SVC-PROFILE
+
+#### 2.5.8.3.0.0 Message
+
+11a. Consume 'AccountPurgeInitiated' event.
+
+#### 2.5.8.4.0.0 Sequence Number
+
+11
+
+#### 2.5.8.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.8.7.0.0 Return Message
+
+
+
+#### 2.5.8.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.8.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.8.10.0.0 Technical Details
+
+##### 2.5.8.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.8.10.2.0 Method
+
+ReceiveMessage
+
+##### 2.5.8.10.3.0 Parameters
+
+Subscribed to 'user-events' SNS topic via dedicated SQS queue.
+
+##### 2.5.8.10.4.0 Authentication
+
+IAM Role for SQS Receive/Delete
+
+##### 2.5.8.10.5.0 Error Handling
+
+Handler must be idempotent. On processing failure, rely on SQS retry policy. After max retries, message moves to DLQ for manual intervention.
+
+##### 2.5.8.10.6.0 Performance
+
+###### 2.5.8.10.6.1 Latency
+
+N/A (async)
+
+#### 2.5.8.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-PROFILE', 'targetId': 'REPO-SVC-PROFILE', 'message': '11b. Purge all profile data and media.', 'sequenceNumber': 12, 'type': 'Database', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'SQL, S3 API', 'method': 'DELETE FROM UserProfiles...; s3.deleteObjects(...)', 'parameters': 'userId', 'authentication': 'DB credentials, IAM role for S3', 'errorHandling': 'Log any deletion failures. A failure here is critical and must be handled by the DLQ process.', 'performance': {}}}
+
+### 2.5.9.0.0.0 Event
+
+#### 2.5.9.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.9.2.0.0 Target Id
+
+REPO-SVC-POSTS
+
+#### 2.5.9.3.0.0 Message
+
+12a. Consume 'AccountPurgeInitiated' event.
+
+#### 2.5.9.4.0.0 Sequence Number
+
+13
+
+#### 2.5.9.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.9.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.9.7.0.0 Return Message
+
+
+
+#### 2.5.9.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.9.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.9.10.0.0 Technical Details
+
+##### 2.5.9.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.9.10.2.0 Method
+
+ReceiveMessage
+
+##### 2.5.9.10.3.0 Parameters
+
+Subscribed to 'user-events' SNS topic via dedicated SQS queue.
+
+##### 2.5.9.10.4.0 Authentication
+
+IAM Role for SQS Receive/Delete
+
+##### 2.5.9.10.5.0 Error Handling
+
+Handler must be idempotent. Use DLQ for permanent failures.
+
+##### 2.5.9.10.6.0 Performance
+
+###### 2.5.9.10.6.1 Latency
+
+N/A (async)
+
+#### 2.5.9.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-POSTS', 'targetId': 'REPO-SVC-POSTS', 'message': '12b. Purge all posts, comments, reactions.', 'sequenceNumber': 14, 'type': 'Database', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'SQL', 'method': 'DELETE FROM Posts WHERE authorId = $1; DELETE FROM Comments... etc.', 'parameters': 'userId', 'authentication': 'Database credentials', 'errorHandling': 'Log any deletion failures. Must be handled by the DLQ process.', 'performance': {}}}
+
+### 2.5.10.0.0.0 Event
+
+#### 2.5.10.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.10.2.0.0 Target Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.5.10.3.0.0 Message
+
+13a. Consume 'AccountPurgeInitiated' event.
+
+#### 2.5.10.4.0.0 Sequence Number
+
+15
+
+#### 2.5.10.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.10.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.10.7.0.0 Return Message
+
+
+
+#### 2.5.10.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.10.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.10.10.0.0 Technical Details
+
+##### 2.5.10.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.10.10.2.0 Method
+
+ReceiveMessage
+
+##### 2.5.10.10.3.0 Parameters
+
+Subscribed to 'user-events' SNS topic via dedicated SQS queue.
+
+##### 2.5.10.10.4.0 Authentication
+
+IAM Role for SQS Receive/Delete
+
+##### 2.5.10.10.5.0 Error Handling
+
+Handler must be idempotent. Use DLQ for permanent failures.
+
+##### 2.5.10.10.6.0 Performance
+
+###### 2.5.10.10.6.1 Latency
+
+N/A (async)
+
+#### 2.5.10.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-CONNECTIONS', 'targetId': 'REPO-SVC-CONNECTIONS', 'message': '13b. Purge all connection records.', 'sequenceNumber': 16, 'type': 'Database', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'SQL', 'method': 'DELETE FROM Connections WHERE user_a_id = $1 OR user_b_id = $1', 'parameters': 'userId', 'authentication': 'Database credentials', 'errorHandling': 'Log any deletion failures. Must be handled by the DLQ process.', 'performance': {}}}
+
+### 2.5.11.0.0.0 Event
+
+#### 2.5.11.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.11.2.0.0 Target Id
+
+REPO-SVC-SEARCH
+
+#### 2.5.11.3.0.0 Message
+
+14a. Consume 'AccountPurgeInitiated' event.
+
+#### 2.5.11.4.0.0 Sequence Number
+
+17
+
+#### 2.5.11.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.11.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.11.7.0.0 Return Message
+
+
+
+#### 2.5.11.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.11.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.11.10.0.0 Technical Details
+
+##### 2.5.11.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.11.10.2.0 Method
+
+ReceiveMessage
+
+##### 2.5.11.10.3.0 Parameters
+
+Subscribed to 'user-events' SNS topic via dedicated SQS queue.
+
+##### 2.5.11.10.4.0 Authentication
+
+IAM Role for SQS Receive/Delete
+
+##### 2.5.11.10.5.0 Error Handling
+
+Handler must be idempotent. Use DLQ for permanent failures.
+
+##### 2.5.11.10.6.0 Performance
+
+###### 2.5.11.10.6.1 Latency
+
+N/A (async)
+
+#### 2.5.11.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-SEARCH', 'targetId': 'REPO-SVC-SEARCH', 'message': '14b. Purge user document from search index.', 'sequenceNumber': 18, 'type': 'Database', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'OpenSearch API', 'method': 'DELETE /user_profiles/_doc/{userId}', 'parameters': 'userId', 'authentication': 'IAM Role for OpenSearch', 'errorHandling': 'Log any deletion failures. Must be handled by the DLQ process.', 'performance': {}}}
+
+### 2.5.12.0.0.0 Event
+
+#### 2.5.12.1.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.12.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.12.3.0.0 Message
+
+15a. Consume 'AccountPurgeInitiated' event (final step).
+
+#### 2.5.12.4.0.0 Sequence Number
+
+19
+
+#### 2.5.12.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.12.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.12.7.0.0 Return Message
+
+
+
+#### 2.5.12.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.12.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.12.10.0.0 Technical Details
+
+##### 2.5.12.10.1.0 Protocol
+
+AWS SQS
+
+##### 2.5.12.10.2.0 Method
+
+ReceiveMessage
+
+##### 2.5.12.10.3.0 Parameters
+
+Subscribed to 'user-events' SNS topic via its own dedicated SQS queue.
+
+##### 2.5.12.10.4.0 Authentication
+
+IAM Role for SQS Receive/Delete
+
+##### 2.5.12.10.5.0 Error Handling
+
+Use DLQ. Failure here means user record is orphaned.
+
+##### 2.5.12.10.6.0 Performance
+
+###### 2.5.12.10.6.1 Latency
+
+N/A (async)
+
+#### 2.5.12.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-SVC-IDENTITY', 'targetId': 'REPO-SVC-IDENTITY', 'message': '15b. Purge core user record and finalize audit log.', 'sequenceNumber': 20, 'type': 'Database', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'SQL', 'method': "DELETE FROM Users WHERE user_id = $1; UPDATE AccountDeletionRequests SET status='COMPLETED', final_purge_timestamp=NOW() WHERE user_id = $1", 'parameters': 'userId', 'authentication': 'Database credentials', 'errorHandling': 'This is the final step; failure must be caught by DLQ and alerted immediately.', 'performance': {}}}
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+SAGA Pattern: This entire process after step 10 is an example of a Choreography-based SAGA. Each service is responsible for its own part of the data purge by listening to a common event. There is no central orchestrator telling each service what to do.
+
+#### 2.6.1.2.0.0 Position
+
+top-right
+
+#### 2.6.1.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0.0 Sequence Number
+
+10
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Scheduled Jobs: Steps 7 and 9 are initiated by a time-based trigger (e.g., a Kubernetes CronJob or AWS EventBridge scheduled task) that invokes an internal function within the Identity Service.
+
+#### 2.6.2.2.0.0 Position
+
+bottom-left
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-SVC-IDENTITY
+
+#### 2.6.2.4.0.0 Sequence Number
+
+7
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Idempotency is CRITICAL for all event consumers. A message might be delivered more than once. Consumers must handle this gracefully (e.g., a DELETE operation is naturally idempotent).
+
+#### 2.6.3.2.0.0 Position
+
+bottom-right
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-EVENT-BUS
+
+#### 2.6.3.4.0.0 Sequence Number
+
+11
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The initial deletion request must be authenticated... |
+| Performance Targets | The initial user-facing request must be acknowledg... |
+| Error Handling Strategy | The primary error handling mechanism for the async... |
+| Testing Considerations | End-to-end testing is mandatory and complex. It re... |
+| Monitoring Requirements | 1. Monitor scheduled job execution success/failure... |
+| Deployment Considerations | This is a compliance-critical feature. It should b... |
+

@@ -1,0 +1,11 @@
+# Ignore patterns are based on .gitignore syntax
+
+# Dependencies
+node_modules
+dist
+build
+coverage
+
+# Generated Code
+src/grpc/v1/ts
+src/graphql/generated

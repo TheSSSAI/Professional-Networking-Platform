@@ -1,0 +1,1 @@
+This diagram shows the core user authentication and profile structure. It includes the User entity, their detailed profile, work and education history, skills, endorsements, and role-based access control. Many-to-many relationships, such as a user having multiple skills, are resolved through explicit join tables like UserProfileSkill.

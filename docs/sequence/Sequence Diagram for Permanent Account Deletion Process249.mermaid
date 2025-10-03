@@ -1,0 +1,48 @@
+sequenceDiagram
+    actor "Client Application" as ClientApplication
+    participant "API Gateway" as APIGateway
+    participant "Identity Service" as IdentityService
+    participant "Event Bus" as EventBus
+    participant "Profile Service" as ProfileService
+    participant "Posts Service" as PostsService
+    participant "Connections Service" as ConnectionsService
+    participant "Search Service" as SearchService
+
+    activate APIGateway
+    ClientApplication->>APIGateway: 1. 1. Request account deletion with confirmation.
+    APIGateway-->>ClientApplication: 6. Acknowledge deletion request and grace period.
+    activate IdentityService
+    APIGateway->>IdentityService: 2. 2. Forward deletion request.
+    IdentityService-->>APIGateway: 5. Return success acknowledgment.
+    IdentityService->>IdentityService: 3. 3. Create deletion request record with 14-day grace period.
+    IdentityService-->>IdentityService: 4. Record created successfully.
+    IdentityService->>IdentityService: 7. 7. [Scheduled Job] Check for pending purges 24 hours before expiration.
+    IdentityService->>EventBus: 8. 8. Publish 'PrePurgeWarning' event for each found user.
+    IdentityService->>IdentityService: 9. 9. [Scheduled Job] Check for expired grace periods.
+    activate EventBus
+    IdentityService->>EventBus: 10. 10. Publish 'AccountPurgeInitiated' event (SAGA Trigger).
+    activate ProfileService
+    EventBus->>ProfileService: 11. 11a. Consume 'AccountPurgeInitiated' event.
+    ProfileService->>ProfileService: 12. 11b. Purge all profile data and media.
+    activate PostsService
+    EventBus->>PostsService: 13. 12a. Consume 'AccountPurgeInitiated' event.
+    PostsService->>PostsService: 14. 12b. Purge all posts, comments, reactions.
+    activate ConnectionsService
+    EventBus->>ConnectionsService: 15. 13a. Consume 'AccountPurgeInitiated' event.
+    ConnectionsService->>ConnectionsService: 16. 13b. Purge all connection records.
+    activate SearchService
+    EventBus->>SearchService: 17. 14a. Consume 'AccountPurgeInitiated' event.
+    SearchService->>SearchService: 18. 14b. Purge user document from search index.
+    EventBus->>IdentityService: 19. 15a. Consume 'AccountPurgeInitiated' event (final step).
+    IdentityService->>IdentityService: 20. 15b. Purge core user record and finalize audit log.
+
+    note over IdentityService: Scheduled Jobs: Steps 7 and 9 are initiated by a time-based trigger (e.g., a Kubernetes CronJob o...
+    note over EventBus: Idempotency is CRITICAL for all event consumers. A message might be delivered more than once. Con...
+
+    deactivate SearchService
+    deactivate ConnectionsService
+    deactivate PostsService
+    deactivate ProfileService
+    deactivate EventBus
+    deactivate IdentityService
+    deactivate APIGateway

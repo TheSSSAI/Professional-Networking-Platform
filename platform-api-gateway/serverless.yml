@@ -1,0 +1,160 @@
+service: platform-api-gateway
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-iam-roles-per-function
+
+custom:
+  # Load environment-specific configuration
+  stage: ${opt:stage, 'dev'}
+  config: ${file(config/env.${self:custom.stage}.json)}
+
+  # Webpack configuration for TypeScript compilation
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+  # Custom domain configuration for Cloudflare integration (REQ-1-072)
+  customDomain:
+    domainName: ${self:custom.config.domainName}
+    basePath: 'v1'
+    stage: ${self:custom.stage}
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: 'tls_1_2'
+    apiType: 'http'
+    autoDomain: true
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${self:custom.stage}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 512 # Default memory size for functions
+
+  # Environment variables passed to the Lambda function
+  environment:
+    NODE_ENV: ${self:custom.stage}
+    # Subgraph URLs for Apollo Federation, sourced from config
+    IDENTITY_SERVICE_URL: ${self:custom.config.subgraphs.identity.url}
+    PROFILE_SERVICE_URL: ${self:custom.config.subgraphs.profile.url}
+    CONNECTION_SERVICE_URL: ${self:custom.config.subgraphs.connection.url}
+    POST_SERVICE_URL: ${self:custom.config.subgraphs.post.url}
+    MESSAGING_SERVICE_URL: ${self:custom.config.subgraphs.messaging.url}
+    SEARCH_SERVICE_URL: ${self:custom.config.subgraphs.search.url}
+    # Other configurations
+    REDIS_HOST: ${self:custom.config.redis.host}
+    REDIS_PORT: ${self:custom.config.redis.port}
+    # Using AWS Systems Manager Parameter Store for secrets
+    JWT_SECRET: ${ssm:${self:custom.config.jwtSecretSsmPath}}
+    
+  # API Gateway V2 (HTTP API) configuration (REQ-1-065, REQ-1-086)
+  httpApi:
+    cors: true
+    
+  # Observability Configuration (REQ-1-083)
+  logs:
+    # Enable API Gateway access logging
+    httpApi:
+      format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","routeKey":"$context.routeKey", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "userAgent":"$context.identity.userAgent" }'
+  tracing:
+    # Enable AWS X-Ray for both API Gateway and Lambda
+    apiGateway: true
+    lambda: true
+
+  # IAM role for the service
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'xray:PutTraceSegments'
+            - 'xray:PutTelemetryRecords'
+          Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+          Resource: 'arn:aws:logs:*:*:*'
+        - Effect: 'Allow'
+          Action:
+            - 'ssm:GetParameter'
+          Resource: ${self:custom.config.jwtSecretSsmArn}
+
+functions:
+  graphql:
+    handler: src/gateway.handler
+    memorySize: 1024 # Increased memory for the federation gateway
+    timeout: 30
+    # Provisioned concurrency for production to eliminate cold starts (REQ-1-051)
+    provisionedConcurrency: ${self:custom.config.provisionedConcurrency, 0}
+    
+    events:
+      # Main GraphQL endpoint (REQ-1-086)
+      - http:
+          path: /graphql
+          method: post
+          cors: true
+          # JWT Authorizer Configuration (REQ-1-087)
+          authorizer:
+            name: jwtAuthorizer
+            type: request
+            functionArn: ${self:custom.config.authorizerArn}
+            identitySource:
+              - $request.header.Authorization
+            resultTtlInSeconds: 300 # Cache authorizer response for 5 minutes
+            enableSimpleResponses: true
+      # Optional GET handler for tools like GraphQL Playground in non-prod environments
+      - http:
+          path: /graphql
+          method: get
+          cors: true
+
+    # Specific IAM role for this function if needed beyond the provider level
+    # iamRoleStatements:
+    #   - Effect: "Allow"
+    #     Action:
+    #       - "s3:GetObject"
+    #     Resource: "arn:aws:s3:::some-bucket/*"
+          
+resources:
+  # API Gateway Rate Limiting Configuration (REQ-1-087)
+  Resources:
+    HttpApiUsagePlan:
+      Type: AWS::ApiGatewayV2::UsagePlan
+      Properties:
+        ApiStages:
+          - ApiId: !Ref HttpApi
+            Stage: ${self:custom.stage}
+        Description: "Usage plan for the platform API gateway"
+        Throttle:
+          BurstLimit: ${self:custom.config.throttle.burstLimit}
+          RateLimit: ${self:custom.config.throttle.rateLimit}
+
+    HttpApiUsagePlanKey:
+      Type: AWS::ApiGatewayV2::UsagePlanKey
+      Properties:
+        KeyId: !Ref HttpApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref HttpApiUsagePlan
+
+    HttpApiKey:
+      Type: AWS::ApiGatewayV2::ApiKey
+      Properties:
+        Name: ${self:service}-${self:custom.stage}-apikey
+        Enabled: true
+
+  # Custom responses for authorizer failures
+  Outputs:
+    ApiGatewayHttpApiId:
+      Value: !Ref HttpApi
+      Export:
+        Name: ${self:service}-HttpApiId-${self:custom.stage}

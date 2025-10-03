@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor "Client SPA" as ClientSPA
+    participant "API Gateway" as APIGateway
+    participant "Connections Service" as ConnectionsService
+    participant "Event Bus" as EventBus
+    participant "Feed Service" as FeedService
+
+    activate APIGateway
+    ClientSPA->>APIGateway: 1. 1. [GraphQL Mutation] removeConnection(connectionUserId: ID!)
+    APIGateway-->>ClientSPA: 8. [GraphQL Response] { data: { removeConnection: { success: true } } }
+    activate ConnectionsService
+    APIGateway->>ConnectionsService: 2. 2. [gRPC] RemoveConnection(request)
+    ConnectionsService-->>APIGateway: 7. [gRPC Response] RemoveConnectionResponse { success: true }
+    activate FeedService
+    EventBus->>FeedService: 6. 6. [Event Delivery] ConnectionRemoved
+    FeedService->>FeedService: 7. 6a. [Internal Logic] Process event for feed cleanup
+    ClientSPA->>ClientSPA: 8. 9. [UI Update] Remove user from connections list
+
+    note over ConnectionsService: Business Rule (REQ-1-018): The removal is reciprocal. The single database transaction in step 4 e...
+
+    deactivate FeedService
+    deactivate ConnectionsService
+    deactivate APIGateway

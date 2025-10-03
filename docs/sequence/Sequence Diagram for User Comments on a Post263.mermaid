@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor "Client Application" as ClientApplication
+    participant "API Gateway" as APIGateway
+    participant "Engagement Service" as EngagementService
+    participant "Event Bus" as EventBus
+    participant "Notifications Service" as NotificationsService
+
+    activate APIGateway
+    ClientApplication->>APIGateway: 1. 1. Send GraphQL Mutation: addComment(postId, content)
+    APIGateway-->>ClientApplication: 8. Return 200 OK with new Comment data and optimistic UI update is confirmed.
+    activate EngagementService
+    APIGateway->>EngagementService: 2. 2. Forward validated request: addComment(AddCommentRequest)
+    EngagementService-->>APIGateway: 7. Return successful AddCommentResponse with created Comment entity.
+    EngagementService->>EngagementService: 3. 3. [Business Logic] Validate comment (length, permissions, post existence).
+    EngagementService->>EngagementService: 4. 4. [Persistence] Save comment to PostgreSQL database.
+    EngagementService-->>EngagementService: Returns the newly created Comment entity.
+    EngagementService->>EventBus: 5. 5. [Async] Publish 'CommentAdded' event.
+    activate NotificationsService
+    EventBus->>NotificationsService: 6. 6. [Async] Consume 'CommentAdded' event from dedicated SQS queue.
+
+    note over EventBus: The 'CommentAdded' event payload is denormalized with data like 'postAuthorId' and 'commenterName...
+    note over NotificationsService: The Notifications Service internal logic will check the post author's notification preferences be...
+
+    deactivate NotificationsService
+    deactivate EngagementService
+    deactivate APIGateway

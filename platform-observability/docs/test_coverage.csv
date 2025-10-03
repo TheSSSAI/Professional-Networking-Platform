@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Prometheus Alerting Rules","Critical","High","Medium","[""Unit"",""Integration"",""E2E"",""Performance""]","100","80","60","95","5","15","10","0.98","High","Low","Excellent","Good"
+"Alertmanager Configuration","Critical","Medium","Low","[""Unit"",""Integration"",""E2E"",""Security""]","100","90","75","90","4","10","6","0.99","High","Low","Excellent","Excellent"
+"Grafana Dashboards","High","Medium","High","[""Unit"",""Integration"",""Functional""]","100","100","20","80","8","12","8","0.9","High","Medium","Excellent","Good"
+"CI/CD Pipelines","Critical","High","Low","[""Functional"",""E2E"",""Security""]","","100","100","100","2","20","4","0.95","High","Medium","Excellent","Excellent"

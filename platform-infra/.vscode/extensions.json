@@ -1,0 +1,33 @@
+.json
+{
+  "recommendations": [
+    // Core Terraform language support, syntax highlighting, formatting, and IntelliSense.
+    "hashicorp.terraform",
+
+    // Essential for enforcing consistent coding styles defined in .editorconfig.
+    "editorconfig.editorconfig",
+
+    // Provides an enhanced Git experience within VS Code, including history visualization.
+    "eamodio.gitlens",
+
+    // Linter for Terraform to enforce best practices. Integrates with the .tflint.hcl config.
+    "terraform-linters.tflint",
+
+    // Security scanner for Terraform. Integrates with .tfsec/config.yml.
+    "aquasecurity.tfsec",
+
+    // Linter and formatter for YAML files, useful for GitHub Actions workflows.
+    "redhat.vscode-yaml",
+
+    // Provides advanced spell checking for code and comments.
+    "streetsidesoftware.code-spell-checker",
+
+    // Dockerfile syntax highlighting and IntelliSense. Although this is an infra repo,
+    // developers might interact with Docker concepts.
+    "ms-azuretools.vscode-docker",
+
+    // Provides live preview for Markdown files, useful for editing READMEs.
+    "shd101wyy.markdown-preview-enhanced"
+  ],
+  "unwantedRecommendations": []
+}

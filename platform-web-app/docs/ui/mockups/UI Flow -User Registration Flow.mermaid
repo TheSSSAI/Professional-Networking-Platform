@@ -1,0 +1,37 @@
+flowchart TD
+    A[User clicks 'Register'] --> B[Display Registration Form]
+    B --> C[User enters Email and Password]
+    C --> D{Client-Side Validation}
+    D -->|Invalid| E[Show inline validation errors]
+    E --> C
+    D -->|Valid| F[Submit form to Server]
+    F --> G{Server-Side Validation}
+    G -->|Error: Email Taken| H[Show 'Email already exists' error]
+    H --> B
+    G -->|Error: Other| I[Show generic server error]
+    I --> B
+    G -->|Success| J[Create User Account in DB<br>(Status: INACTIVE)]
+    J --> K[Generate Verification Token]
+    K --> L[Trigger 'Send Verification Email' Event]
+    L --> M[Show 'Please check your email' message]
+    M --> N[Redirect to Login Page]
+
+    subgraph Legend
+        direction LR
+        P1(Process) -- P2(Decision)
+        P2 -- P3(Success)
+        P2 -- P4(Error)
+    end
+
+    %% Styling
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decisionNode fill:#fff8e1,stroke:#ffc107,color:#000
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#000
+
+    class B,C,F,K,L,M,N,P1 processNode
+    class D,G,P2 decisionNode
+    class E,H,I,P4 errorNode
+    class J,P3 successNode
+
+    style Legend fill:#f8f9fa,stroke:#adb5bd

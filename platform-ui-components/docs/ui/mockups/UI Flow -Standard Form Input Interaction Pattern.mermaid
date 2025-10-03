@@ -1,0 +1,25 @@
+flowchart TD
+    A[Input in Pristine State] --> B[User Focuses Input];
+    B --> C[User Types Content];
+    C --> D[User Blurs Input (leaves field)];
+    D --> E{Validation Logic Executes};
+    E -->|Data is Invalid| F[Show Error State];
+    E -->|Data is Valid| G[Show Valid State];
+    F --> H(User re-focuses to correct error);
+    H --> C;
+
+    subgraph Legend
+        direction LR
+        L1(Pristine State): Initial, untouched state.
+        L2(Error State): Field highlighted, error message shown.
+        L3(Valid State): Field appears normal or with success indicator.
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#212529
+    classDef validNode fill:#e8f5e9,stroke:#2e7d32,color:#212529
+    classDef processNode fill:#e3f2fd,stroke:#1976d2,color:#212529
+
+    class F errorNode;
+    class G validNode;
+    class B,C,D,E,H processNode;

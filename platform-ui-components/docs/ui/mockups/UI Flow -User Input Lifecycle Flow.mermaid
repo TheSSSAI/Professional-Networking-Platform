@@ -1,0 +1,43 @@
+flowchart TD
+    subgraph User Action
+        A[Start: User views profile in edit mode] --> B(User focuses on an input field, e.g., 'Headline')
+        B --> C(User types characters)
+    end
+
+    subgraph Client-Side Validation Cycle
+        C --> D{Real-time Validation}
+        D -- "Invalid (e.g., > 220 chars)" --> E[UI State: Error]
+        E -- "- Input border: red<br/>- Error message: visible<br/>- Save button: disabled" --> F(User corrects input)
+        F --> C
+        
+        D -- "Valid" --> G[UI State: Valid]
+        G -- "- Input border: default<br/>- Error message: hidden<br/>- Save button: enabled" --> H{User clicks Save?}
+        H -- "No, continues typing" --> C
+    end
+
+    subgraph Server Submission
+        H -- "Yes" --> I[Submit form data to server]
+        I --> J{Server-Side Validation}
+        J -- "Valid" --> K[Update data in database]
+        J -- "Invalid" --> L[Return 4xx error with details]
+    end
+
+    subgraph Final UI Feedback
+        K --> M[Show 'Success' toast notification]
+        M --> N[Return form to view mode with updated data]
+        L --> O[Show specific server error message]
+        O --> G
+    end
+
+    %% Styling
+    classDef userAction fill:#e3f2fd,stroke:#1565c0,color:#000
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef successNode fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef decisionNode fill:#fffde7,stroke:#f57f17,color:#000
+    classDef processNode fill:#f1f3f5,stroke:#495057,color:#000
+
+    class A,B,C,F userAction;
+    class E,L,O errorNode;
+    class G,K,M,N successNode;
+    class D,H,J decisionNode;
+    class I processNode;

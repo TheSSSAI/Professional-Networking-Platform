@@ -1,0 +1,422 @@
+-- PostgreSQL Schema for a Professional Networking Platform
+
+-- Enable UUID extension if not already enabled
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =============================================
+-- SECTION 1: TABLE CREATION
+-- =============================================
+
+-- Table: User
+-- Stores core user account credentials and status.
+CREATE TABLE "User" (
+    "userId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "email" VARCHAR(255) NOT NULL,
+    "passwordHash" VARCHAR(255) NOT NULL,
+    "dateOfBirth" DATE NOT NULL,
+    "status" VARCHAR(50) NOT NULL DEFAULT 'inactive',
+    "mfaSecret" VARCHAR(255),
+    "mfaEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_User_Email" UNIQUE ("email"),
+    CONSTRAINT "CHK_User_Status" CHECK ("status" IN ('inactive', 'active', 'deactivated', 'suspended', 'banned'))
+);
+
+-- Table: UserProfile
+-- Stores detailed, publicly-visible information about a user.
+-- NOTE: This table's data is intended to be cached in Redis using a write-through strategy.
+CREATE TABLE "UserProfile" (
+    "userProfileId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "fullName" VARCHAR(100) NOT NULL,
+    "headline" VARCHAR(220),
+    "location" VARCHAR(255),
+    "contactInfoVisibility" JSONB,
+    "profilePictureUrl" VARCHAR(2048),
+    "bannerImageUrl" VARCHAR(2048),
+    "customUrlSlug" VARCHAR(100),
+    "visibility" VARCHAR(50) NOT NULL DEFAULT 'public',
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_UserProfile_UserId" UNIQUE ("userId"),
+    CONSTRAINT "UC_UserProfile_CustomUrlSlug" UNIQUE ("customUrlSlug"),
+    CONSTRAINT "CHK_UserProfile_Visibility" CHECK ("visibility" IN ('public', 'private'))
+);
+
+-- Table: WorkExperience
+CREATE TABLE "WorkExperience" (
+    "workExperienceId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userProfileId" UUID NOT NULL,
+    "companyName" VARCHAR(255) NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "startDate" DATE NOT NULL,
+    "endDate" DATE,
+    "description" TEXT,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: Education
+CREATE TABLE "Education" (
+    "educationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userProfileId" UUID NOT NULL,
+    "institutionName" VARCHAR(255) NOT NULL,
+    "degree" VARCHAR(255),
+    "fieldOfStudy" VARCHAR(255),
+    "startDate" DATE NOT NULL,
+    "endDate" DATE,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: Skill
+CREATE TABLE "Skill" (
+    "skillId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "skillName" VARCHAR(100) NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_Skill_SkillName" UNIQUE ("skillName")
+);
+
+-- Table: UserProfileSkill
+CREATE TABLE "UserProfileSkill" (
+    "userProfileId" UUID NOT NULL,
+    "skillId" UUID NOT NULL,
+    "endorsementCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("userProfileId", "skillId")
+);
+
+-- Table: SkillEndorsement
+CREATE TABLE "SkillEndorsement" (
+    "skillEndorsementId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userProfileId" UUID NOT NULL,
+    "skillId" UUID NOT NULL,
+    "endorserUserId" UUID NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_SkillEndorsement_Profile_Skill_Endorser" UNIQUE ("userProfileId", "skillId", "endorserUserId")
+);
+
+-- Table: Connection
+-- NOTE: A user's list of connection IDs is intended to be cached in a Redis Set.
+CREATE TABLE "Connection" (
+    "requesterId" UUID NOT NULL,
+    "addresseeId" UUID NOT NULL,
+    "status" VARCHAR(50) NOT NULL DEFAULT 'pending',
+    "personalizedMessage" VARCHAR(300),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("requesterId", "addresseeId"),
+    CONSTRAINT "CHK_Connection_Status" CHECK ("status" IN ('pending', 'accepted')),
+    CONSTRAINT "CHK_Connection_Order" CHECK ("requesterId" < "addresseeId")
+);
+
+-- Table: Post
+CREATE TABLE "Post" (
+    "postId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "authorId" UUID NOT NULL,
+    "textContent" TEXT,
+    "linkPreviewData" JSONB,
+    "reactionCount" INTEGER NOT NULL DEFAULT 0,
+    "commentCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT "CHK_Post_TextContent_Length" CHECK (length("textContent") <= 3000)
+);
+
+-- Table: Media
+CREATE TABLE "Media" (
+    "mediaId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "uploaderId" UUID NOT NULL,
+    "mediaType" VARCHAR(50) NOT NULL DEFAULT 'image',
+    "fileFormat" VARCHAR(10) NOT NULL,
+    "fileSizeBytes" INTEGER NOT NULL DEFAULT 0,
+    "storageUrl" VARCHAR(2048) NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "CHK_Media_MediaType" CHECK ("mediaType" IN ('image')),
+    CONSTRAINT "CHK_Media_FileFormat" CHECK ("fileFormat" IN ('jpeg', 'png'))
+);
+
+-- Table: PostMedia
+CREATE TABLE "PostMedia" (
+    "postMediaId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "postId" UUID NOT NULL,
+    "mediaId" UUID NOT NULL,
+    "displayOrder" INTEGER NOT NULL DEFAULT 0
+);
+
+-- Table: PostReaction
+-- NOTE: At high scale, this table can be partitioned by HASH(postId).
+CREATE TABLE "PostReaction" (
+    "postId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "reactionType" VARCHAR(50) NOT NULL DEFAULT 'like',
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("postId", "userId")
+);
+
+-- Table: Comment
+CREATE TABLE "Comment" (
+    "commentId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "postId" UUID NOT NULL,
+    "authorId" UUID NOT NULL,
+    "textContent" TEXT NOT NULL,
+    "authorFullName" VARCHAR(100) NOT NULL,
+    "authorProfilePictureUrl" VARCHAR(2048),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT "CHK_Comment_TextContent_Length" CHECK (length("textContent") <= 1500)
+);
+
+-- Table: ContentReport
+CREATE TABLE "ContentReport" (
+    "contentReportId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "reporterId" UUID NOT NULL,
+    "reportedPostId" UUID,
+    "reportedCommentId" UUID,
+    "reason" TEXT NOT NULL,
+    "status" VARCHAR(50) NOT NULL DEFAULT 'pending',
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "CHK_ContentReport_Status" CHECK ("status" IN ('pending', 'dismissed', 'action_taken'))
+);
+
+-- Table: Conversation
+CREATE TABLE "Conversation" (
+    "conversationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: ConversationParticipant
+CREATE TABLE "ConversationParticipant" (
+    "conversationId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "joinedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("conversationId", "userId")
+);
+
+-- Table: Message
+-- NOTE: This table should be partitioned by RANGE(createdAt) for performance and data management.
+CREATE TABLE "Message" (
+    "messageId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "conversationId" UUID NOT NULL,
+    "senderId" UUID NOT NULL,
+    "textContent" TEXT NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: MessageStatus
+CREATE TABLE "MessageStatus" (
+    "messageId" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "status" VARCHAR(50) NOT NULL DEFAULT 'delivered',
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY ("messageId", "userId"),
+    CONSTRAINT "CHK_MessageStatus_Status" CHECK ("status" IN ('delivered', 'read'))
+);
+
+-- Table: Notification
+-- NOTE: This table should be partitioned by RANGE(createdAt) for performance and data purging.
+CREATE TABLE "Notification" (
+    "notificationId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "recipientId" UUID NOT NULL,
+    "actorId" UUID,
+    "notificationType" VARCHAR(100) NOT NULL,
+    "targetEntityId" UUID,
+    "targetEntityType" VARCHAR(100),
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "aggregatedCount" INTEGER NOT NULL DEFAULT 1,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: UserNotificationSetting
+CREATE TABLE "UserNotificationSetting" (
+    "userId" UUID NOT NULL,
+    "notificationType" VARCHAR(100) NOT NULL,
+    "inAppEnabled" BOOLEAN NOT NULL DEFAULT true,
+    "emailEnabled" BOOLEAN NOT NULL DEFAULT true,
+    PRIMARY KEY ("userId", "notificationType")
+);
+
+-- Table: UserToken
+CREATE TABLE "UserToken" (
+    "tokenId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "tokenHash" VARCHAR(255) NOT NULL,
+    "tokenType" VARCHAR(50) NOT NULL,
+    "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_UserToken_TokenHash" UNIQUE ("tokenHash"),
+    CONSTRAINT "CHK_UserToken_TokenType" CHECK ("tokenType" IN ('email_verification', 'password_reset'))
+);
+
+-- Table: AccountDeletionRequest
+CREATE TABLE "AccountDeletionRequest" (
+    "requestId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "status" VARCHAR(50) NOT NULL DEFAULT 'pending_grace_period',
+    "scheduledPurgeAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "finalPurgeAt" TIMESTAMP WITH TIME ZONE,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UC_AccountDeletionRequest_UserId" UNIQUE ("userId"),
+    CONSTRAINT "CHK_AccountDeletionRequest_Status" CHECK ("status" IN ('pending_grace_period', 'cancelled', 'purged'))
+);
+
+-- Table: Role
+CREATE TABLE "Role" (
+    "roleId" INTEGER PRIMARY KEY,
+    "roleName" VARCHAR(50) NOT NULL,
+    CONSTRAINT "UC_Role_RoleName" UNIQUE ("roleName")
+);
+
+-- Table: UserRole
+CREATE TABLE "UserRole" (
+    "userId" UUID NOT NULL,
+    "roleId" INTEGER NOT NULL,
+    PRIMARY KEY ("userId", "roleId")
+);
+
+-- Table: AdminAuditLog
+CREATE TABLE "AdminAuditLog" (
+    "logId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "adminUserId" UUID NOT NULL,
+    "action" VARCHAR(255) NOT NULL,
+    "targetEntityType" VARCHAR(100),
+    "targetEntityId" VARCHAR(255),
+    "details" JSONB,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: UserSecurityAuditLog
+-- NOTE: This table should be partitioned by RANGE(createdAt) for efficient data retention.
+CREATE TABLE "UserSecurityAuditLog" (
+    "logId" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "userId" UUID NOT NULL,
+    "action" VARCHAR(255) NOT NULL,
+    "sourceIpAddress" VARCHAR(45),
+    "details" JSONB,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================
+-- SECTION 2: INDEXES
+-- =============================================
+
+-- Indexes for User
+CREATE INDEX "IX_User_Status" ON "User" ("status");
+CREATE INDEX "IX_User_CreatedAt" ON "User" ("createdAt");
+
+-- Indexes for UserProfile
+CREATE INDEX "IX_UserProfile_FullName" ON "UserProfile" ("fullName");
+CREATE INDEX "IX_UserProfile_Location" ON "UserProfile" ("location");
+CREATE INDEX "IX_UserProfile_ContactInfo_GIN" ON "UserProfile" USING GIN ("contactInfoVisibility");
+
+-- Indexes for WorkExperience
+CREATE INDEX "IX_WorkExperience_Profile_StartDate" ON "WorkExperience" ("userProfileId", "startDate" DESC);
+
+-- Indexes for Education
+CREATE INDEX "IX_Education_UserProfileId" ON "Education" ("userProfileId");
+
+-- Indexes for UserProfileSkill
+CREATE INDEX "IX_UserProfileSkill_SkillId" ON "UserProfileSkill" ("skillId");
+
+-- Indexes for SkillEndorsement
+CREATE INDEX "IX_SkillEndorsement_Profile_Skill" ON "SkillEndorsement" ("userProfileId", "skillId");
+
+-- Indexes for Connection
+CREATE INDEX "IX_Connection_AddresseeId_Status" ON "Connection" ("addresseeId", "status");
+CREATE INDEX "IX_Connection_Requester_Status" ON "Connection" ("requesterId", "status");
+
+-- Indexes for Post
+CREATE INDEX "IX_Post_Author_Active_CreatedAt" ON "Post" ("authorId", "createdAt" DESC) WHERE "deletedAt" IS NULL;
+CREATE INDEX "IX_Post_DeletedAt" ON "Post" ("deletedAt");
+
+-- Indexes for Media
+CREATE INDEX "IX_Media_UploaderId" ON "Media" ("uploaderId");
+
+-- Indexes for PostMedia
+CREATE INDEX "IX_PostMedia_PostId_DisplayOrder" ON "PostMedia" ("postId", "displayOrder");
+
+-- Indexes for PostReaction
+CREATE INDEX "IX_PostReaction_UserId" ON "PostReaction" ("userId");
+
+-- Indexes for Comment
+CREATE INDEX "IX_Comment_PostId_CreatedAt" ON "Comment" ("postId", "createdAt");
+
+-- Indexes for ContentReport
+CREATE INDEX "IX_ContentReport_Status_CreatedAt" ON "ContentReport" ("status", "createdAt");
+
+-- Indexes for ConversationParticipant
+CREATE INDEX "IX_ConversationParticipant_UserId" ON "ConversationParticipant" ("userId");
+
+-- Indexes for Message
+CREATE INDEX "IX_Message_ConversationId_CreatedAt" ON "Message" ("conversationId", "createdAt");
+
+-- Indexes for MessageStatus
+CREATE INDEX "IX_MessageStatus_UserId_Status" ON "MessageStatus" ("userId", "status");
+
+-- Indexes for Notification
+CREATE INDEX "IX_Notification_Recipient_IsRead_CreatedAt" ON "Notification" ("recipientId", "isRead", "createdAt");
+
+-- Indexes for UserToken
+CREATE INDEX "IX_UserToken_UserId_TokenType" ON "UserToken" ("userId", "tokenType");
+CREATE INDEX "IX_UserToken_ExpiresAt" ON "UserToken" ("expiresAt");
+
+-- Indexes for AccountDeletionRequest
+CREATE INDEX "IX_AccountDeletionRequest_Status_ScheduledPurgeAt" ON "AccountDeletionRequest" ("status", "scheduledPurgeAt");
+
+-- Indexes for UserRole
+CREATE INDEX "IX_UserRole_RoleId" ON "UserRole" ("roleId");
+
+-- Indexes for AdminAuditLog
+CREATE INDEX "IX_AdminAuditLog_TargetEntity" ON "AdminAuditLog" ("targetEntityType", "targetEntityId");
+CREATE INDEX "IX_AdminAuditLog_AdminUserId_CreatedAt" ON "AdminAuditLog" ("adminUserId", "createdAt");
+
+-- Indexes for UserSecurityAuditLog
+CREATE INDEX "IX_UserSecurityAuditLog_UserId_CreatedAt" ON "UserSecurityAuditLog" ("userId", "createdAt");
+
+
+-- =============================================
+-- SECTION 3: FOREIGN KEY CONSTRAINTS
+-- =============================================
+
+ALTER TABLE "UserProfile" ADD CONSTRAINT "FK_UserProfile_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "WorkExperience" ADD CONSTRAINT "FK_WorkExperience_UserProfile" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile"("userProfileId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Education" ADD CONSTRAINT "FK_Education_UserProfile" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile"("userProfileId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserProfileSkill" ADD CONSTRAINT "FK_UserProfileSkill_UserProfile" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile"("userProfileId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserProfileSkill" ADD CONSTRAINT "FK_UserProfileSkill_Skill" FOREIGN KEY ("skillId") REFERENCES "Skill"("skillId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SkillEndorsement" ADD CONSTRAINT "FK_SkillEndorsement_UserProfile" FOREIGN KEY ("userProfileId") REFERENCES "UserProfile"("userProfileId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SkillEndorsement" ADD CONSTRAINT "FK_SkillEndorsement_Skill" FOREIGN KEY ("skillId") REFERENCES "Skill"("skillId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SkillEndorsement" ADD CONSTRAINT "FK_SkillEndorsement_User" FOREIGN KEY ("endorserUserId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Connection" ADD CONSTRAINT "FK_Connection_Requester" FOREIGN KEY ("requesterId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Connection" ADD CONSTRAINT "FK_Connection_Addressee" FOREIGN KEY ("addresseeId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Post" ADD CONSTRAINT "FK_Post_User" FOREIGN KEY ("authorId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Media" ADD CONSTRAINT "FK_Media_User" FOREIGN KEY ("uploaderId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostMedia" ADD CONSTRAINT "FK_PostMedia_Post" FOREIGN KEY ("postId") REFERENCES "Post"("postId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostMedia" ADD CONSTRAINT "FK_PostMedia_Media" FOREIGN KEY ("mediaId") REFERENCES "Media"("mediaId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostReaction" ADD CONSTRAINT "FK_PostReaction_Post" FOREIGN KEY ("postId") REFERENCES "Post"("postId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostReaction" ADD CONSTRAINT "FK_PostReaction_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "FK_Comment_Post" FOREIGN KEY ("postId") REFERENCES "Post"("postId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "FK_Comment_User" FOREIGN KEY ("authorId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ContentReport" ADD CONSTRAINT "FK_ContentReport_Reporter" FOREIGN KEY ("reporterId") REFERENCES "User"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ContentReport" ADD CONSTRAINT "FK_ContentReport_Post" FOREIGN KEY ("reportedPostId") REFERENCES "Post"("postId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ContentReport" ADD CONSTRAINT "FK_ContentReport_Comment" FOREIGN KEY ("reportedCommentId") REFERENCES "Comment"("commentId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ConversationParticipant" ADD CONSTRAINT "FK_ConvP_Conversation" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("conversationId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ConversationParticipant" ADD CONSTRAINT "FK_ConvP_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Message" ADD CONSTRAINT "FK_Message_Conversation" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("conversationId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Message" ADD CONSTRAINT "FK_Message_Sender" FOREIGN KEY ("senderId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MessageStatus" ADD CONSTRAINT "FK_MessageStatus_Message" FOREIGN KEY ("messageId") REFERENCES "Message"("messageId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "MessageStatus" ADD CONSTRAINT "FK_MessageStatus_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Notification" ADD CONSTRAINT "FK_Notification_Recipient" FOREIGN KEY ("recipientId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Notification" ADD CONSTRAINT "FK_Notification_Actor" FOREIGN KEY ("actorId") REFERENCES "User"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserNotificationSetting" ADD CONSTRAINT "FK_UNS_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserToken" ADD CONSTRAINT "FK_UserToken_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AccountDeletionRequest" ADD CONSTRAINT "FK_ADR_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserRole" ADD CONSTRAINT "FK_UserRole_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserRole" ADD CONSTRAINT "FK_UserRole_Role" FOREIGN KEY ("roleId") REFERENCES "Role"("roleId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "AdminAuditLog" ADD CONSTRAINT "FK_AdminAuditLog_User" FOREIGN KEY ("adminUserId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserSecurityAuditLog" ADD CONSTRAINT "FK_UserSecurityAuditLog_User" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;

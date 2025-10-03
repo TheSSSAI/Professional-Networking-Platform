@@ -1,0 +1,27 @@
+flowchart TD
+    subgraph Page ["Login Screen"]
+        direction TB
+        A["<h1>Sign In</h1>"]
+        B["Email Address Input"]
+        C["Password Input"]
+        D["<a href='/forgot-password'>Forgot Password?</a>"]
+        E["Login Button (Primary Action)"]
+        F["Don't have an account? <a href='/register'>Sign Up</a>"]
+        G((Error Message Area<br/>'Invalid email or password.'))
+
+        A -- " " --> G
+        G -- " " --> B
+        B --> C
+        C --> D
+        D -- " " --> E
+        E -- " " --> F
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#d32f2f,stroke-width:2px,stroke-dasharray: 5 5
+    classDef buttonNode fill:#1976D2,stroke:#0D47A1,color:white
+    classDef inputNode fill:#f8f9fa,stroke:#ced4da
+
+    class G errorNode
+    class E buttonNode
+    class B,C inputNode

@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor "User Client" as UserClient
+    participant "API Gateway" as APIGateway
+    participant "Posts Service" as PostsService
+    participant "Event Bus" as EventBus
+    participant "Admin Service" as AdminService
+    actor "Admin Dashboard" as AdminDashboard
+
+    activate APIGateway
+    UserClient->>APIGateway: 1. 1. Submit Content Report
+    APIGateway-->>UserClient: 8. Return Success Confirmation
+    activate PostsService
+    APIGateway->>PostsService: 2. 2. Forward ReportPost request
+    PostsService-->>APIGateway: 7. Return ReportPostResponse
+    PostsService->>PostsService: 3. 3. [Self] Flag content as reported in DB
+    PostsService->>EventBus: 4. 4. Publish ContentReported event
+    activate AdminService
+    EventBus->>AdminService: 5. 5. Deliver ContentReported event
+    AdminService->>AdminService: 6. 6. [Self] Create moderation record in DB
+    AdminDashboard->>APIGateway: 9. 9. Fetch Moderation Queue
+    APIGateway-->>AdminDashboard: 12. Return Moderation Queue Data
+    APIGateway->>AdminService: 10. 10. Forward GetModerationQueue request
+    AdminService-->>APIGateway: 11. Return GetModerationQueueResponse
+    AdminDashboard->>APIGateway: 13. 13. Submit Moderation Action
+    APIGateway-->>AdminDashboard: 18. Return Action Success Confirmation
+    APIGateway->>AdminService: 14. 14. Forward TakeModerationAction request
+    AdminService-->>APIGateway: 17. Return TakeModerationActionResponse
+    AdminService->>PostsService: 15. 15a. Request Content Deletion
+    PostsService-->>AdminService: 15b. Confirm Deletion
+    AdminService->>AdminService: 16. 16. [Self] Update report status and create immutable audit log
+
+    note over AdminService: Immutable Audit Trail (REQ-1.8.5): Step 16 is critical for compliance. The admin_audit_log table ...
+
+    deactivate AdminService
+    deactivate PostsService
+    deactivate APIGateway

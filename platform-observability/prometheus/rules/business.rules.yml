@@ -1,0 +1,40 @@
+# prometheus/rules/business.rules.yml
+#
+# Alerting rules for key business metrics.
+# These rules monitor the health of the business, not just the application.
+# Corresponds to requirements in REQ-1-084.
+
+groups:
+  - name: business-kpi-alerts
+    rules:
+      - alert: UserSignupsAnomalouslyLow
+        # This alert fires if the user signup rate in the last hour is less than 50%
+        # of the signup rate from one week ago, for at least 2 hours.
+        # This indicates a potential issue with the registration funnel.
+        # Assumes a counter metric 'platform_user_signups_total'.
+        expr: |
+          rate(platform_user_signups_total[1h])
+          <
+          (0.5 * rate(platform_user_signups_total[1h] offset 1w))
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "User signup rate is anomalously low"
+          description: "The number of user signups in the last hour ({{ $value | printf \"%.2f\" }}/hr) is less than 50% of the rate from one week ago. This could indicate a problem with the registration page or marketing campaigns."
+
+      - alert: PostCreationsAnomalouslyLow
+        # This alert fires if the post creation rate in the last hour is less than 50%
+        # of the rate from one week ago, for at least 2 hours.
+        # This indicates a potential issue with user engagement or the post creation feature.
+        # Assumes a counter metric 'platform_posts_created_total'.
+        expr: |
+          rate(platform_posts_created_total[1h])
+          <
+          (0.5 * rate(platform_posts_created_total[1h] offset 1w))
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Post creation rate is anomalously low"
+          description: "The number of new posts in the last hour ({{ $value | printf \"%.2f\" }}/hr) is less than 50% of the rate from one week ago. This could indicate a problem with user engagement or a bug in the post creation feature."

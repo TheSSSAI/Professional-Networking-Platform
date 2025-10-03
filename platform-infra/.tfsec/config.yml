@@ -1,0 +1,44 @@
+.yml
+# .tfsec/config.yml
+# This file provides custom configuration for the tfsec static analysis tool.
+# It allows us to fine-tune security checks, exclude specific rules, and set severity levels.
+# Documentation: https://aquasecurity.github.io/tfsec/latest/getting-started/configuration/
+
+# ---
+# You can set a minimum severity to report on.
+# Options: CRITICAL, HIGH, MEDIUM, LOW, INFO
+# Setting to MEDIUM means LOW and INFO severity issues will be ignored.
+min_required_severity: MEDIUM
+
+# ---
+# You can exclude specific rule IDs from checks.
+# This is useful for ignoring rules that are not applicable to your environment
+# or represent an accepted risk. Use this with caution and provide justification.
+exclude:
+  # Example: If your S3 bucket for logs doesn't need versioning, you might exclude this.
+  # - AWS019  # aws-s3-enable-versioning
+
+  # Example: In some development environments, you might not enforce MFA for all IAM users.
+  # - AWS010 # aws-iam-enforce-mfa
+
+  # This rule often flags the use of `AmazonSSMManagedInstanceCore`, which is a standard AWS-managed policy.
+  # In many cases, this is an acceptable practice.
+  - AWS090 # aws-iam-no-policy-wildcards: Ignores wildcard checks on IAM policies which can be noisy for AWS managed policies.
+
+  # This rule checks if an S3 bucket has access logging enabled. While good practice,
+  # it might be considered non-critical for certain types of buckets (e.g., transient).
+  - AWS002 # aws-s3-enable-bucket-logging
+
+# ---
+# You can specify paths to exclude from scanning.
+# This is useful for ignoring test fixtures, vendor directories, or legacy code.
+exclude_paths:
+  - "modules/vendor/"
+  - "test/fixtures/"
+
+# ---
+# You can also run only a specific set of checks.
+# This is generally not recommended as it can cause you to miss new security checks.
+# run:
+#   - AWS001
+#   - AWS006

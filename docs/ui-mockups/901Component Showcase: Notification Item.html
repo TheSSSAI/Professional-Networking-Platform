@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Showcase: Notification Item</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+   
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-normal: 400;
+      --font-weight-semibold: 600;
+      --line-height-body: 1.5;
+      --line-height-caption: 1.4;
+
+      /* Color Palette */
+      --color-primary-50: #E3F2FD;
+      --color-primary-100: #BBDEFB;
+      --color-primary-700: #1976D2;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-600: #6C757D;
+      --color-neutral-800: #343A40;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      
+      /* Spacing */
+      --space-xxs: 4px;
+      --space-xs: 8px;
+      --space-sm: 12px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --border-radius-full: 9999px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-800);
+      line-height: var(--line-height-body);
+      font-size: var(--font-size-body);
+    }
+
+    .screen-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: var(--space-lg);
+    }
+
+    .showcase-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--color-neutral-900);
+        margin-bottom: var(--space-lg);
+        border-bottom: 1px solid #DEE2E6;
+        padding-bottom: var(--space-md);
+    }
+
+    /* Notification List Component Styles */
+    .notification-list {
+      list-style: none;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .notification-item a {
+        display: flex;
+        gap: var(--space-sm);
+        padding: var(--space-md);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        transition: background-color 0.15s ease-in-out;
+        border-bottom: 1px solid var(--color-neutral-100);
+    }
+    .notification-list li:last-child .notification-item a {
+        border-bottom: none;
+    }
+
+    .notification-item a:hover,
+    .notification-item a:focus {
+        background-color: var(--color-neutral-50);
+        outline: none;
+    }
+
+    .notification-item a:focus-visible {
+        outline: 2px solid var(--color-primary-700);
+        outline-offset: -2px;
+    }
+
+    /* Unread State */
+    .notification-item--unread a {
+        background-color: var(--color-primary-50);
+    }
+    .notification-item--unread a:hover,
+    .notification-item--unread a:focus {
+        background-color: var(--color-primary-100);
+    }
+    .notification-item--unread a::after {
+        content: '';
+        position: absolute;
+        right: var(--space-md);
+        top: 50%;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        background-color: var(--color-primary-700);
+        border-radius: var(--border-radius-full);
+    }
+
+    /* Avatar Sub-component */
+    .avatar {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: var(--border-radius-full);
+        background-color: var(--color-neutral-100);
+        overflow: hidden;
+    }
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Notification Content */
+    .notification-content {
+        flex-grow: 1;
+    }
+
+    .notification-text {
+        font-size: var(--font-size-body);
+        color: var(--color-neutral-800);
+    }
+
+    .notification-text strong {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-neutral-900);
+    }
+
+    .timestamp {
+        font-size: var(--font-size-caption);
+        color: var(--color-neutral-600);
+        margin-top: var(--space-xxs);
+    }
+    
+    /* Variants */
+    .notification-item--comment .notification-text {
+        /* Add specific styles for comment variant if needed */
+    }
+
+    .notification-item--reaction .notification-text {
+        /* Add specific styles for reaction variant if needed */
+    }
+
+    .notification-item--connection .notification-text {
+        /* Add specific styles for connection variant if needed */
+    }
+
+    /* Screen Variations Documentation */
+    .screen-variations {
+        margin-top: 40px;
+        padding: 20px;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+    }
+    .screen-variations h2 {
+        margin-bottom: 20px;
+    }
+    .variation-group {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .variation-group h3 {
+        margin-bottom: 10px;
+        font-size: 1.2em;
+        color: #333;
+    }
+    .variation-group normal {
+        font-style: italic;
+        color: #555;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="screen-container">
+    <h1 class="showcase-title">Notification Item Showcase</h1>
+    
+    <ul class="notification-list">
+        <li class="notification-item notification-item--connection notification-item--unread">
+            <a href="#connection-request" aria-label="Unread: Jane Doe sent you a connection request.">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/48?u=jane" alt="">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text"><strong>Jane Doe</strong> sent you a connection request.</p>
+                    <p class="timestamp">2m ago</p>
+                </div>
+                <span class="unread-dot" aria-hidden="true"></span>
+            </a>
+        </li>
+        <li class="notification-item notification-item--reaction notification-item--unread">
+            <a href="#reaction" aria-label="Unread: John Smith and 2 others reacted to your post.">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/48?u=john" alt="">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text"><strong>John Smith</strong> and <strong>2 others</strong> reacted to your post: "Excited to share our latest project..."</p>
+                    <p class="timestamp">15m ago</p>
+                </div>
+                <span class="unread-dot" aria-hidden="true"></span>
+            </a>
+        </li>
+        <li class="notification-item notification-item--comment notification-item--unread">
+            <a href="#comment" aria-label="Unread: Emily White commented on your post.">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/48?u=emily" alt="">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text"><strong>Emily White</strong> commented on your post: "This is a great insight! Thanks for sharing."</p>
+                    <p class="timestamp">1h ago</p>
+                </div>
+                <span class="unread-dot" aria-hidden="true"></span>
+            </a>
+        </li>
+        <li class="notification-item notification-item--connection">
+            <a href="#connection-accepted" aria-label="Read: Your connection request to Acme Corp was accepted.">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/48?u=acme" alt="">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text">Your connection request to <strong>Acme Corp</strong> was accepted.</p>
+                    <p class="timestamp">Yesterday</p>
+                </div>
+            </a>
+        </li>
+        <li class="notification-item notification-item--comment">
+            <a href="#comment-read" aria-label="Read: David Green commented on your post.">
+                <div class="avatar">
+                    <img src="https://i.pravatar.cc/48?u=david" alt="">
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text"><strong>David Green</strong> commented on your post.</p>
+                    <p class="timestamp">2 days ago</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+  </div>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations screen-container">
+    <h2>Component Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Unread Connection Request"</h3>
+      <!--description--><normal>An incoming connection request that has not yet been seen by the user. It has a distinct background color and an 'unread' indicator dot.</normal>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Unread Reaction (Batched)"</h3>
+      <!--description--><normal>A notification for multiple similar events (e.g., likes) on a single piece of content, grouped together. Shown in the unread state.</normal>
+    </div>
+
+    <div class="variation-group">
+      <h3>Variant Name: "Unread Comment"</h3>
+      <!--description--><normal>A notification for a new comment on the user's content, shown in the unread state.</normal>
+    </div>
+
+    <div class="variation-group">
+      <h3>Variant Name: "Read Notification"</h3>
+      <!--description--><normal>A standard notification that has already been seen by the user. It has a neutral background and no 'unread' indicator.</normal>
+    </div>
+  </div>
+</body>
+</html>

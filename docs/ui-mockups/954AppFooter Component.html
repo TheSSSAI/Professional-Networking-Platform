@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppFooter Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-weight-normal: 400;
+      --font-weight-semibold: 600;
+
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-primary-300: #64B5F6;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+
+      /* Spacing */
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 48px;
+
+      /* Borders */
+      --border-radius-md: 8px;
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-body);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: 1.5;
+    }
+
+    /* Component: AppFooter */
+    .app-footer {
+      background-color: var(--color-neutral-50);
+      border-top: 1px solid #DEE2E6;
+      padding: var(--spacing-lg) 0;
+      color: var(--color-neutral-600);
+    }
+    
+    .footer-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-md);
+      text-align: center;
+    }
+
+    .copyright-text {
+      font-size: var(--font-size-caption);
+      order: 2; /* Puts copyright below links on mobile */
+    }
+
+    .footer-nav {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+      order: 1; /* Puts links above copyright on mobile */
+    }
+
+    .footer-link a {
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-600);
+      text-decoration: none;
+      transition: color 0.2s ease-in-out;
+      border-radius: 4px;
+      padding: 4px;
+    }
+
+    .footer-link a:hover {
+      color: var(--color-primary-700);
+      text-decoration: underline;
+    }
+
+    .footer-link a:focus-visible {
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: 2px;
+      color: var(--color-primary-700);
+    }
+
+    /* Responsive Styles: Tablet and Desktop */
+    @media (min-width: 768px) {
+      .app-footer {
+        padding: var(--spacing-xl) 0;
+      }
+
+      .footer-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+      }
+
+      .copyright-text {
+        order: 1; /* Puts copyright first on desktop */
+      }
+
+      .footer-nav {
+        flex-direction: row;
+        gap: var(--spacing-lg);
+        order: 2; /* Puts links second on desktop */
+      }
+    }
+    
+    /* Helper for demonstration */
+    .demo-page-content {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+        flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-page-content">
+      <h1>Application Content Area</h1>
+      <p>Scroll down to see the footer component.</p>
+  </div>
+  
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p class="copyright-text">&copy; 2025 Professional Network. All Rights Reserved.</p>
+      <nav aria-label="Footer">
+        <ul class="footer-nav">
+          <li class="footer-link"><a href="#about">About</a></li>
+          <li class="footer-link"><a href="#help">Help Center</a></li>
+          <li class="footer-link"><a href="#privacy">Privacy Policy</a></li>
+          <li class="footer-link"><a href="#terms">Terms of Service</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations" style="padding: 2rem; background-color: #fff; margin-top: 2rem; border-top: 1px dashed #ccc;">
+    <h2 style="margin-bottom: 1rem;">Component Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Default"</h3>
+      <p style="margin-bottom: 1rem;"><normal>This is the standard and only state of the footer. Its appearance changes based on the viewport size (responsive behavior).</normal></p>
+      <!-- The component above demonstrates the default state -->
+      <p><b>Desktop View (&gt;768px):</b> Copyright text is on the left, navigation links are on the right.</p>
+      <p><b>Mobile View (&lt;768px):</b> Navigation links are stacked vertically above the copyright text, all centered.</p>
+    </div>
+  </div>
+
+</body>
+</html>

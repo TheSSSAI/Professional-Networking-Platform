@@ -1,0 +1,4 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Identity Service (Overall)","Critical","High","Medium","[""Unit"",""Integration"",""End-to-End"",""Security"",""Performance""]","90","95","85","95","20","330","125","0.98","High","Medium","Excellent","Good"
+"AuthModule (Registration, Login, Logout)","Critical","High","Low","[""Unit"",""Integration"",""Security""]","95","100","90","100","","80","40","0.99","Very High","Low","Excellent","Good"
+"DeletionModule (SAGA Orchestration)","Critical","High","Low","[""Unit"",""Integration""]","90","95","70","95","10","60","20","0.95","High","High","Good","Medium"

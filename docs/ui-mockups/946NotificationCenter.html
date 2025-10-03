@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organism: NotificationCenter</title>
+    <style>
+        /* 1. CSS Reset & Base Styles */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        h1, h2, h3, p { margin: 0 0 1rem 0; }
+        h1 { font-size: 2.5rem; text-align: center; }
+        h2 { font-size: 1.5rem; margin-top: 2rem; border-bottom: 1px solid var(--color-neutral-200); padding-bottom: 0.5rem; }
+        
+        /* 2. Design System Tokens */
+        :root {
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-primary-700: #1976D2;
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-400: #CED4DA;
+            --color-neutral-600: #6C757D;
+            --color-neutral-900: #212529;
+            --color-semantic-error: #D32F2F;
+            --color-white: #FFFFFF;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+
+        /* 3. Showcase Layout Styles */
+        .showcase-container { max-width: 900px; margin: 0 auto; }
+        .showcase-header { text-align: center; margin-bottom: 2rem; }
+        .showcase-header p { color: var(--color-neutral-600); }
+        .component-display { 
+            display: flex; 
+            justify-content: flex-end; 
+            padding: 3rem 1rem; 
+            min-height: 550px; 
+            background-color: var(--color-white);
+            border: 1px dashed var(--color-neutral-400);
+            border-radius: var(--border-radius-md);
+        }
+
+        /* 4. Atomic Dependencies Styles */
+        .avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--color-neutral-200); color: var(--color-neutral-600); font-weight: var(--font-weight-semibold); object-fit: cover; }
+        .avatar--sm { width: 40px; height: 40px; font-size: 1rem; }
+        .spinner { border: 3px solid var(--color-neutral-200); border-top-color: var(--color-primary-700); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .skeleton { background-color: var(--color-neutral-200); position: relative; overflow: hidden; border-radius: 4px; }
+        .skeleton::after { content: ''; position: absolute; top: 0; left: -150%; width: 150%; height: 100%; background: linear-gradient(90deg, transparent, var(--color-neutral-100), transparent); animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 100% { left: 150%; } }
+
+        /* 5. NotificationCenter Component Styles */
+        .notification-center {
+            position: relative;
+            display: inline-block;
+        }
+
+        .notification-center__toggle {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--color-neutral-600);
+            transition: background-color 150ms ease, color 150ms ease;
+        }
+        .notification-center__toggle:hover {
+            background-color: var(--color-neutral-100);
+            color: var(--color-neutral-900);
+        }
+        .notification-center__toggle:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+            background-color: var(--color-neutral-100);
+        }
+
+        .notification-center__badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background-color: var(--color-semantic-error);
+            color: var(--color-white);
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: var(--font-weight-semibold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--color-white);
+        }
+
+        .notification-center__panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 380px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-neutral-200);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 200ms ease, transform 200ms ease, visibility 200ms;
+            z-index: 1000;
+        }
+        
+        .notification-center:focus-within > .notification-center__panel,
+        .notification-center.is-open .notification-center__panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-center__header,
+        .notification-center__footer {
+            padding: var(--spacing-sm) var(--spacing-md);
+            flex-shrink: 0;
+        }
+        .notification-center__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-neutral-200);
+        }
+        .notification-center__title {
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+        }
+        .notification-center__mark-read {
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-primary-700);
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .notification-center__footer {
+            text-align: center;
+            border-top: 1px solid var(--color-neutral-200);
+        }
+        .notification-center__footer a {
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            text-decoration: none;
+            color: var(--color-primary-700);
+            display: block;
+            padding: var(--spacing-xs);
+        }
+
+        .notification-center__body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: var(--spacing-sm) 0;
+        }
+        .notification-center__list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Notification Item (Dependency) */
+        .notification-item {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-decoration: none;
+            color: var(--color-neutral-900);
+            position: relative;
+        }
+        .notification-item:hover, .notification-item:focus-visible {
+            background-color: var(--color-neutral-50);
+            outline: none;
+        }
+        .notification-item__avatar { flex-shrink: 0; }
+        .notification-item__content { flex-grow: 1; min-width: 0; }
+        .notification-item__text { font-size: var(--font-size-sm); margin: 0 0 var(--spacing-xs) 0; line-height: 1.4; }
+        .notification-item__text strong { font-weight: var(--font-weight-semibold); }
+        .notification-item__timestamp { font-size: var(--font-size-xs); color: var(--color-neutral-600); }
+        .notification-item--unread {
+            background-color: var(--color-primary-50);
+        }
+        .notification-item--unread:hover {
+             background-color: #dbeafe;
+        }
+        .notification-item--unread::after {
+            content: '';
+            position: absolute;
+            right: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-primary-500);
+            border-radius: 50%;
+        }
+
+        /* States: Loading & Empty */
+        .notification-center__state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg) var(--spacing-md);
+            text-align: center;
+            height: 100%;
+            min-height: 200px;
+        }
+        .notification-center__state-icon { 
+            color: var(--color-neutral-400); 
+            margin-bottom: var(--spacing-md);
+        }
+        .notification-center__state-title {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-xs);
+        }
+        .notification-center__state-text {
+            font-size: var(--font-size-sm);
+            color: var(--color-neutral-600);
+            max-width: 250px;
+            margin: 0;
+        }
+        .notification-center__body--loading, .notification-center__body--empty { padding: 0; }
+
+        @media (max-width: 480px) {
+            .notification-center__panel {
+                width: calc(100vw - 16px);
+                right: -8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="showcase-container">
+        <header class="showcase-header">
+            <h1>Organism: NotificationCenter</h1>
+            <p>A popover panel that displays a user's recent notifications, with states for loading, empty, and populated content.</p>
+        </header>
+
+        <h2>Live Demo</h2>
+        <div class="component-display">
+            <div class="notification-center is-open">
+                <button class="notification-center__toggle" type="button" aria-haspopup="true" aria-expanded="true" aria-label="Notifications, 3 unread">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="notification-center__badge">3</span>
+                </button>
+
+                <div class="notification-center__panel" role="region" aria-label="Notifications Panel">
+                    <header class="notification-center__header">
+                        <h3 class="notification-center__title">Notifications</h3>
+                        <button class="notification-center__mark-read" type="button">Mark all as read</button>
+                    </header>
+                    <div class="notification-center__body">
+                        <ul class="notification-center__list">
+                            <li>
+                                <a href="#" class="notification-item notification-item--unread">
+                                    <img src="https://i.pravatar.cc/40?u=user1" alt="Profile picture of John Doe" class="avatar avatar--sm notification-item__avatar"/>
+                                    <div class="notification-item__content">
+                                        <p class="notification-item__text"><strong>John Doe</strong> sent you a connection request.</p>
+                                        <span class="notification-item__timestamp">2 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="notification-item notification-item--unread">
+                                    <img src="https://i.pravatar.cc/40?u=user2" alt="Profile picture of Jane Smith" class="avatar avatar--sm notification-item__avatar"/>
+                                    <div class="notification-item__content">
+                                        <p class="notification-item__text"><strong>Jane Smith, Alex Johnson, and 3 others</strong> reacted to your post: "Excited to share our new project launch!"</p>
+                                        <span class="notification-item__timestamp">15 minutes ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="notification-item notification-item--unread">
+                                    <img src="https://i.pravatar.cc/40?u=user3" alt="Profile picture of Sarah Lee" class="avatar avatar--sm notification-item__avatar"/>
+                                    <div class="notification-item__content">
+                                        <p class="notification-item__text"><strong>Sarah Lee</strong> accepted your connection request.</p>
+                                        <span class="notification-item__timestamp">1 hour ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="notification-item">
+                                    <div class="avatar avatar--sm notification-item__avatar" style="background-color: #e9ecef;">?</div>
+                                    <div class="notification-item__content">
+                                        <p class="notification-item__text"><strong>Deactivated User</strong> commented on your post.</p>
+                                        <span class="notification-item__timestamp">3 hours ago</span>
+                                    </div>
+                                </a>
+                            </li>
+                             <li>
+                                <a href="#" class="notification-item">
+                                    <img src="https://i.pravatar.cc/40?u=user5" alt="Profile picture of Michael Chen" class="avatar avatar--sm notification-item__avatar"/>
+                                    <div class="notification-item__content">
+                                        <p class="notification-item__text"><strong>Michael Chen</strong> reacted to your comment: "Great point!"</p>
+                                        <span class="notification-item__timestamp">Yesterday</span>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <footer class="notification-center__footer">
+                        <a href="#">View All Notifications</a>
+                    </footer>
+                </div>
+            </div>
+        </div>
+
+        <h2>States</h2>
+        <div class="component-display" style="min-height: 400px; justify-content: space-around; flex-wrap: wrap;">
+            <!-- Loading State -->
+            <div class="notification-center is-open">
+                 <div class="notification-center__panel">
+                    <header class="notification-center__header">
+                        <h3 class="notification-center__title">Notifications</h3>
+                    </header>
+                    <div class="notification-center__body notification-center__body--loading">
+                        <div class="notification-center__state">
+                             <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+             <div class="notification-center is-open">
+                 <div class="notification-center__panel">
+                    <header class="notification-center__header">
+                        <h3 class="notification-center__title">Notifications</h3>
+                    </header>
+                    <div class="notification-center__body notification-center__body--empty">
+                        <div class="notification-center__state">
+                            <svg class="notification-center__state-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                            <h4 class="notification-center__state-title">No new notifications</h4>
+                            <p class="notification-center__state-text">You're all caught up! We'll let you know when there's new activity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The standard notification center popover. </normal>
+		<!-- vrient 1 html -->
+        <div class="notification-center is-open">                <button class="notification-center__toggle" type="button" aria-haspopup="true" aria-expanded="true" aria-label="Notifications, 3 unread">                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>                    <span class="notification-center__badge">3</span>                </button>                <div class="notification-center__panel" role="region" aria-label="Notifications Panel">                    <header class="notification-center__header">                        <h3 class="notification-center__title">Notifications</h3>                        <button class="notification-center__mark-read" type="button">Mark all as read</button>                    </header>                    <div class="notification-center__body">                        <ul class="notification-center__list">                            <li>                                <a href="#" class="notification-item notification-item--unread">                                    <img src="https://i.pravatar.cc/40?u=user1" alt="Profile picture of John Doe" class="avatar avatar--sm notification-item__avatar">                                    <div class="notification-item__content">                                        <p class="notification-item__text"><strong>John Doe</strong> sent you a connection request.</p>                                        <span class="notification-item__timestamp">2 minutes ago</span>                                    </div>                                </a>                            </li>                            <li>                                <a href="#" class="notification-item notification-item--unread">                                    <img src="https://i.pravatar.cc/40?u=user2" alt="Profile picture of Jane Smith" class="avatar avatar--sm notification-item__avatar">                                    <div class="notification-item__content">                                        <p class="notification-item__text"><strong>Jane Smith, Alex Johnson, and 3 others</strong> reacted to your post: "Excited to share our new project launch!"</p>                                        <span class="notification-item__timestamp">15 minutes ago</span>                                    </div>                                </a>                            </li>                        </ul>                    </div>                    <footer class="notification-center__footer">                        <a href="#">View All Notifications</a>                    </footer>                </div>            </div>"     
+		
+      <div>
+	 </div>
+	
+</body>
+</html>

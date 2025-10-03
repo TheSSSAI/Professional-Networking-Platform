@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileUpload Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset & Base --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8F9FA;
+      color: #212529;
+      padding: 32px;
+    }
+    .showcase {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .showcase-section { margin-bottom: 32px; }
+    .showcase-section h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #212529;
+    }
+    .showcase-section p {
+        font-size: 0.9rem;
+        color: #6C757D;
+        margin-bottom: 16px;
+    }
+
+    /* --- Design System Tokens (from Atomic Components) --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD; --color-primary-100: #BBDEFB; --color-primary-200: #90CAF9; --color-primary-300: #64B5F6; --color-primary-500: #2196F3; --color-primary-700: #1976D2; --color-primary-800: #1565C0; --color-primary-900: #0D47A1;
+      --color-danger-500: #D32F2F;
+      --color-neutrals-white: #FFFFFF; --color-neutrals-gray-50: #F8F9FA; --color-neutrals-gray-100: #F1F3F5; --color-neutrals-gray-200: #E9ECEF; --color-neutrals-gray-400: #CED4DA; --color-neutrals-gray-500: #ADB5BD; --color-neutrals-gray-600: #6C757D; --color-neutrals-gray-700: #495057; --color-neutrals-gray-900: #212529;
+      --color-semantic-success: #2E7D32; --color-semantic-error: #D32F2F; --color-semantic-error-bg: #FFEBEE;
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-caption: 0.875rem;
+      --font-weight-semibold: 600;
+      /* Spacing */
+      --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-5: 32px;
+      /* Borders */
+      --border-radius-md: 8px; --border-radius-lg: 12px;
+    }
+
+    /* --- Atomic Component Styles (Dependencies) --- */
+    .icon { display: inline-block; width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; fill: none; stroke: currentColor; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border-radius: var(--border-radius-md); font-weight: var(--font-weight-semibold); text-decoration: none; cursor: pointer; transition: background-color 0.2s ease; border: 1px solid transparent; min-height: 44px; }
+    .btn:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+    .btn--text { padding: 10px; color: var(--color-primary-700); background-color: transparent; }
+    .btn--text:hover { background-color: var(--color-primary-50); }
+    .btn--icon { padding: 10px; font-size: 1.25rem; line-height: 1; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .spinner { display: inline-block; border-style: solid; border-color: currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+    .spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+    .error-message { color: var(--color-semantic-error); font-size: var(--font-size-caption); margin-top: var(--space-2); display: block; }
+    
+    /* --- FileUpload Component CSS --- */
+    .file-upload {
+      width: 100%;
+      font-family: var(--font-family-primary);
+    }
+
+    .file-upload__input {
+      /* Visually hide the input but keep it accessible */
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+
+    .file-upload__dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-5);
+      border: 2px dashed var(--color-neutrals-gray-400);
+      border-radius: var(--border-radius-lg);
+      background-color: var(--color-neutrals-gray-50);
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .file-upload__input:focus + .file-upload__dropzone,
+    .file-upload__dropzone:hover,
+    .file-upload__dropzone.is-dragover {
+      border-color: var(--color-primary-700);
+      background-color: var(--color-primary-50);
+    }
+    
+    .file-upload__input:focus-visible + .file-upload__dropzone {
+       outline: 2px solid var(--color-primary-300);
+       outline-offset: 2px;
+    }
+
+    .file-upload__icon {
+      font-size: 2rem;
+      color: var(--color-primary-700);
+      margin-bottom: var(--space-3);
+    }
+
+    .file-upload__prompt-text {
+      color: var(--color-neutrals-gray-900);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .file-upload__prompt-text strong {
+      color: var(--color-primary-700);
+    }
+
+    .file-upload__meta-text {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-600);
+      margin-top: var(--space-1);
+    }
+
+    /* Progress/Status States */
+    .file-upload__progress-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      border: 1px solid var(--color-neutrals-gray-200);
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-neutrals-white);
+    }
+
+    .file-upload__preview {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-neutrals-gray-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-neutrals-gray-500);
+      font-size: 1.5rem;
+      overflow: hidden;
+    }
+    
+    .file-upload__preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .file-upload__details {
+      flex-grow: 1;
+      min-width: 0; /* Prevents text overflow issues in flexbox */
+    }
+
+    .file-upload__filename {
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--color-neutrals-gray-700);
+      margin-bottom: var(--space-1);
+    }
+    
+    .file-upload__filesize {
+       font-size: var(--font-size-caption);
+       color: var(--color-neutrals-gray-600);
+    }
+
+    .file-upload__progress-bar-wrapper {
+      width: 100%;
+      background-color: var(--color-neutrals-gray-200);
+      border-radius: var(--border-radius-lg);
+      height: 8px;
+      overflow: hidden;
+      margin-top: var(--space-2);
+    }
+
+    .file-upload__progress-bar {
+      height: 100%;
+      background-color: var(--color-primary-700);
+      border-radius: var(--border-radius-lg);
+      transition: width 0.3s ease;
+    }
+
+    .file-upload__status {
+      flex-shrink: 0;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+    
+    .file-upload__status .spinner { 
+        color: var(--color-primary-700);
+    }
+    
+    .file-upload__status .icon--success {
+        color: var(--color-semantic-success);
+    }
+    
+    .file-upload__status .icon--error {
+        color: var(--color-semantic-error);
+    }
+
+    .file-upload__remove-btn {
+        color: var(--color-neutrals-gray-600);
+        padding: var(--space-1);
+    }
+    
+    .file-upload__remove-btn:hover {
+        color: var(--color-danger-500);
+        background-color: transparent; /* Override default hover */
+    }
+    
+    .file-upload--error .file-upload__progress-item {
+        border-color: var(--color-semantic-error);
+        background-color: var(--color-semantic-error-bg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG Icon Definitions -->
+  <svg width="0" height="0" style="position: absolute; overflow: hidden;">
+    <symbol id="icon-upload-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+      <polyline points="16 16 12 12 8 16"></polyline>
+      <line x1="12" y1="12" x2="12" y2="21"></line>
+    </symbol>
+    <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+        <polyline points="13 2 13 9 20 9"></polyline>
+    </symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </symbol>
+    <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </symbol>
+     <symbol id="icon-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+    </symbol>
+  </svg>
+
+  <div class="showcase">
+    <div class="showcase-section">
+      <h3>FileUpload Component</h3>
+      <p>A component for uploading files with a dropzone and progress states. Built using atomic components like Button, Spinner, and Icon.</p>
+    </div>
+
+    <!-- Idle State -->
+    <div class="showcase-section">
+      <h4>Idle State</h4>
+      <p>The default state, prompting the user to select a file or drag and drop.</p>
+      <div class="file-upload file-upload--image">
+        <input type="file" id="file-input-idle" class="file-upload__input" aria-describedby="file-meta-text-idle">
+        <label for="file-input-idle" class="file-upload__dropzone">
+          <svg class="file-upload__icon icon"><use href="#icon-upload-cloud"></use></svg>
+          <span class="file-upload__prompt-text">
+            <strong>Click to upload</strong> or drag and drop
+          </span>
+          <span id="file-meta-text-idle" class="file-upload__meta-text">PNG or JPG (max. 5MB)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Uploading State -->
+    <div class="showcase-section">
+      <h4>Uploading State</h4>
+      <p>Displays a progress bar and a spinner while the file is being uploaded.</p>
+      <div class="file-upload file-upload--image">
+        <div class="file-upload__progress-item">
+          <div class="file-upload__preview">
+            <svg class="icon"><use href="#icon-file"></use></svg>
+          </div>
+          <div class="file-upload__details">
+            <span class="file-upload__filename">profile-picture.jpg</span>
+            <div class="file-upload__progress-bar-wrapper">
+              <div class="file-upload__progress-bar" style="width: 45%;"></div>
+            </div>
+          </div>
+          <div class="file-upload__status">
+            <span class="spinner spinner--sm"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div class="showcase-section">
+      <h4>Success State</h4>
+      <p>Shows that the file has been successfully uploaded, providing an option to remove it.</p>
+      <div class="file-upload file-upload--image">
+        <div class="file-upload__progress-item">
+          <div class="file-upload__preview">
+             <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iI0JCREVGQiIvPgo8cGF0aCBkPSJNMjggMTZMMTcgMjcgTDEyIDIyIiBzdHJva2U9IiMwRDQ3QTEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=" alt="Placeholder image thumbnail">
+          </div>
+          <div class="file-upload__details">
+            <span class="file-upload__filename">corporate-banner-final.png</span>
+            <span class="file-upload__filesize">2.1 MB</span>
+          </div>
+          <div class="file-upload__status">
+            <svg class="icon icon--success"><use href="#icon-check-circle"></use></svg>
+          </div>
+          <button class="btn btn--icon btn--text file-upload__remove-btn" aria-label="Remove file">
+            <svg class="icon"><use href="#icon-x-circle"></use></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="showcase-section">
+      <h4>Error State</h4>
+      <p>Indicates a failure during upload and provides an error message.</p>
+      <div class="file-upload file-upload--image file-upload--error">
+        <div class="file-upload__progress-item">
+          <div class="file-upload__preview">
+             <svg class="icon"><use href="#icon-file"></use></svg>
+          </div>
+          <div class="file-upload__details">
+            <span class="file-upload__filename">annual-report.pdf</span>
+             <span class="file-upload__filesize">12.5 MB</span>
+          </div>
+          <div class="file-upload__status">
+            <svg class="icon icon--error"><use href="#icon-alert-triangle"></use></svg>
+          </div>
+          <button class="btn btn--icon btn--text file-upload__remove-btn" aria-label="Remove file">
+            <svg class="icon"><use href="#icon-x-circle"></use></svg>
+          </button>
+        </div>
+        <span class="error-message">File size exceeds the 5MB limit.</span>
+      </div>
+    </div>
+  </div>
+
+	
+	<div class="showcase"> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : image_uploader<h3>
+		<normal> The primary variant used for uploading images. It includes a drag-and-drop zone and provides visual feedback for various states such as idle, uploading, success, and error. </normal>
+		
+        <div class="file-upload file-upload--image">
+            <input type="file" id="file-input-variant" class="file-upload__input" aria-describedby="file-meta-text-variant">
+            <label for="file-input-variant" class="file-upload__dropzone">
+              <svg class="file-upload__icon icon"><use href="#icon-upload-cloud"></use></svg>
+              <span class="file-upload__prompt-text">
+                <strong>Click to upload</strong> or drag and drop
+              </span>
+              <span id="file-meta-text-variant" class="file-upload__meta-text">PNG or JPG (max. 5MB)</span>
+            </label>
+          </div>
+      <div>
+	 </div>
+	</div></body>
+</html>

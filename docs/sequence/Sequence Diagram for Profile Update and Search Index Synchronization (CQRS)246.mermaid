@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor "User Profile Service" as UserProfileService
+    participant "PostgreSQL Database" as PostgreSQLDatabase
+    participant "AWS Event Bus (SNS/SQS)" as AWSEventBusSNSSQS
+    participant "Search Service" as SearchService
+    participant "OpenSearch Cluster" as OpenSearchCluster
+
+    activate PostgreSQLDatabase
+    UserProfileService->>PostgreSQLDatabase: 1. COMMIT Transaction (UPDATE/INSERT UserProfile, WorkExperience, etc.)
+    PostgreSQLDatabase-->>UserProfileService: Success
+    UserProfileService->>AWSEventBusSNSSQS: 2. PUBLISH UserProfileUpdated Event v1.0 to SNS Topic 'profile-events-topic'
+    activate SearchService
+    AWSEventBusSNSSQS->>SearchService: 3. DELIVER Event via SQS Queue 'search-profile-updated-queue'
+    SearchService->>SearchService: 4. PROCESS Event: Transform Data and Ensure Idempotency
+    SearchService->>UserProfileService: 4.1. gRPC: GetFullProfileForIndexing(userId)
+    UserProfileService-->>SearchService: Full UserProfile DTO
+    SearchService->>SearchService: 4.2. TRANSFORM to Search Document, applying visibility rules (SRS-001-F6)
+    SearchService-->>SearchService: OpenSearch Document
+    SearchService->>OpenSearchCluster: 5. INDEX Document
+    OpenSearchCluster-->>SearchService: 200 OK / 201 Created
+    SearchService->>AWSEventBusSNSSQS: 6. DELETE Message from SQS Queue
+
+    note over SearchService: Idempotency is critical. The Search Service consumer must handle duplicate events without causing...
+    note over AWSEventBusSNSSQS: A Dead Letter Queue (DLQ) is configured for 'search-profile-updated-queue'. A CloudWatch alarm wi...
+    note over SearchService: The transformation logic at step 4.2 must strictly enforce business rule REQ-1-032. For private p...
+
+    deactivate SearchService
+    deactivate PostgreSQLDatabase

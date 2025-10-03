@@ -1,0 +1,22 @@
+# This script provides example Redis commands based on the defined schema.
+# It is not meant to be run as a single file, but demonstrates the usage patterns.
+
+# --- Entity: UserProfileCache ---
+# Description: Caches a full UserProfile object as a JSON string.
+# Key Format: profile:{userId}
+# Command: SETEX sets a key with a value and a timeout in seconds (24 hours = 86400s).
+SETEX profile:12345 86400 "{\"name\":\"Jane Doe\",\"headline\":\"Principal Software Engineer\",\"company\":\"Tech Solutions Inc.\"}"
+
+
+# --- Entity: JwtBlocklist ---
+# Description: Stores a revoked JWT's unique identifier (jti) to prevent its reuse.
+# Key Format: blocklist:jwt:{jti}
+# Command: SETEX is used to store the blocklist entry until the original token would have expired. (e.g., 1 hour = 3600s)
+SETEX blocklist:jwt:abc-123-def-456 3600 "revoked"
+
+
+# --- Entity: ConnectionSet ---
+# Description: Caches the set of a user's first-degree connection IDs.
+# Key Format: connections:set:{userId}
+# Command: SADD adds one or more members to a set. Sets are unordered collections of unique strings.
+SADD connections:set:12345 67890 11223 44556 98765

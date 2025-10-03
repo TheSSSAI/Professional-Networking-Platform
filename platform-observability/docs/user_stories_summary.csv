@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"14","50","12","2","0","[""Prometheus Configuration & Alerting"",""Grafana Dashboards & Provisioning"",""Repository Tooling & CI/CD""]","3","[""Kubernetes Cluster Access"",""PagerDuty Integration Key"",""Application Metrics Endpoints""]"

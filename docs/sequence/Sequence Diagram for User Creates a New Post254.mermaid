@@ -1,0 +1,39 @@
+sequenceDiagram
+    actor "User" as User
+    participant "Platform Web App" as PlatformWebApp
+    participant "API Gateway" as APIGateway
+    participant "Posts Service" as PostsService
+    participant "PostgreSQL DB" as PostgreSQLDB
+    participant "Event Bus" as EventBus
+
+    activate PlatformWebApp
+    User->>PlatformWebApp: 1. 1. Enters post content into 'CreatePost' component and clicks 'Post' button.
+    PlatformWebApp->>PlatformWebApp: 2. 2. Performs client-side validation on content (length < 3000 chars). Sets loading state.
+    PlatformWebApp-->>PlatformWebApp: Validation result (pass/fail).
+    activate APIGateway
+    PlatformWebApp->>APIGateway: 3. 3. Sends 'createPost' GraphQL mutation.
+    APIGateway-->>PlatformWebApp: HTTP 200 OK with GraphQL payload or error.
+    activate PostsService
+    APIGateway->>PostsService: 4. 4. Validates JWT, authorizes scope, and forwards request via gRPC.
+    PostsService-->>APIGateway: gRPC success or error status code with payload.
+    activate PostgreSQLDB
+    PostsService->>PostgreSQLDB: 5. 5. Performs server-side validation and inserts new post record within a transaction.
+    PostgreSQLDB-->>PostsService: New post record with generated ID.
+    PostgreSQLDB->>PostsService: 6. 6. Confirms insertion.
+    activate EventBus
+    PostsService->>EventBus: 7. 7. Publishes 'PostCreated' event.
+    EventBus-->>PostsService: Acknowledgement of publish.
+    EventBus->>PostsService: 8. 8. Acknowledges receipt.
+    PostsService->>APIGateway: 9. 9. Returns gRPC success response with new post data.
+    APIGateway->>PlatformWebApp: 10. 10. Translates gRPC response and returns HTTP 200 OK with GraphQL payload.
+    PlatformWebApp->>PlatformWebApp: 11. 11. Updates Apollo Client cache, resets loading state, and optimistically renders the new post.
+    PlatformWebApp->>User: 12. 12. Displays a success toast notification and shows the new post in the UI.
+
+    note over EventBus: The 'PostCreated' event is consumed by the Feed Service in a separate, asynchronous sequence (SEQ...
+    note over PlatformWebApp: Optimistic UI Update: The client immediately shows the new post upon submission, assuming success...
+
+    deactivate EventBus
+    deactivate PostgreSQLDB
+    deactivate PostsService
+    deactivate APIGateway
+    deactivate PlatformWebApp

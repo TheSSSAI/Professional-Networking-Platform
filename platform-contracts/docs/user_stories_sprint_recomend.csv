@@ -1,0 +1,7 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""US-001"",""US-002"",""US-003"",""US-004"",""US-005"",""US-006"",""US-009""]","19","Establish the foundational user onboarding and authentication flow: users can register with a secure password, verify their email, and log in with clear error handling.","true"
+"2","[""US-007"",""US-010"",""US-011"",""US-012"",""US-008""]","16","Complete the core account lifecycle by implementing secure logout, a full password recovery flow, and specific error handling for unverified accounts.","true"
+"3","[""US-021"",""US-022"",""US-025"",""US-030"",""US-099""]","22","Build the foundational user profile, allowing users to add basic info, work experience, and education. Implement profile pictures and establish the core responsive UI framework.","true"
+"4","[""US-039"",""US-041"",""US-042"",""US-043"",""US-044"",""US-047""]","13","Implement the core networking functionality: users can send, view, accept, decline, and remove connection requests, and view their list of connections.","true"
+"5","[""US-048"",""US-053""]","18","Launch content creation and consumption by enabling users to create text posts and view a personalized news feed of their connections' content.","true"
+"6","[""US-054"",""US-055"",""US-056"",""US-058"",""US-059""]","16","Enable post interactions: users can like/unlike posts, add/delete comments, and report inappropriate content to moderators.","true"

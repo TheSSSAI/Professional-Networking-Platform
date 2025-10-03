@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph "Phase 1: Registration Submission"
+        A[User visits /register page] --> B[Fills out Registration Form <br>(Email, Password)]
+        B --> C{Client-Side Validation Passes?}
+        C -->|No| D[Display inline validation errors]
+        D --> B
+        C -->|Yes| E[POST /api/auth/register]
+        E --> F{Server-Side Validation <br>(Email unique? Pass complex?)}
+        F -->|No| G[Return 4xx Error with message]
+        G --> D
+        F -->|Yes| H[Create User in DB <br>status: 'inactive']
+        H --> I[Generate & Store Verification Token]
+        I --> J[Async: Send Verification Email via SES]
+        J --> K[Return 201 Created <br> Show 'Check your email' message]
+    end
+
+    subgraph "Phase 2: Email Verification"
+        L(User receives email) --> M[Clicks Verification Link]
+        M --> N[GET /api/auth/verify?token=...]
+        N --> O{Token Valid & Not Expired?}
+        O -->|No| P[Display 'Invalid/Expired Link' page <br> Offer to resend email]
+        O -->|Yes| Q[Update User status in DB to 'active']
+        Q --> R[Invalidate Verification Token]
+        R --> S[Redirect to /login with Success Message]
+        S --> T(Account Activated)
+    end
+
+    %% Styling
+    classDef process fill:#e3f2fd,stroke:#1976d2,color:#212529
+    classDef decision fill:#fff9c4,stroke:#fbc02d,color:#212529
+    classDef error fill:#ffebee,stroke:#d32f2f,color:#212529
+    classDef success fill:#e8f5e9,stroke:#4caf50,color:#212529
+    classDef io fill:#f3e5f5,stroke:#8e24aa,color:#212529
+
+    class A,B,D,G,K,L,M,P,S process
+    class C,F,O decision
+    class H,I,J,Q,R,T success
+    class E,N io

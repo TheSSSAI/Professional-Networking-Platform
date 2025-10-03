@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component: MessageBubble</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Typography */
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-line-height-body: 1.5;
+
+      /* Colors */
+      --color-primary-100: #BBDEFB;
+      --color-primary-700: #1976D2;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      --color-success: #2E7D32;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+
+      /* Borders */
+      --border-radius-lg: 16px;
+      --border-radius-sm: 4px;
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: var(--font-line-height-body);
+      font-size: var(--font-size-body);
+      padding: var(--spacing-md);
+    }
+    
+    /* Screen/Container Styles */
+    .screen-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: var(--color-white);
+        padding: var(--spacing-md);
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .screen-header {
+        padding-bottom: var(--spacing-md);
+        border-bottom: 1px solid var(--color-neutral-100);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .screen-header h1 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .message-row {
+        display: flex;
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* --- MessageBubble Component Implementation --- */
+
+    .message-bubble {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--border-radius-lg);
+        max-width: 75%;
+        word-wrap: break-word;
+    }
+
+    .message-bubble__text {
+        font-size: var(--font-size-body);
+        line-height: var(--font-line-height-body);
+        white-space: pre-wrap; /* Preserve newlines */
+    }
+
+    .message-bubble__meta {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: var(--spacing-xs);
+        font-size: var(--font-size-caption);
+        color: var(--color-neutral-600);
+    }
+
+    .message-bubble__timestamp {
+        margin-right: var(--spacing-xs);
+    }
+
+    /* Variant: Received */
+    .message-row--received {
+        justify-content: flex-start;
+    }
+    .message-bubble--received {
+        background-color: var(--color-neutral-100);
+        color: var(--color-neutral-900);
+        border-bottom-left-radius: var(--border-radius-sm);
+    }
+
+    /* Variant: Sent */
+    .message-row--sent {
+        justify-content: flex-end;
+    }
+    .message-bubble--sent {
+        background-color: var(--color-primary-700);
+        color: var(--color-white);
+        border-bottom-right-radius: var(--border-radius-sm);
+    }
+    .message-bubble--sent .message-bubble__meta {
+        color: var(--color-primary-100);
+    }
+
+    /* State: with_status_indicator */
+    .message-bubble__status {
+        position: relative; /* For tooltip positioning */
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .message-bubble__status .icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .message-bubble__status .icon--delivered {
+        color: var(--color-neutral-500);
+    }
+    .message-bubble--sent .message-bubble__status .icon--delivered {
+        color: var(--color-primary-100);
+    }
+    
+    .message-bubble__status .icon--read {
+       color: var(--color-success);
+    }
+
+    /* Tooltip Implementation */
+    .message-bubble__status .tooltip {
+        visibility: hidden;
+        width: max-content;
+        background-color: var(--color-neutral-900);
+        color: var(--color-white);
+        text-align: center;
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px; /* Use half of the width to center */
+        opacity: 0;
+        transition: opacity 0.2s;
+        font-size: 12px;
+    }
+    .message-bubble__status .tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: var(--color-neutral-900) transparent transparent transparent;
+    }
+    .message-bubble__status:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Variations section for documentation */
+    .screen-variations {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px dashed var(--color-neutral-500);
+    }
+    .screen-variations h2 {
+        margin-bottom: 24px;
+    }
+    .variation-group {
+        margin-bottom: 32px;
+        padding: 16px;
+        border: 1px solid var(--color-neutral-100);
+        border-radius: 8px;
+    }
+    .variation-group h3 {
+        margin-bottom: 16px;
+        font-size: 18px;
+        font-weight: 600;
+        border-bottom: 1px solid var(--color-neutral-100);
+        padding-bottom: 8px;
+    }
+     .variation-group h3 normal {
+        font-weight: 400;
+        font-size: 14px;
+        color: #6C757D;
+        margin-left: 8px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="screen-container">
+    <header class="screen-header">
+      <h1>Component Showcase: MessageBubble</h1>
+    </header>
+    
+    <main class="screen-content">
+      <!-- "Received" Message Example -->
+      <div class="message-row message-row--received">
+        <div class="message-bubble message-bubble--received">
+          <p class="message-bubble__text">Hi there! Just following up on our conversation from yesterday. Let me know if you have any updates.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">10:42 AM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- "Sent" Message Examples -->
+      <div class="message-row message-row--sent">
+        <div class="message-bubble message-bubble--sent">
+          <p class="message-bubble__text">Of course! I'm working on the final draft now. I should have it over to you by EOD.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">10:43 AM</span>
+            <div class="message-bubble__status" role="img" aria-label="Message Sent">
+              <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span class="tooltip">Sent at 10:43 AM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="message-row message-row--sent">
+        <div class="message-bubble message-bubble--sent">
+          <p class="message-bubble__text">Also, I've attached the preliminary report for your review.
+Line breaks are preserved.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">10:44 AM</span>
+            <div class="message-bubble__status" role="img" aria-label="Message Delivered">
+              <svg class="icon icon--delivered" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7m-4 4l-4 4-4-4"></path></svg>
+              <span class="tooltip">Delivered at 10:44 AM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="message-row message-row--sent">
+        <div class="message-bubble message-bubble--sent">
+          <p class="message-bubble__text">Perfect, thanks!</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">10:45 AM</span>
+            <div class="message-bubble__status" role="img" aria-label="Message Read">
+              <svg class="icon icon--read" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7m-4 4l-4 4-4-4"></path></svg>
+              <span class="tooltip">Read at 10:45 AM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Received"<normal> - For messages from the other user.</normal></h3>
+      <div class="message-row message-row--received">
+        <div class="message-bubble message-bubble--received">
+          <p class="message-bubble__text">This is a standard received message. It aligns to the left and has a neutral background color.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">11:01 AM</span>
+          </div>
+        </div>
+      </div>
+       <div class="message-row message-row--received">
+        <div class="message-bubble message-bubble--received">
+          <p class="message-bubble__text">This is a much longer received message to demonstrate how the text wraps within the bubble and how the bubble's maximum width is constrained. This ensures that even very long messages remain readable and do not stretch across the entire width of the chat window, maintaining a clean and organized layout.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">11:02 AM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Sent"<normal> - For messages from the current user.</normal></h3>
+       <div class="message-row message-row--sent">
+        <div class="message-bubble message-bubble--sent">
+          <p class="message-bubble__text">This is a standard sent message. It aligns to the right and uses the primary brand color for its background.</p>
+          <div class="message-bubble__meta">
+            <span class="message-bubble__timestamp">11:05 AM</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="variation-group">
+        <h3>State Name: "With Status Indicators"<normal> - For sent messages to show delivery status.</normal></h3>
+        <div class="message-row message-row--sent">
+            <div class="message-bubble message-bubble--sent">
+              <p class="message-bubble__text">Sent status.</p>
+              <div class="message-bubble__meta">
+                <span class="message-bubble__timestamp">11:10 AM</span>
+                <div class="message-bubble__status" role="img" aria-label="Message Sent">
+                  <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  <span class="tooltip">Sent at 11:10 AM</span>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="message-row message-row--sent">
+            <div class="message-bubble message-bubble--sent">
+              <p class="message-bubble__text">Delivered status.</p>
+              <div class="message-bubble__meta">
+                <span class="message-bubble__timestamp">11:11 AM</span>
+                <div class="message-bubble__status" role="img" aria-label="Message Delivered">
+                  <svg class="icon icon--delivered" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7m-4 4l-4 4-4-4"></path></svg>
+                  <span class="tooltip">Delivered at 11:11 AM</span>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="message-row message-row--sent">
+            <div class="message-bubble message-bubble--sent">
+              <p class="message-bubble__text">Read status.</p>
+              <div class="message-bubble__meta">
+                <span class="message-bubble__timestamp">11:12 AM</span>
+                <div class="message-bubble__status" role="img" aria-label="Message Read">
+                  <svg class="icon icon--read" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7m-4 4l-4 4-4-4"></path></svg>
+                  <span class="tooltip">Read at 11:12 AM</span>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+  </div>
+</body>
+</html>

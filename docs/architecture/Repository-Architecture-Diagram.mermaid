@@ -1,0 +1,106 @@
+graph TD
+    subgraph "User Layer"
+        U1(End User)
+        U2(Administrator)
+    end
+
+    subgraph "Presentation Layer"
+        WebApp[REPO-APP-WEB<br><b>platform-web-app</b><br><i>Next.js SPA</i>] 
+        AdminUI[REPO-APP-ADMIN<br><b>platform-admin-ui</b><br><i>Next.js SPA</i>]
+    end
+
+    subgraph "Shared UI Library"
+        LibUI[REPO-LIB-UI<br><b>platform-ui-components</b><br><i>React Components</i>]
+    end
+
+    subgraph "API Gateway Layer"
+        APIGW[REPO-GW-API<br><b>platform-api-gateway</b><br><i>GraphQL Federation</i>]
+    end
+
+    subgraph "Application Service Layer"
+        SvcIDT[REPO-SVC-IDT<br><b>Identity Service</b>]
+        SvcPRF[REPO-SVC-PRF<br><b>Profile Service</b>]
+        SvcCONN[REPO-SVC-CONN<br><b>Connections Service</b>]
+        SvcPOSTS[REPO-SVC-POSTS<br><b>Posts Service</b>]
+        SvcENGAGE[REPO-SVC-ENGAGE<br><b>Engagement Service</b>]
+        SvcFEED[REPO-SVC-FEED<br><b>Feed Service</b>]
+        SvcMSG[REPO-SVC-MSG<br><b>Messaging Service</b>]
+        SvcSEARCH[REPO-SVC-SEARCH<br><b>Search Service</b>]
+        SvcNOTIFY[REPO-SVC-NOTIFY<br><b>Notifications Service</b>]
+        SvcADMIN[REPO-SVC-ADMIN<br><b>Admin Service</b>]
+    end
+
+    subgraph "Shared Backend Libraries"
+        LibContracts[REPO-LIB-CONTRACTS<br><b>platform-contracts</b><br><i>gRPC, GraphQL, Events</i>]
+        LibCore[REPO-LIB-CORE<br><b>platform-core-libs</b><br><i>Logging, Auth Guards</i>]
+    end
+
+    subgraph "Infrastructure & Ops Layer"
+        Infra[REPO-INFRA<br><b>platform-infra</b><br><i>Terraform IaC</i>]
+        Observability[REPO-OBS<br><b>platform-observability</b><br><i>Grafana, Prometheus</i>]
+    end
+
+    %% User to App Interactions
+    U1 --> WebApp
+    U2 --> AdminUI
+    
+    %% Presentation Layer Dependencies
+    WebApp --> LibUI
+    AdminUI --> LibUI
+    WebApp --> APIGW -- GraphQL API --> WebApp
+    AdminUI --> APIGW -- Admin GraphQL API --> AdminUI
+    WebApp -. WebSocket .-> SvcMSG
+    WebApp -. WebSocket .-> SvcNOTIFY
+
+    %% Gateway to Service Dependencies
+    APIGW --> SvcIDT
+    APIGW --> SvcPRF
+    APIGW --> SvcCONN
+    APIGW --> SvcPOSTS
+    APIGW --> SvcENGAGE
+    APIGW --> SvcFEED
+    APIGW --> SvcMSG
+    APIGW --> SvcSEARCH
+    APIGW --> SvcNOTIFY
+    APIGW --> SvcADMIN
+
+    %% Service to Service Dependencies (Sync - gRPC)
+    SvcPOSTS -.-> SvcPRF
+    SvcPOSTS -.-> SvcCONN
+    SvcMSG -.-> SvcCONN
+    SvcFEED -.-> SvcCONN
+    SvcADMIN -.-> SvcIDT
+    SvcADMIN -.-> SvcPOSTS
+
+    %% Service to Service Dependencies (Async - Events)
+    SvcIDT -. Event: UserRegistered .-> SvcNOTIFY
+    SvcPRF -. Event: UserProfileUpdated .-> SvcSEARCH
+    SvcPOSTS -. Event: PostCreated .-> SvcFEED
+    SvcENGAGE -. Event: PostReacted, CommentAdded .-> SvcNOTIFY
+    SvcCONN -. Event: ConnectionAccepted .-> SvcNOTIFY
+
+    %% Shared Library Dependencies
+    APIGW --> LibContracts
+    SvcIDT --> LibContracts & LibCore
+    SvcPRF --> LibContracts & LibCore
+    SvcCONN --> LibContracts & LibCore
+    SvcPOSTS --> LibContracts & LibCore
+    SvcENGAGE --> LibContracts & LibCore
+    SvcFEED --> LibContracts & LibCore
+    SvcMSG --> LibContracts & LibCore
+    SvcSEARCH --> LibContracts & LibCore
+    SvcNOTIFY --> LibContracts & LibCore
+    SvcADMIN --> LibContracts & LibCore
+
+    %% Style Definitions
+    classDef app fill:#e1effd,stroke:#367dca,stroke-width:2px
+    classDef gateway fill:#f5f5f5,stroke:#333,stroke-width:2px
+    classDef service fill:#d5e8d4,stroke:#82b366,stroke-width:2px
+    classDef lib fill:#fff2cc,stroke:#d6b656,stroke-width:2px
+    classDef infra fill:#f8cecc,stroke:#b85450,stroke-width:2px
+
+    class WebApp,AdminUI app
+    class APIGW gateway
+    class SvcIDT,SvcPRF,SvcCONN,SvcPOSTS,SvcENGAGE,SvcFEED,SvcMSG,SvcSEARCH,SvcNOTIFY,SvcADMIN service
+    class LibUI,LibContracts,LibCore lib
+    class Infra,Observability infra

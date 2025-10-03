@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  identity-service:
+    container_name: platform-identity-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051" # gRPC port
+      - "9229:9229"   # Debug port
+    command: npm run start:debug
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+      - redis-cache
+    env_file:
+      - .env
+
+  postgres-db:
+    container_name: platform-postgres-db
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: platform-identity
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d platform-identity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    container_name: platform-redis-cache
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:

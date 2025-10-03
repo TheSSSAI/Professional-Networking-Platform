@@ -1,0 +1,50 @@
+# prometheus/rules/api.rules.yml
+#
+# Alerting rules for API Gateways and microservice HTTP endpoints.
+# These rules monitor application-level performance and error rates.
+# Corresponds to requirements in REQ-1-084 and NFRs like REQ-1-051.
+
+groups:
+  - name: api-performance-alerts
+    rules:
+      - alert: HighApiErrorRate
+        # This alert fires if the rate of 5xx server errors is greater than 5% for 5 minutes.
+        # Assumes http_requests_total metric with 'code' and 'service' labels.
+        expr: |
+          sum(rate(http_requests_total{code=~"5.."}[5m])) by (service)
+          /
+          sum(rate(http_requests_total[5m])) by (service)
+          * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate for service {{ $labels.service }}"
+          description: "The service {{ $labels.service }} is experiencing a server error rate of {{ $value | printf \"%.2f\" }}% over the last 5 minutes."
+          runbook_url: "https://internal-wiki.example.com/runbooks/high-api-error-rate"
+
+      - alert: HighApiP95Latency
+        # This alert fires if the 95th percentile latency exceeds 200ms for 10 minutes.
+        # This directly monitors the NFR from REQ-1-051.
+        # Assumes a histogram metric named 'http_request_duration_seconds_bucket'.
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 0.2
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High P95 latency for service {{ $labels.service }}"
+          description: "The 95th percentile latency for service {{ $labels.service }} is above 200ms. Current value is {{ $value | printf \"%.3f\" }}s."
+          runbook_url: "https://internal-wiki.example.com/runbooks/high-api-latency"
+
+      - alert: HighApiP99Latency
+        # This alert provides an earlier warning for tail latency issues.
+        expr: |
+          histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High P99 latency for service {{ $labels.service }}"
+          description: "The 99th percentile latency for service {{ $labels.service }} is above 500ms. Current value is {{ $value | printf \"%.3f\" }}s."
+          runbook_url: "https://internal-wiki.example.com/runbooks/high-api-latency"

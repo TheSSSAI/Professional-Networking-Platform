@@ -1,0 +1,86 @@
+# This workflow automates the deployment of the Platform API Gateway to the AWS production environment.
+# It is triggered on every push to the 'main' branch, ensuring continuous deployment.
+#
+# This pipeline directly implements the requirements of REQ-1-078 by including mandatory stages for:
+# 1. Static Application Security Testing (SAST) using GitHub's CodeQL.
+# 2. Software Composition Analysis (SCA) using 'npm audit'.
+# 3. Automated testing, building, and deployment.
+#
+# It adheres to enterprise security best practices by using OpenID Connect (OIDC) for
+# secure, keyless authentication to AWS, eliminating the need for long-lived access keys.
+
+name: Deploy API Gateway to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+# Permissions required for OIDC-based AWS authentication and CodeQL analysis.
+permissions:
+  id-token: write # Required for federated authentication to AWS
+  contents: read # Required to checkout the repository
+  security-events: write # Required to upload CodeQL scan results
+
+jobs:
+  deploy:
+    name: Build, Test, and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Initialize CodeQL for SAST Analysis
+        # Implements the Static Application Security Testing (SAST) requirement from REQ-1-078.
+        # It prepares the runner to perform an analysis of the TypeScript code.
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript
+
+      - name: 3. Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm' # Caches npm packages for faster subsequent builds
+
+      - name: 4. Install Dependencies
+        # 'npm ci' is used for deterministic builds based on package-lock.json
+        run: npm ci
+
+      - name: 5. Run Linter
+        # Enforces code quality and style consistency before proceeding.
+        run: npm run lint
+
+      - name: 6. Run Unit & Integration Tests
+        # Executes the test suite defined in jest.config.js.
+        run: npm test
+
+      - name: 7. Perform Software Composition Analysis (SCA)
+        # Implements the SCA requirement from REQ-1-078.
+        # Fails the build if any high-severity vulnerabilities are found in dependencies.
+        run: npm audit --audit-level=high
+
+      - name: 8. Perform CodeQL Analysis (SAST)
+        # Completes the SAST scan and uploads the results to GitHub's security dashboard.
+        uses: github/codeql-action/analyze@v3
+
+      - name: 9. Configure AWS Credentials via OIDC
+        # Securely authenticates with AWS using OIDC, avoiding the need for static secrets.
+        # Assumes an IAM role configured with the necessary permissions for Serverless Framework deployment.
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PROD_ROLE_TO_ASSUME }} # Stored in GitHub repository secrets
+          aws-region: ${{ vars.AWS_PROD_REGION }} # Stored in GitHub repository variables
+
+      - name: 10. Install Serverless Framework CLI
+        # Installs the Serverless Framework globally on the runner.
+        run: npm install -g serverless
+
+      - name: 11. Deploy to Production with Serverless Framework
+        # Deploys the service using the configuration in serverless.yml for the 'prod' stage.
+        # The Serverless Framework will handle packaging (using webpack.config.js),
+        # provisioning AWS resources, and deploying the Lambda function.
+        run: serverless deploy --stage prod --verbose

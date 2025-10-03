@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: ConfirmationModal</title>
+  <style>
+    /* CSS Reset & Basic Setup */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background-color: #F8F9FA; color: #212529; }
+    h1, h2, h3, h4, p { margin: 0; }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-600: #1E88E5;
+      --color-primary-100: #E3F2FD;
+      --color-danger-500: #D32F2F;
+      --color-danger-600: #C62828;
+      --color-danger-100: #FFEBEE;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-600: #6C757D;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-xs: 4px; --spacing-sm: 8px; --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px;
+      /* Typography */
+      --font-size-sm: 0.875rem; --font-size-base: 1rem; --font-size-lg: 1.25rem;
+      --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-semibold: 600;
+      /* Borders */
+      --border-radius-md: 8px; --border-radius-lg: 12px;
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+    
+    /* ATOMIC DEPENDENCY: Button */
+    .btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; font-weight: var(--font-weight-semibold); text-decoration: none; border: 1px solid transparent; border-radius: var(--border-radius-md); padding: 10px 22px; min-height: 44px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; white-space: nowrap; }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .btn--primary { background-color: var(--color-primary-500); color: var(--color-white); }
+    .btn--primary:hover { background-color: var(--color-primary-600); }
+    .btn--danger { background-color: var(--color-danger-500); color: var(--color-white); }
+    .btn--danger:hover { background-color: var(--color-danger-600); }
+    .btn--secondary { background-color: var(--color-white); color: var(--color-neutral-700); border-color: var(--color-neutral-300); }
+    .btn--secondary:hover { background-color: var(--color-neutral-100); }
+    @media (min-width: 640px) { .btn { width: auto; } }
+
+    /* ORGANISM: Confirmation Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-md);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0s 0.3s;
+    }
+
+    .modal--open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition: opacity 0.3s ease, visibility 0s;
+    }
+    
+    .modal__overlay {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(33, 37, 41, 0.6);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal--open .modal__overlay {
+        opacity: 1;
+    }
+    
+    .modal__panel {
+      position: relative;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 480px;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    .modal--open .modal__panel {
+      transform: scale(1);
+    }
+    
+    .modal__header {
+      display: flex;
+      align-items: flex-start;
+      padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .modal__icon-wrapper {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: var(--spacing-md);
+    }
+    
+    .modal__icon-wrapper--standard {
+      background-color: var(--color-primary-100);
+    }
+    
+    .modal__icon-wrapper--standard svg {
+      color: var(--color-primary-500);
+    }
+    
+    .modal__icon-wrapper--destructive {
+      background-color: var(--color-danger-100);
+    }
+    
+    .modal__icon-wrapper--destructive svg {
+      color: var(--color-danger-500);
+    }
+    
+    .modal__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      line-height: 1.4;
+      margin-top: 2px;
+      flex-grow: 1;
+    }
+    
+    .modal__close-btn {
+      margin-left: var(--spacing-sm);
+      padding: var(--spacing-xs);
+      background: none;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--color-neutral-500);
+      transition: background-color 0.2s ease;
+    }
+    
+    .modal__close-btn:hover {
+      background-color: var(--color-neutral-100);
+    }
+    
+    .modal__close-btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    
+    .modal__content {
+      padding: 0 var(--spacing-lg);
+      color: var(--color-neutral-600);
+      line-height: 1.6;
+    }
+    
+    .modal__footer {
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column-reverse;
+      gap: var(--spacing-sm);
+    }
+
+    /* Responsive & Reduced Motion */
+    @media (min-width: 640px) {
+      .modal__footer {
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .modal, .modal__panel, .modal__overlay {
+        transition: none;
+      }
+    }
+    
+    /* CSS-only demo helper */
+    .modal:target {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity 0.3s ease, visibility 0s;
+    }
+    .modal:target .modal__overlay {
+        opacity: 1;
+    }
+    .modal:target .modal__panel {
+        transform: scale(1);
+    }
+    
+    /* Showcase Layout */
+    .showcase-body { padding: var(--spacing-xl); background-color: #e9ecef; }
+    .showcase-header { text-align: center; margin-bottom: var(--spacing-xl); }
+    .showcase-buttons { display: flex; justify-content: center; gap: var(--spacing-md); }
+  </style>
+</head>
+<body class="showcase-body">
+
+  <header class="showcase-header">
+    <h1>Confirmation Modal</h1>
+    <p>Click the buttons below to open the different modal variants.</p>
+  </header>
+
+  <div class="showcase-buttons">
+    <a href="#standard-modal" class="btn btn--primary">Open Standard Modal</a>
+    <a href="#destructive-modal" class="btn btn--danger">Open Destructive Modal</a>
+  </div>
+
+  <!-- Standard Confirmation Modal -->
+  <div id="standard-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="standard-modal-title" aria-describedby="standard-modal-desc">
+    <a href="#" class="modal__overlay" aria-label="Close modal"></a>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div class="modal__icon-wrapper modal__icon-wrapper--standard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2 id="standard-modal-title" class="modal__title">Update Profile Visibility?</h2>
+        <a href="#" class="modal__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </a>
+      </div>
+      <div class="modal__content">
+        <p id="standard-modal-desc">
+          Changing your profile to 'Public' will make your full profile visible to all users on the platform. Are you sure you want to proceed?
+        </p>
+      </div>
+      <div class="modal__footer">
+        <a href="#" class="btn btn--secondary">Cancel</a>
+        <a href="#" class="btn btn--primary">Confirm Update</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destructive Action Confirmation Modal -->
+  <div id="destructive-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="destructive-modal-title" aria-describedby="destructive-modal-desc">
+    <a href="#" class="modal__overlay" aria-label="Close modal"></a>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div class="modal__icon-wrapper modal__icon-wrapper--destructive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2 id="destructive-modal-title" class="modal__title">Permanently Delete Post?</h2>
+        <a href="#" class="modal__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </a>
+      </div>
+      <div class="modal__content">
+        <p id="destructive-modal-desc">
+          This action cannot be undone. All comments and reactions associated with this post will also be permanently removed.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <a href="#" class="btn btn--secondary">Cancel</a>
+        <a href="#" class="btn btn--danger">Delete Post</a>
+      </div>
+    </div>
+  </div>
+  
+  	
+	<div style='margin-top: 50px;'> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : standard<h3>
+		<normal> For standard, non-destructive confirmation actions. The primary action button uses the primary color. </normal>
+		  <div id="standard-modal-static" class="modal modal--open" role="dialog" aria-modal="true" aria-labelledby="standard-modal-title-static" aria-describedby="standard-modal-desc-static" style="position:relative; z-index:1; height: auto; display:block;">
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div class="modal__icon-wrapper modal__icon-wrapper--standard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2 id="standard-modal-title-static" class="modal__title">Update Profile Visibility?</h2>
+        <button class="modal__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__content">
+        <p id="standard-modal-desc-static">
+          Changing your profile to 'Public' will make your full profile visible to all users on the platform. Are you sure you want to proceed?
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary">Cancel</button>
+        <button class="btn btn--primary">Confirm Update</button>
+      </div>
+    </div>
+  </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : destructive_action<h3>
+		<normal> For actions that are irreversible or have significant consequences, such as deleting data. The primary action button uses the danger color. </normal>
+		  <div id="destructive-modal-static" class="modal modal--open" role="dialog" aria-modal="true" aria-labelledby="destructive-modal-title-static" aria-describedby="destructive-modal-desc-static" style="position:relative; z-index:1; height: auto; display:block;">
+    <div class="modal__panel">
+      <div class="modal__header">
+        <div class="modal__icon-wrapper modal__icon-wrapper--destructive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h2 id="destructive-modal-title-static" class="modal__title">Permanently Delete Post?</h2>
+        <button class="modal__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal__content">
+        <p id="destructive-modal-desc-static">
+          This action cannot be undone. All comments and reactions associated with this post will also be permanently removed.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary">Cancel</button>
+        <button class="btn btn--danger">Delete Post</button>
+      </div>
+    </div>
+  </div>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

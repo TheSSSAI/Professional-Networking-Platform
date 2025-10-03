@@ -1,0 +1,47 @@
+name: Release Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Create Release and Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # This is needed to allow changesets to commit version bumps
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Release Pull Request or Publish to GPR
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # This will create a PR with the version bump. On merge, the 'publish' command will run.
+          # For direct publishing on merge to main, you would use `publish: "npm run release"`
+          version: "npm run changeset:version"
+          publish: "npm run changeset:publish"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use GITHUB_TOKEN for GitHub Packages Registry
+          NPM_CONFIG_PROVENANCE: true

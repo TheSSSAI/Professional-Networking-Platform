@@ -1,0 +1,852 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-RC-001
+
+## 1.2 Name
+
+Database Point-in-Time Recovery
+
+## 1.3 Description
+
+In the event of a catastrophic data loss incident, an administrator initiates a point-in-time recovery (PITR) of the primary PostgreSQL database using AWS RDS's managed backups and continuous transaction logs.
+
+## 1.4 Type
+
+🔹 RecoveryFlow
+
+## 1.5 Purpose
+
+To meet the defined Recovery Point Objective (RPO) and Recovery Time Objective (RTO) in the event of a disaster, as per SRS-001-NFR 2.8.
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-ADMINISTRATOR
+- REPO-AWS-CONSOLE
+- REPO-RDS-POSTGRESQL
+
+## 1.10 Key Interactions
+
+- A SEV1 incident is declared due to major data corruption or accidental deletion.
+- An administrator navigates to the AWS RDS console and selects the production database.
+- The administrator initiates the Point-In-Time Recovery (PITR) process, selecting the precise target timestamp just before the incident occurred.
+- AWS RDS automatically provisions a new database instance and restores it to the specified state by using the latest daily full backup and replaying all subsequent transaction logs.
+- Once the new DB is available, application services are reconfigured (e.g., updating Kubernetes secrets) to point to the new, restored database endpoint.
+- Post-restoration data integrity checks and validation steps are performed before returning the system to service.
+
+## 1.11 Triggers
+
+- A critical data loss event in the primary database is confirmed.
+
+## 1.12 Outcomes
+
+- The database is restored to a consistent state from a point in time before the incident.
+- The platform's data integrity is recovered, minimizing data loss to less than 5 minutes (RPO).
+- The platform is returned to service within 4 hours (RTO).
+
+## 1.13 Business Rules
+
+- Recovery Point Objective (RPO) must be less than 5 minutes (2.8.2).
+- Recovery Time Objective (RTO) must be less than 4 hours (2.8.2).
+- Disaster recovery plans must be tested and documented semi-annually (2.8.3).
+
+## 1.14 Error Scenarios
+
+- Backups are found to be corrupted or incomplete during the recovery drill.
+- The transaction logs required for PITR are missing for the target window.
+- The restoration process takes longer than the defined RTO.
+
+## 1.15 Integration Points
+
+- AWS RDS managed backup and recovery services (2.6.4).
+- AWS S3 for secure, cross-region backup storage (2.8.1).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-RC-001
+
+## 2.2 Name
+
+Database Point-in-Time Recovery (PITR) via AWS RDS
+
+## 2.3 Description
+
+A detailed technical sequence for executing a Point-in-Time Recovery (PITR) of the primary PostgreSQL database using AWS RDS managed services. This procedure is initiated by an Administrator in response to a critical data loss event (SEV1) and is designed to meet the RPO of <5 minutes and RTO of <4 hours as specified in SRS-001-NFR 2.8.
+
+## 2.4 Participants
+
+### 2.4.1 HumanActor
+
+#### 2.4.1.1 Repository Id
+
+REPO-ADMINISTRATOR
+
+#### 2.4.1.2 Display Name
+
+Administrator (SRE)
+
+#### 2.4.1.3 Type
+
+🔹 HumanActor
+
+#### 2.4.1.4 Technology
+
+N/A (Human)
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #90CAF9 |
+| Stereotype | Operator |
+
+### 2.4.2.0 ExternalSystemInterface
+
+#### 2.4.2.1 Repository Id
+
+REPO-AWS-CONSOLE
+
+#### 2.4.2.2 Display Name
+
+AWS Management Console
+
+#### 2.4.2.3 Type
+
+🔹 ExternalSystemInterface
+
+#### 2.4.2.4 Technology
+
+Web Application (React)
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FFAB40 |
+| Stereotype | Web UI |
+
+### 2.4.3.0 ManagedService
+
+#### 2.4.3.1 Repository Id
+
+REPO-RDS-POSTGRESQL
+
+#### 2.4.3.2 Display Name
+
+AWS RDS Service API
+
+#### 2.4.3.3 Type
+
+🔹 ManagedService
+
+#### 2.4.3.4 Technology
+
+AWS API
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #B39DDB |
+| Stereotype | AWS RDS |
+
+### 2.4.4.0 ControlPlane
+
+#### 2.4.4.1 Repository Id
+
+REPO-KUBERNETES-API
+
+#### 2.4.4.2 Display Name
+
+Kubernetes API Server (EKS)
+
+#### 2.4.4.3 Type
+
+🔹 ControlPlane
+
+#### 2.4.4.4 Technology
+
+Kubernetes API
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #80DEEA |
+| Stereotype | EKS |
+
+### 2.4.5.0 ApplicationServices
+
+#### 2.4.5.1 Repository Id
+
+REPO-APP-SERVICES
+
+#### 2.4.5.2 Display Name
+
+Application Services
+
+#### 2.4.5.3 Type
+
+🔹 ApplicationServices
+
+#### 2.4.5.4 Technology
+
+NestJS on EKS
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #A5D6A7 |
+| Stereotype | Microservices |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 UserAction
+
+#### 2.5.1.1 Source Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.1.2 Target Id
+
+REPO-AWS-CONSOLE
+
+#### 2.5.1.3 Message
+
+1. Logs into AWS Console with IAM credentials
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 UserAction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Displays AWS Console dashboard
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST /signin |
+| Parameters | IAM username, password, MFA token |
+| Authentication | Mandatory Multi-Factor Authentication (MFA) as per... |
+| Error Handling | Handles invalid credentials, locked accounts, and ... |
+| Performance | Login latency < 2 seconds |
+
+### 2.5.2.0 UserAction
+
+#### 2.5.2.1 Source Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.2.2 Target Id
+
+REPO-AWS-CONSOLE
+
+#### 2.5.2.3 Message
+
+2. Initiates Point-in-Time Recovery for production DB
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 UserAction
+
+#### 2.5.2.6 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7 Return Message
+
+
+
+#### 2.5.2.8 Has Return
+
+❌ No
+
+#### 2.5.2.9 Is Activation
+
+❌ No
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | UI Interaction |
+| Parameters | SourceDBInstanceIdentifier, TargetRestoreTime (ISO... |
+| Authentication | Inherits IAM session from login |
+| Error Handling | UI validation for valid timestamp format and insta... |
+| Performance | N/A |
+
+### 2.5.3.0 ApiCall
+
+#### 2.5.3.1 Source Id
+
+REPO-AWS-CONSOLE
+
+#### 2.5.3.2 Target Id
+
+REPO-RDS-POSTGRESQL
+
+#### 2.5.3.3 Message
+
+3. RestoreDBInstanceToPointInTime(params)
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 ApiCall
+
+#### 2.5.3.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7 Return Message
+
+Restore initiated response (200 OK)
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK (HTTPS) |
+| Method | RestoreDBInstanceToPointInTime |
+| Parameters | JSON payload containing source instance, target ti... |
+| Authentication | IAM role credentials with `rds:RestoreDBInstanceTo... |
+| Error Handling | API returns error for invalid parameters, insuffic... |
+| Performance | API response time < 500ms. The restore process is ... |
+
+#### 2.5.3.11 Nested Interactions
+
+##### 2.5.3.11.1 InternalProcess
+
+###### 2.5.3.11.1.1 Source Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.1.2 Target Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.1.3 Message
+
+3a. Provisions new DB instance resources
+
+###### 2.5.3.11.1.4 Sequence Number
+
+3.1
+
+###### 2.5.3.11.1.5 Type
+
+🔹 InternalProcess
+
+###### 2.5.3.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.1.7 Return Message
+
+
+
+###### 2.5.3.11.1.8 Has Return
+
+❌ No
+
+###### 2.5.3.11.1.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | N/A |
+| Parameters | *N/A* |
+| Authentication | *N/A* |
+| Error Handling | Monitored via AWS Health Dashboard and CloudWatch ... |
+| Performance | Varies by instance size. |
+
+##### 2.5.3.11.2.0 InternalProcess
+
+###### 2.5.3.11.2.1 Source Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.2.2 Target Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.2.3 Message
+
+3b. Restores latest full backup from S3
+
+###### 2.5.3.11.2.4 Sequence Number
+
+3.2
+
+###### 2.5.3.11.2.5 Type
+
+🔹 InternalProcess
+
+###### 2.5.3.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.2.7 Return Message
+
+
+
+###### 2.5.3.11.2.8 Has Return
+
+❌ No
+
+###### 2.5.3.11.2.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | N/A |
+| Parameters | *N/A* |
+| Authentication | *N/A* |
+| Error Handling | Failure due to corrupt backup triggers a critical ... |
+| Performance | Dependent on database size. |
+
+##### 2.5.3.11.3.0 InternalProcess
+
+###### 2.5.3.11.3.1 Source Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.3.2 Target Id
+
+REPO-RDS-POSTGRESQL
+
+###### 2.5.3.11.3.3 Message
+
+3c. Replays transaction logs to target timestamp
+
+###### 2.5.3.11.3.4 Sequence Number
+
+3.3
+
+###### 2.5.3.11.3.5 Type
+
+🔹 InternalProcess
+
+###### 2.5.3.11.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.3.7 Return Message
+
+
+
+###### 2.5.3.11.3.8 Has Return
+
+❌ No
+
+###### 2.5.3.11.3.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | N/A |
+| Parameters | *N/A* |
+| Authentication | *N/A* |
+| Error Handling | Missing logs for the target window will cause the ... |
+| Performance | Dependent on volume of transactions to replay. |
+
+### 2.5.4.0.0.0 Event
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-RDS-POSTGRESQL
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-AWS-CONSOLE
+
+#### 2.5.4.3.0.0 Message
+
+4. Emits 'RDS-EVENT-0006: DB instance created' event
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 Event
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7.0.0 Return Message
+
+Updates UI status to 'Available'
+
+#### 2.5.4.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS EventBridge |
+| Method | N/A |
+| Parameters | Event payload with new DB instance details (ARN, e... |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Near real-time. |
+
+### 2.5.5.0.0.0 CliCommand
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-KUBERNETES-API
+
+#### 2.5.5.3.0.0 Message
+
+5. Updates database connection secret (`kubectl apply -f ...`)
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 CliCommand
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+secret/db-connection updated
+
+#### 2.5.5.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.5.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | PATCH /api/v1/namespaces/default/secrets/db-connec... |
+| Parameters | Kubernetes Secret manifest with the new RDS endpoi... |
+| Authentication | Requires valid `kubeconfig` with permissions to ed... |
+| Error Handling | kubectl CLI returns error on permission failure or... |
+| Performance | API response < 200ms. |
+
+### 2.5.6.0.0.0 ControlAction
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-KUBERNETES-API
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-APP-SERVICES
+
+#### 2.5.6.3.0.0 Message
+
+6. Triggers rolling restart of deployments
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 ControlAction
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | Pod Termination/Creation |
+| Parameters | If deployments are configured to roll on config/se... |
+| Authentication | N/A |
+| Error Handling | Failed pod starts (CrashLoopBackOff) are monitored... |
+| Performance | Dependent on pod startup time and readiness probes... |
+
+### 2.5.7.0.0.0 Validation
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-APP-SERVICES
+
+#### 2.5.7.3.0.0 Message
+
+7. Performs data integrity validation checks
+
+#### 2.5.7.4.0.0 Sequence Number
+
+7
+
+#### 2.5.7.5.0.0 Type
+
+🔹 Validation
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7.0.0 Return Message
+
+Validation success/failure report
+
+#### 2.5.7.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.7.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.7.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | Various API GET requests or execution of a validat... |
+| Parameters | N/A |
+| Authentication | N/A (script may use service account or admin check... |
+| Error Handling | Script exits with non-zero code on failure. |
+| Performance | Should be completed within minutes. |
+
+### 2.5.8.0.0.0 Decision
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.8.2.0.0 Target Id
+
+REPO-ADMINISTRATOR
+
+#### 2.5.8.3.0.0 Message
+
+8. Declares incident resolved and returns system to service
+
+#### 2.5.8.4.0.0 Sequence Number
+
+8
+
+#### 2.5.8.5.0.0 Type
+
+🔹 Decision
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7.0.0 Return Message
+
+
+
+#### 2.5.8.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.8.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.8.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | Update status page, notify stakeholders. |
+| Parameters | N/A |
+| Authentication | N/A |
+| Error Handling | If validation fails, must initiate rollback or fur... |
+| Performance | N/A |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Trigger: A SEV1 incident is declared due to confirmed data corruption or loss. The entire process is time-critical.
+
+#### 2.6.1.2.0.0 Position
+
+top-left
+
+#### 2.6.1.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.1.4.0.0 Sequence Number
+
+0
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+The entire sequence from step 2 to 8 must complete in under 4 hours to meet the RTO.
+
+#### 2.6.2.2.0.0 Position
+
+bottom-right
+
+#### 2.6.2.3.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.2.4.0.0 Sequence Number
+
+8
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Post-restoration, an automated process must be run to re-delete user data based on the account deletion log to maintain compliance, as per SRS-001-F1.
+
+#### 2.6.3.2.0.0 Position
+
+bottom-left
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-ADMINISTRATOR
+
+#### 2.6.3.4.0.0 Sequence Number
+
+7
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Administrator access to the AWS Console must be pr... |
+| Performance Targets | Recovery Point Objective (RPO): < 5 minutes. This ... |
+| Error Handling Strategy | If the restore process fails (e.g., corrupt backup... |
+| Testing Considerations | This entire recovery plan must be tested semi-annu... |
+| Monitoring Requirements | AWS CloudWatch should be configured with alarms on... |
+| Deployment Considerations | The application's dependency on the database endpo... |
+

@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor "Platform User" as PlatformUser
+    actor "Client: MUI Accordion" as ClientMUIAccordion
+    actor "Client: MUI Accordion" as ClientMUIAccordion
+    actor "Client: MUI Accordion" as ClientMUIAccordion
+    actor "Client: MUI Accordion" as ClientMUIAccordion
+
+    activate ClientMUIAccordion
+    PlatformUser->>ClientMUIAccordion: 1. 1. Clicks 'Help' link in application footer.
+    ClientMUIAccordion->>ClientMUIAccordion: 2. 2. Intercepts click on <Link href='/help'>.
+    ClientMUIAccordion->>ClientMUIAccordion: 2.1. 2.1. Resolves '/help' route and identifies target component.
+    ClientMUIAccordion-->>ClientMUIAccordion: Component: HelpPage
+    ClientMUIAccordion->>ClientMUIAccordion: 3. 3. Mounts HelpPage component.
+    ClientMUIAccordion->>ClientMUIAccordion: 4. 4. Renders static content (headings, categories, Q&A accordions).
+    ClientMUIAccordion-->>ClientMUIAccordion: HTML/CSS to be painted
+    ClientMUIAccordion->>PlatformUser: 5. 5. Displays rendered Help Center page.
+    PlatformUser->>ClientMUIAccordion: 6. 6. Clicks a question (MUI AccordionSummary).
+    ClientMUIAccordion->>ClientMUIAccordion: 7. 7. Handles 'onChange' event and updates state.
+    ClientMUIAccordion->>ClientMUIAccordion: 8. 8. Re-renders with 'expanded' prop set to true.
+    ClientMUIAccordion-->>ClientMUIAccordion: Updated HTML/CSS with visible answer.
+    ClientMUIAccordion->>PlatformUser: 9. 9. Displays expanded answer.
+    PlatformUser->>ClientMUIAccordion: 10. 10. Clicks the same question again to collapse.
+    ClientMUIAccordion->>ClientMUIAccordion: 11. 11. Handles 'onChange' event, updates state to collapse.
+
+    note over ClientMUIAccordion: Accessibility (AC-007): All accordions must be fully navigable and operable via keyboard (Tab to ...
+    note over ClientMUIAccordion: Static Content: The initial FAQ content is managed as a static JSON asset within the frontend cod...
+    note over ClientMUIAccordion: Responsiveness (AC-006): The layout must adapt to mobile, tablet, and desktop viewports. MUI's gr...
+
+    deactivate ClientMUIAccordion

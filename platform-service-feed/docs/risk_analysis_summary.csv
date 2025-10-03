@@ -1,0 +1,2 @@
+"total_risks_identified","critical_risks","high_priority_risks","average_risk_score","key_risk_themes","immediate_actions_required"
+"6","0","2","13.17","[""Security Implementation Complexity"",""Infrastructure & CI/CD Reliability"",""External Dependency Management""]","[""Finalize and review the secure JWT secret management strategy for EKS."",""Define mandatory, targeted testing protocols for all security-critical flows beyond generic coverage metrics."",""Prioritize a minimum viable CI/CD pipeline to de-risk deployment dependencies.""]"

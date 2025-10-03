@@ -1,0 +1,37 @@
+sequenceDiagram
+    actor "Client Application" as ClientApplication
+    participant "API Gateway" as APIGateway
+    participant "Engagement Service" as EngagementService
+    participant "Event Bus" as EventBus
+    participant "Notifications Service" as NotificationsService
+
+    activate ClientApplication
+    ClientApplication->>ClientApplication: 1. Optimistically update UI state for postId
+    activate APIGateway
+    ClientApplication->>APIGateway: 2. POST /graphql - addReaction(postId, reactionType: 'LIKE')
+    APIGateway-->>ClientApplication: HTTP 200 OK | 4xx/5xx Error
+    activate EngagementService
+    APIGateway->>EngagementService: 3. Invoke EngagementService.addReaction
+    EngagementService-->>APIGateway: gRPC Status OK | Error Code
+    EngagementService->>EngagementService: 3.1. DB TX: Validate user has not already liked post
+    EngagementService-->>EngagementService: Existing record found / not found
+    EngagementService->>EngagementService: 3.2. DB TX: Persist the 'LIKE' reaction
+    EngagementService-->>EngagementService: Write success
+    EngagementService->>EventBus: 3.3. Publish PostReactedEvent
+    activate NotificationsService
+    EventBus->>NotificationsService: 4. Delivers PostReactedEvent message
+    NotificationsService->>NotificationsService: 5. Process notification for post author
+    NotificationsService->>NotificationsService: 5.1. Check user's notification preferences
+    NotificationsService-->>NotificationsService: Preferences object
+    NotificationsService->>NotificationsService: 5.2. DB: Create/Aggregate and persist notification
+    NotificationsService-->>NotificationsService: Notification object
+    NotificationsService->>ClientApplication: 5.3. Push real-time notification via WebSocket
+    NotificationsService->>EventBus: 6. Acknowledge and delete message from queue
+
+    note over ClientApplication: Optimistic UI: The client immediately updates the UI to provide instant feedback. This is a cruci...
+    note over EventBus: Asynchronous Decoupling: The publication of the PostReactedEvent decouples the core action of 'li...
+
+    deactivate NotificationsService
+    deactivate EngagementService
+    deactivate APIGateway
+    deactivate ClientApplication

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: AppFooter</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #212529;
+    }
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+
+      /* Spacing */
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-weight-semibold: 600;
+
+      /* Layout */
+      --container-desktop: 1140px;
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase-header {
+      text-align: center;
+      padding: var(--spacing-xl) var(--spacing-md);
+      background-color: #fff;
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+
+    .showcase-header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .showcase-header p {
+      font-size: 1.1rem;
+      color: var(--color-neutral-600);
+      margin: 0;
+    }
+
+    .showcase-main {
+      padding: var(--spacing-xl) var(--spacing-md);
+      min-height: 80vh; /* Ensure footer is at the bottom */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .showcase-main h2 {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    /* 4. AppFooter Component CSS */
+    .app-footer {
+      background-color: var(--color-neutral-100);
+      padding: var(--spacing-lg) var(--spacing-md);
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      border-top: 1px solid var(--color-neutral-200);
+      width: 100%;
+    }
+
+    .app-footer__container {
+      max-width: var(--container-desktop);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      /* Mobile-first */
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .app-footer__copyright {
+      margin: 0;
+      text-align: center;
+    }
+
+    .app-footer__nav {
+      width: 100%;
+    }
+
+    .app-footer__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      /* Mobile-first */
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .app-footer__link {
+      color: var(--color-neutral-600);
+      text-decoration: none;
+      font-weight: var(--font-weight-semibold);
+      transition: color 150ms ease-in-out;
+    }
+
+    .app-footer__link:hover,
+    .app-footer__link:focus-visible {
+      color: var(--color-primary-700);
+      text-decoration: underline;
+      outline: none;
+    }
+    
+    .app-footer__link:focus-visible {
+      outline: 2px solid var(--color-primary-700);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* Responsive Adaptations */
+    @media (min-width: 768px) {
+      .app-footer__container {
+        flex-direction: row;
+        /* Desktop layout */
+      }
+
+      .app-footer__copyright {
+        text-align: left;
+      }
+
+      .app-footer__nav {
+        width: auto;
+      }
+
+      .app-footer__list {
+        flex-direction: row;
+        /* Desktop layout */
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .app-footer__link {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase-header">
+    <h1>AppFooter Component</h1>
+    <p>A global footer for the application that adapts from mobile to desktop layouts.</p>
+  </div>
+
+  <main class="showcase-main">
+    <h2>Page Content Area</h2>
+
+    <!-- AppFooter Component Implementation -->
+    <footer class="app-footer">
+      <div class="app-footer__container">
+        <p class="app-footer__copyright">&copy; 2025 Platform Name, Inc. All rights reserved.</p>
+        <nav class="app-footer__nav" aria-label="Footer">
+          <ul class="app-footer__list">
+            <li><a href="#" class="app-footer__link">About</a></li>
+            <li><a href="#" class="app-footer__link">Help Center</a></li>
+            <li><a href="#" class="app-footer__link">Privacy Policy</a></li>
+            <li><a href="#" class="app-footer__link">Terms of Service</a></li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
+  </main>
+  
+  <div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "default"<h3>
+		<!--description--><normal> The standard application footer. Stacks vertically on mobile and horizontally on desktop. </normal>
+		<!-- vrient 1 html -->
+        <footer class="app-footer">
+      <div class="app-footer__container">
+        <p class="app-footer__copyright">&copy; 2025 Platform Name, Inc. All rights reserved.</p>
+        <nav class="app-footer__nav" aria-label="Footer">
+          <ul class="app-footer__list">
+            <li><a href="#" class="app-footer__link">About</a></li>
+            <li><a href="#" class="app-footer__link">Help Center</a></li>
+            <li><a href="#" class="app-footer__link">Privacy Policy</a></li>
+            <li><a href="#" class="app-footer__link">Terms of Service</a></li>
+          </ul>
+        </nav>
+      </div>
+    </footer>"     
+		
+      <div>
+	 </div>
+	 </div>
+</body>
+</html>

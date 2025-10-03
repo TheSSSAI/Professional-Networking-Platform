@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molecular Component: SearchBar</title>
+    <style>
+        /* CSS Reset & Basic Setup */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+        body { margin: 0; background-color: var(--color-neutral-100); color: var(--color-neutral-900); }
+        h1, h2, h3, h4, p { margin: 0; }
+        
+        /* Visually Hidden Utility */
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+
+        /* Design System Tokens */
+        :root {
+          /* Colors */
+          --color-primary-500: #0077B5;
+          --color-primary-600: #005E90;
+          --color-primary-100: #E6F3FA;
+          --color-secondary-500: #6B7280;
+          --color-secondary-100: #F3F4F6;
+          --color-neutral-900: #111827;
+          --color-neutral-500: #6B7280;
+          --color-neutral-300: #D1D5DB;
+          --color-neutral-200: #E5E7EB;
+          --color-neutral-100: #F9FAFB;
+          --color-white: #FFFFFF;
+          /* Spacing */
+          --spacing-xs: 4px;
+          --spacing-sm: 8px;
+          --spacing-md: 16px;
+          --spacing-lg: 24px;
+          --spacing-xl: 32px;
+          /* Typography */
+          --font-size-base: 1rem;
+          --font-weight-semibold: 600;
+          /* Borders */
+          --border-radius-md: 6px;
+          --focus-ring: 0 0 0 3px rgba(0, 119, 181, 0.3);
+        }
+
+        /* Showcase Layout */
+        .showcase { max-width: 800px; margin: 0 auto; padding: var(--spacing-xl); }
+        .showcase__header { margin-bottom: var(--spacing-xl); text-align: center; }
+        .showcase__header h1 { font-size: 2.25rem; color: var(--color-neutral-900); }
+        .component-section { margin-bottom: var(--spacing-xl); padding: var(--spacing-lg); background: var(--color-white); border-radius: var(--border-radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .component-section > h2 { font-size: 1.5rem; margin-bottom: var(--spacing-lg); }
+        .component-group { display: flex; flex-direction: column; gap: var(--spacing-md); }
+
+        /* Icon SVG Styles */
+        .icon {
+            width: 1.25em;
+            height: 1.25em;
+            vertical-align: middle;
+        }
+        
+        /* Atomic Dependencies (simplified for showcase) */
+        .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: var(--font-weight-semibold); text-decoration: none; border: 1px solid transparent; border-radius: var(--border-radius-md); padding: var(--spacing-sm) var(--spacing-md); min-height: 44px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; white-space: nowrap; }
+        .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+        .btn--primary { background-color: var(--color-primary-500); color: var(--color-white); }
+        .btn--primary:hover { background-color: var(--color-primary-600); }
+        .btn--secondary { background-color: var(--color-white); color: var(--color-neutral-700); border-color: var(--color-neutral-300); }
+        .btn--secondary:hover { background-color: var(--color-secondary-100); }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--color-white); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* SearchBar Component CSS */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .search-bar__wrapper {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar__icon {
+            position: absolute;
+            left: var(--spacing-md);
+            color: var(--color-neutral-500);
+            pointer-events: none;
+            transition: color 0.2s ease;
+            width: 20px;
+            height: 20px;
+        }
+
+        .search-bar__input {
+            width: 100%;
+            border: 1px solid var(--color-neutral-300);
+            border-radius: var(--border-radius-md);
+            font-size: var(--font-size-base);
+            min-height: 44px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 40px; /* Padding left for icon */
+            background-color: var(--color-white);
+        }
+        
+        .search-bar__input:focus-visible {
+            outline: none; /* We use box-shadow for focus */
+        }
+
+        .search-bar__input::placeholder {
+            color: var(--color-neutral-500);
+        }
+
+        .search-bar__submit-btn {
+            flex-shrink: 0;
+        }
+
+        .search-bar__filter-btn {
+            flex-shrink: 0;
+            padding: var(--spacing-sm);
+        }
+
+        .search-bar__filter-btn .icon {
+            margin-right: var(--spacing-xs);
+        }
+
+        /* States */
+        .search-bar__wrapper:focus-within .search-bar__input {
+            border-color: var(--color-primary-500);
+            box-shadow: var(--focus-ring);
+        }
+
+        .search-bar__wrapper:focus-within .search-bar__icon {
+            color: var(--color-primary-500);
+        }
+
+        .search-bar--loading .search-bar__input {
+            background-color: var(--color-neutral-100);
+            cursor: not-allowed;
+        }
+
+        .search-bar--loading .search-bar__submit-btn {
+            cursor: wait;
+        }
+
+        .search-bar--loading .search-bar__submit-btn .search-bar__submit-text {
+            display: none;
+        }
+
+        .search-bar--loading .search-bar__submit-btn .spinner {
+            display: inline-block;
+        }
+
+        .search-bar__submit-btn .spinner {
+            display: none; /* Hidden by default */
+        }
+
+        /* Responsive Adaptations */
+        @media (max-width: 768px) {
+            .search-bar {
+                max-width: 100%;
+            }
+            .search-bar__submit-text {
+                /* Hide text on mobile for icon-only button */
+                display: none;
+            }
+            .search-bar__submit-btn .icon {
+                margin: 0;
+            }
+            .search-bar__submit-btn {
+                padding: var(--spacing-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="showcase">
+        <header class="showcase__header">
+            <h1>SearchBar Component</h1>
+        </header>
+
+        <section class="component-section">
+            <h2>Variations and States</h2>
+            <div class="component-group">
+                
+                <!-- Default State -->
+                <h3>Default</h3>
+                <form class="search-bar" role="search" onsubmit="event.preventDefault();">
+                    <label for="search-default" class="sr-only">Search</label>
+                    <div class="search-bar__wrapper">
+                        <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                        <input type="search" id="search-default" class="search-bar__input" placeholder="Search for people, skills...">
+                    </div>
+                    <button type="submit" class="btn btn--primary search-bar__submit-btn" aria-label="Search">
+                        <span class="search-bar__submit-text">Search</span>
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display: none;" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                    </button>
+                </form>
+
+                <!-- Focused State -->
+                <h3>Focused</h3>
+                <p>Focus is applied automatically via CSS <code>:focus-within</code>. Click into the input field above to see the effect.</p>
+
+                <!-- Loading State -->
+                <h3>Loading</h3>
+                <form class="search-bar search-bar--loading" role="search" onsubmit="event.preventDefault();">
+                    <label for="search-loading" class="sr-only">Search</label>
+                    <div class="search-bar__wrapper">
+                        <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                        <input type="search" id="search-loading" class="search-bar__input" placeholder="Searching..." disabled>
+                    </div>
+                    <button type="submit" class="btn btn--primary search-bar__submit-btn" aria-label="Searching, please wait" disabled>
+                        <span class="spinner"></span>
+                        <span class="search-bar__submit-text">Search</span>
+                    </button>
+                </form>
+
+                <!-- With Filters Variant -->
+                <h3>With Filters</h3>
+                <form class="search-bar" role="search" onsubmit="event.preventDefault();">
+                    <label for="search-filters" class="sr-only">Search</label>
+                    <div class="search-bar__wrapper">
+                        <svg class="search-bar__icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                        <input type="search" id="search-filters" class="search-bar__input" placeholder="Search for people, skills...">
+                    </div>
+                    <button type="button" class="btn btn--secondary search-bar__filter-btn" aria-label="Open search filters">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+                    </button>
+                    <button type="submit" class="btn btn--primary search-bar__submit-btn" aria-label="Search">
+                        <span class="search-bar__submit-text">Search</span>
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display: none;" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                    </button>
+                </form>
+
+            </div>
+        </section>
+    </div>
+</body>
+</html>

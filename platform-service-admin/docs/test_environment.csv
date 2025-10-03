@@ -1,0 +1,4 @@
+"environment_name","environment_type","deployment_frequency","data_refresh_frequency","infrastructure_stack","service_dependencies","monitoring_tools","access_control","backup_strategy","disaster_recovery","cost_optimization","maintenance_window"
+"Local Development","Isolated","On-demand","On-demand","Docker Compose (PostgreSQL, Redis)","N/A","Local console logs","Individual Developer","None","N/A","N/A","N/A"
+"CI / Integration Testing","Ephemeral","Every PR commit","Per run","GitHub Actions Services (PostgreSQL, Redis containers)","Ephemeral instances for each run.","GitHub Actions Logs","Automated via workflow","None","N/A","N/A","N/A"
+"Staging","Shared","On merge to `main`","Weekly (sanitized production data)","AWS EKS (Terraform-managed)","All other services' staging versions.","Prometheus; Grafana; Jaeger; Loki","Development & QA Teams","Daily RDS snapshots","8-hour RTO","Scaled-down replica counts.","Nightly"

@@ -1,0 +1,505 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-SF-001
+
+## 1.2 Name
+
+Secure Logout and Token Revocation
+
+## 1.3 Description
+
+A user logs out of the platform. The system immediately invalidates the user's session tokens by adding their unique identifiers (JTI) to a blocklist in a Redis cache, preventing any further use.
+
+## 1.4 Type
+
+🔹 SecurityFlow
+
+## 1.5 Purpose
+
+To provide a secure logout mechanism that prevents token reuse, as per SRS-001-F1 (1.1.2, 1.1.4).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-IDENTITY
+
+## 1.10 Key Interactions
+
+- User clicks the logout button in the client SPA.
+- Client sends a request to the logout endpoint on the Identity Service, including the current tokens.
+- Identity Service extracts the unique token identifiers (JTI) from both the access and refresh tokens.
+- Identity Service adds the tokens' JTIs to a Redis blocklist with an expiration set to the token's original remaining lifetime.
+- Client clears the tokens from its local storage/cookies and redirects to the login page.
+
+## 1.11 Triggers
+
+- User initiates the logout process.
+
+## 1.12 Outcomes
+
+- User session is terminated on both client and server.
+- The session's tokens are effectively revoked and cannot be used for future API requests.
+
+## 1.13 Business Rules
+
+- The API Gateway's authentication middleware MUST check the Redis blocklist for every incoming request to reject revoked tokens.
+
+## 1.14 Error Scenarios
+
+- Redis cache is unavailable, preventing token revocation (the system should fail securely and log the user out on the client).
+- Client fails to clear local tokens, but they are still invalid on the backend.
+
+## 1.15 Integration Points
+
+- Redis via AWS ElastiCache for the JWT blocklist (2.6.6).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-SF-001
+
+## 2.2 Name
+
+Implementation: Secure Logout and JWT Revocation
+
+## 2.3 Description
+
+Provides a detailed technical specification for the secure user logout process. This flow ensures that when a user logs out, their session's JWT access and refresh tokens are immediately and irrevocably invalidated on the server-side by adding their unique identifiers (JTI) to a Redis blocklist. This prevents token reuse, even if the tokens are compromised after logout.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+Next.js 14, React 18, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | User Interface |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF4500 |
+| Stereotype | Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-IDENTITY
+
+#### 2.4.3.2 Display Name
+
+Identity Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS 10, TypeScript 5, gRPC
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #8A2BE2 |
+| Stereotype | IAM Service |
+
+### 2.4.4.0 In-Memory Cache
+
+#### 2.4.4.1 Repository Id
+
+infra-redis-cache
+
+#### 2.4.4.2 Display Name
+
+Redis Blocklist
+
+#### 2.4.4.3 Type
+
+🔹 In-Memory Cache
+
+#### 2.4.4.4 Technology
+
+AWS ElastiCache for Redis 7
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #DC143C |
+| Stereotype | Cache |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Synchronous Request
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+2. POST /v1/auth/logout
+
+#### 2.5.1.4 Sequence Number
+
+2
+
+#### 2.5.1.5 Type
+
+🔹 Synchronous Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+9. HTTP/1.1 204 No Content
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+HTTPS/2
+
+##### 2.5.1.10.2 Method
+
+POST
+
+##### 2.5.1.10.3 Parameters
+
+###### 2.5.1.10.3.1 Authorization
+
+####### 2.5.1.10.3.1.1 Name
+
+Authorization
+
+####### 2.5.1.10.3.1.2 Type
+
+🔹 Header
+
+####### 2.5.1.10.3.1.3 Value
+
+Bearer <accessToken>
+
+###### 2.5.1.10.3.2.0 Body
+
+####### 2.5.1.10.3.2.1 Name
+
+Body
+
+####### 2.5.1.10.3.2.2 Type
+
+🔹 JSON
+
+####### 2.5.1.10.3.2.3 Value
+
+{"refreshToken": "<refreshToken>"}
+
+##### 2.5.1.10.4.0.0 Authentication
+
+Requires a valid, non-expired JWT Access Token. The token is validated by the API Gateway's authorizer, but its JTI is NOT yet checked against the blocklist for the logout endpoint itself.
+
+##### 2.5.1.10.5.0.0 Error Handling
+
+If the request fails (e.g., 5xx), the client should proceed with clearing local tokens to ensure a consistent UX.
+
+##### 2.5.1.10.6.0.0 Performance
+
+###### 2.5.1.10.6.1.0 Latency
+
+< 50ms (network dependent)
+
+###### 2.5.1.10.6.2.0 Throughput
+
+N/A
+
+#### 2.5.1.11.0.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-GW-API', 'targetId': 'REPO-SVC-IDENTITY', 'message': '3. [gRPC] AuthService.logout(LogoutRequest)', 'sequenceNumber': 3, 'type': 'gRPC Call', 'isSynchronous': True, 'returnMessage': '8. LogoutResponse(success=true)', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'gRPC', 'method': 'AuthService.logout', 'parameters': [{'name': 'LogoutRequest', 'type': 'Protobuf', 'schema': 'message LogoutRequest { string access_token = 1; string refresh_token = 2; }'}], 'authentication': 'Requires mTLS and valid IAM role for inter-service communication.', 'errorHandling': 'Standard gRPC status codes. The gateway will translate internal errors into HTTP 500 responses.', 'performance': {'latency': '< 10ms', 'throughput': 'High'}}, 'nestedInteractions': [{'sourceId': 'REPO-SVC-IDENTITY', 'targetId': 'REPO-SVC-IDENTITY', 'message': '4. Decode tokens, extract JTI & remaining TTL', 'sequenceNumber': 4, 'type': 'Internal Processing', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'N/A', 'method': 'jwt.decode(), calculateTTL(token.exp)', 'parameters': [{'name': 'accessToken'}, {'name': 'refreshToken'}], 'authentication': 'N/A', 'errorHandling': "If tokens are malformed, the request is rejected with an 'InvalidArgument' gRPC status. This indicates a potential client-side issue or tampering.", 'performance': {'latency': '< 1ms', 'throughput': 'Very High'}}, 'nestedInteractions': []}, {'sourceId': 'REPO-SVC-IDENTITY', 'targetId': 'infra-redis-cache', 'message': '5. SETEX blocklist:<access_token_jti> <ttl_seconds> "1"', 'sequenceNumber': 5, 'type': 'Cache Write', 'isSynchronous': True, 'returnMessage': 'OK', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'Redis Protocol', 'method': 'SETEX', 'parameters': [{'name': 'key', 'value': "Formatted string 'blocklist:<JTI>'"}, {'name': 'seconds', 'value': 'Calculated remaining lifetime of the access token'}, {'name': 'value', 'value': '"1"'}], 'authentication': 'Requires authentication to the Redis cluster (e.g., password or IAM).', 'errorHandling': 'If Redis is unavailable, a CRITICAL error is logged with the JTI. The service proceeds with the logout flow to avoid user-facing failure (fail-safe).', 'performance': {'latency': '< 5ms', 'throughput': 'Very High'}}, 'nestedInteractions': []}, {'sourceId': 'REPO-SVC-IDENTITY', 'targetId': 'infra-redis-cache', 'message': '6. SETEX blocklist:<refresh_token_jti> <ttl_seconds> "1"', 'sequenceNumber': 6, 'type': 'Cache Write', 'isSynchronous': True, 'returnMessage': 'OK', 'hasReturn': True, 'isActivation': True, 'technicalDetails': {'protocol': 'Redis Protocol', 'method': 'SETEX', 'parameters': [{'name': 'key', 'value': "Formatted string 'blocklist:<JTI>'"}, {'name': 'seconds', 'value': 'Calculated remaining lifetime of the refresh token'}, {'name': 'value', 'value': '"1"'}], 'authentication': 'Requires authentication to the Redis cluster.', 'errorHandling': 'Same as previous Redis interaction: log critical error on failure but continue.', 'performance': {'latency': '< 5ms', 'throughput': 'Very High'}}, 'nestedInteractions': []}, {'sourceId': 'REPO-SVC-IDENTITY', 'targetId': 'REPO-SVC-IDENTITY', 'message': '7. Create security audit log entry', 'sequenceNumber': 7, 'type': 'Audit Logging', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'N/A', 'method': 'Logger.info()', 'parameters': [{'name': 'event', 'value': 'USER_LOGOUT_SUCCESS'}, {'name': 'userId', 'value': 'Extracted from token'}, {'name': 'revokedJtis', 'value': '[jti1, jti2]'}], 'authentication': 'N/A', 'errorHandling': 'Logging failures should not block the main execution path but must be alerted on.', 'performance': {'latency': '< 1ms', 'throughput': 'Very High'}}, 'nestedInteractions': []}]}
+
+### 2.5.2.0.0.0.0 Internal Processing
+
+#### 2.5.2.1.0.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2.0.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.3.0.0.0 Message
+
+10. Clear tokens from secure storage
+
+#### 2.5.2.4.0.0.0 Sequence Number
+
+10
+
+#### 2.5.2.5.0.0.0 Type
+
+🔹 Internal Processing
+
+#### 2.5.2.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.2.10.0.0.0 Technical Details
+
+##### 2.5.2.10.1.0.0 Protocol
+
+N/A
+
+##### 2.5.2.10.2.0.0 Method
+
+storage.removeItem('accessToken'), storage.removeItem('refreshToken')
+
+##### 2.5.2.10.3.0.0 Parameters
+
+*No items available*
+
+##### 2.5.2.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.2.10.5.0.0 Error Handling
+
+Client-side operation; failure should be handled gracefully.
+
+##### 2.5.2.10.6.0.0 Performance
+
+###### 2.5.2.10.6.1.0 Latency
+
+Immediate
+
+###### 2.5.2.10.6.2.0 Throughput
+
+N/A
+
+#### 2.5.2.11.0.0.0 Nested Interactions
+
+*No items available*
+
+### 2.5.3.0.0.0.0 UI Navigation
+
+#### 2.5.3.1.0.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.3.0.0.0 Message
+
+11. Redirect to login page
+
+#### 2.5.3.4.0.0.0 Sequence Number
+
+11
+
+#### 2.5.3.5.0.0.0 Type
+
+🔹 UI Navigation
+
+#### 2.5.3.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0.0 Technical Details
+
+##### 2.5.3.10.1.0.0 Protocol
+
+N/A
+
+##### 2.5.3.10.2.0.0 Method
+
+router.push('/login')
+
+##### 2.5.3.10.3.0.0 Parameters
+
+*No items available*
+
+##### 2.5.3.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0.0 Error Handling
+
+N/A
+
+##### 2.5.3.10.6.0.0 Performance
+
+###### 2.5.3.10.6.1.0 Latency
+
+Immediate
+
+###### 2.5.3.10.6.2.0 Throughput
+
+N/A
+
+#### 2.5.3.11.0.0.0 Nested Interactions
+
+*No items available*
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+Defense-in-Depth: The API Gateway's custom authorizer MUST check the Redis blocklist for the JTI of every incoming token for all authenticated endpoints. This is the enforcement mechanism that rejects revoked tokens.
+
+#### 2.6.1.2.0.0.0 Position
+
+top-right
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-GW-API
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+*Not specified*
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+User-initiated action, e.g., clicking a 'Logout' button. This is the trigger for the sequence.
+
+#### 2.6.2.2.0.0.0 Position
+
+above
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+1
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. All JWTs (access and refresh) MUST contain a un... |
+| Performance Targets | 1. The end-to-end server-side logout process (API ... |
+| Error Handling Strategy | The system must fail-safe from a user experience p... |
+| Testing Considerations | 1. **Happy Path:** Verify that after logout, using... |
+| Monitoring Requirements | 1. A CRITICAL alert must be configured to fire if ... |
+| Deployment Considerations | The API Gateway's custom authorizer logic must be ... |
+

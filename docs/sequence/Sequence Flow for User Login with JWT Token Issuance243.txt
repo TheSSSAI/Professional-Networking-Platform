@@ -1,0 +1,624 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-AF-001
+
+## 1.2 Name
+
+User Login with JWT Token Issuance
+
+## 1.3 Description
+
+A registered and verified user logs in with their credentials. The system authenticates them against the stored password hash and issues short-lived JWT access tokens and long-lived refresh tokens for secure session management.
+
+## 1.4 Type
+
+🔹 AuthenticationFlow
+
+## 1.5 Purpose
+
+To authenticate users and establish a secure session using a standard JWT-based flow, as per SRS-001-F1 (1.1.2, 1.1.4).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-IDENTITY
+
+## 1.10 Key Interactions
+
+- User submits login credentials via the client SPA.
+- API Gateway authenticates the request and forwards it to the Identity Service.
+- Identity Service validates credentials against the bcrypt-hashed password in PostgreSQL.
+- Upon success, Identity Service generates a JWT access token (15 min expiry) and a refresh token (7 day expiry).
+- Tokens are returned to the client, which stores them securely (e.g., in HttpOnly cookies).
+
+## 1.11 Triggers
+
+- User enters their email and password on the login page and clicks 'Login'.
+
+## 1.12 Outcomes
+
+- User is successfully authenticated.
+- Client application has the necessary tokens to make authenticated API requests.
+
+## 1.13 Business Rules
+
+- Only verified accounts can log in.
+- Access tokens have a short lifespan (e.g., 15 minutes).
+- Refresh tokens have a long lifespan (e.g., 7 days).
+
+## 1.14 Error Scenarios
+
+- Invalid credentials are provided.
+- User account is not verified or is deactivated/banned.
+- Failed login attempts are logged for security monitoring (2.3.6).
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-AF-001-IMPL
+
+## 2.2 Name
+
+Implementation: User Login and JWT Token Issuance
+
+## 2.3 Description
+
+Detailed sequence for a registered and verified user authenticating via the platform. The Next.js client sends credentials via a GraphQL mutation to the AWS API Gateway. The gateway forwards the request via gRPC to the NestJS Identity Service, which validates the credentials against the bcrypt-hashed password stored in PostgreSQL. Upon successful validation, the service generates a signed JWT access token (15-min expiry) and a secure refresh token (7-day expiry), returning them to the client for session management.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client Application (SPA)
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+Next.js, React, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #4285F4 |
+| Stereotype | User Agent |
+
+### 2.4.2.0 Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FF9900 |
+| Stereotype | Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-IDENTITY
+
+#### 2.4.3.2 Display Name
+
+Identity & Access Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, gRPC, PostgreSQL, Redis
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #DB4437 |
+| Stereotype | Service |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 GraphQL Mutation
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+Executes GraphQL 'login' mutation with user credentials.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 GraphQL Mutation
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Returns GraphQL response with JWT tokens or an error.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/GraphQL |
+| Method | mutation login($email: String!, $password: String!... |
+| Parameters | email and password provided in GraphQL variables. |
+| Authentication | None (Public Endpoint) |
+| Error Handling | Handles HTTP 4xx/5xx responses, network failures, ... |
+| Performance | P99 Latency < 1000ms (end-to-end from client). |
+
+### 2.5.2.0 gRPC Request
+
+#### 2.5.2.1 Source Id
+
+REPO-GW-API
+
+#### 2.5.2.2 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.2.3 Message
+
+Invokes 'login' method via gRPC.
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 gRPC Request
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+Returns LoginResponseDto with tokens or a gRPC error status.
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | AuthService.login(LoginRequestDto) |
+| Parameters | { email: string, password: string } |
+| Authentication | Internal Service Mesh Authentication (e.g., mTLS) |
+| Error Handling | Handles gRPC status codes (e.g., UNAUTHENTICATED, ... |
+| Performance | P95 Latency < 50ms. |
+
+#### 2.5.2.11 Nested Interactions
+
+##### 2.5.2.11.1 Database Query
+
+###### 2.5.2.11.1.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.1.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.1.3 Message
+
+1. Fetches user record from PostgreSQL by email.
+
+###### 2.5.2.11.1.4 Sequence Number
+
+2.1
+
+###### 2.5.2.11.1.5 Type
+
+🔹 Database Query
+
+###### 2.5.2.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.11.1.7 Return Message
+
+Returns user entity or null.
+
+###### 2.5.2.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.11.1.9 Is Activation
+
+❌ No
+
+###### 2.5.2.11.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | SELECT * FROM "User" WHERE email = $1 |
+| Parameters | email |
+| Authentication | Database credentials from secret store. |
+| Error Handling | Handles query timeouts, connection errors. Throws ... |
+| Performance | P99 Latency < 10ms (with index on email). |
+
+##### 2.5.2.11.2.0 Business Rule Validation
+
+###### 2.5.2.11.2.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.2.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.2.3 Message
+
+2. Verifies user status is 'ACTIVE' and 'VERIFIED'.
+
+###### 2.5.2.11.2.4 Sequence Number
+
+2.2
+
+###### 2.5.2.11.2.5 Type
+
+🔹 Business Rule Validation
+
+###### 2.5.2.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.11.2.7 Return Message
+
+Continues or throws exception.
+
+###### 2.5.2.11.2.8 Has Return
+
+❌ No
+
+###### 2.5.2.11.2.9 Is Activation
+
+❌ No
+
+###### 2.5.2.11.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Logic |
+| Method | validateUserStatus(user) |
+| Parameters | User entity. |
+| Authentication | N/A |
+| Error Handling | Throws UnauthorizedException with specific reason ... |
+| Performance | Negligible. |
+
+##### 2.5.2.11.3.0 Cryptographic Operation
+
+###### 2.5.2.11.3.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.3.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.3.3 Message
+
+3. Compares provided password with stored hash using bcrypt.
+
+###### 2.5.2.11.3.4 Sequence Number
+
+2.3
+
+###### 2.5.2.11.3.5 Type
+
+🔹 Cryptographic Operation
+
+###### 2.5.2.11.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.11.3.7 Return Message
+
+Returns boolean (match or mismatch).
+
+###### 2.5.2.11.3.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.11.3.9 Is Activation
+
+❌ No
+
+###### 2.5.2.11.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Logic |
+| Method | bcrypt.compare(password, user.passwordHash) |
+| Parameters | Plaintext password, stored hash. |
+| Authentication | N/A |
+| Error Handling | If mismatch, logs failed login attempt and throws ... |
+| Performance | Designed to be computationally intensive (~100-200... |
+
+##### 2.5.2.11.4.0 Token Generation
+
+###### 2.5.2.11.4.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.4.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.4.3 Message
+
+4. Generates signed JWT access and refresh tokens.
+
+###### 2.5.2.11.4.4 Sequence Number
+
+2.4
+
+###### 2.5.2.11.4.5 Type
+
+🔹 Token Generation
+
+###### 2.5.2.11.4.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.11.4.7 Return Message
+
+Returns accessToken and refreshToken strings.
+
+###### 2.5.2.11.4.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.11.4.9 Is Activation
+
+❌ No
+
+###### 2.5.2.11.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | JWT Library (e.g., @nestjs/jwt) |
+| Method | jwtService.sign(payload, options) |
+| Parameters | Payload with { sub: userId, email: userEmail }. Op... |
+| Authentication | N/A |
+| Error Handling | Handles signing errors from the library. |
+| Performance | P99 < 5ms. |
+
+##### 2.5.2.11.5.0 Audit Logging
+
+###### 2.5.2.11.5.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.5.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.11.5.3 Message
+
+5. Logs successful login event for security audit trail.
+
+###### 2.5.2.11.5.4 Sequence Number
+
+2.5
+
+###### 2.5.2.11.5.5 Type
+
+🔹 Audit Logging
+
+###### 2.5.2.11.5.6 Is Synchronous
+
+❌ No
+
+###### 2.5.2.11.5.7 Return Message
+
+N/A
+
+###### 2.5.2.11.5.8 Has Return
+
+❌ No
+
+###### 2.5.2.11.5.9 Is Activation
+
+❌ No
+
+###### 2.5.2.11.5.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Structured Logging (JSON) |
+| Method | logger.info('User login successful') |
+| Parameters | { event: 'LOGIN_SUCCESS', userId: user.id, ipAddre... |
+| Authentication | N/A |
+| Error Handling | Logging failures should not block the main request... |
+| Performance | Asynchronous write to stdout. |
+
+### 2.5.3.0.0.0 Client-Side Action
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.3.0.0 Message
+
+Securely stores tokens for session management.
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Client-Side Action
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Browser API |
+| Method | Sets tokens in secure, HttpOnly cookies via Set-Co... |
+| Parameters | accessToken, refreshToken |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Negligible. |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Password validation is performed using `bcrypt.compare()` to mitigate timing attacks. Failed login attempts MUST be logged to a security audit trail for monitoring brute-force attacks, as per REQ-1-059.
+
+#### 2.6.1.2.0.0 Position
+
+RightOf
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-SVC-IDENTITY
+
+#### 2.6.1.4.0.0 Sequence Number
+
+2.3
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Client must not store JWT tokens in client-side storage like localStorage. The server should set tokens in secure, HttpOnly cookies to prevent XSS attacks. The access token can be stored in memory for use by the Apollo Client.
+
+#### 2.6.2.2.0.0 Position
+
+LeftOf
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+3
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Passwords must be hashed with bcrypt using a salt ... |
+| Performance Targets | The entire login flow (sequence 1 to 3) must have ... |
+| Error Handling Strategy | The API Gateway is responsible for translating gRP... |
+| Testing Considerations | Test cases must include: successful login, invalid... |
+| Monitoring Requirements | A metric `auth_login_attempts_total` with labels f... |
+| Deployment Considerations | JWT signing keys must be rotated periodically. The... |
+

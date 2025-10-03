@@ -1,0 +1,1103 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-OP-001
+
+## 1.2 Name
+
+Automated CI/CD Pipeline Execution
+
+## 1.3 Description
+
+A developer pushes code to a feature branch in GitHub. This automatically triggers a CI/CD pipeline in GitHub Actions that builds, tests, performs security scans, containers the application, and deploys the service to the staging environment using a rolling update.
+
+## 1.4 Type
+
+🔹 OperationalFlow
+
+## 1.5 Purpose
+
+To automate the software delivery lifecycle, ensuring code quality, security, and consistent deployments, as defined in architecture 2.7.4.
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-CODE-HOST
+- REPO-CI-CD-PLATFORM
+- REPO-CONTAINER-REGISTRY
+- REPO-K8S-CLUSTER
+
+## 1.10 Key Interactions
+
+- Developer pushes code to a GitHub repository.
+- A GitHub Actions workflow is triggered by the push event.
+- The pipeline runs linting and static analysis.
+- Unit and integration tests are executed, and code coverage is checked against the 80% target.
+- Mandatory security scans (SAST, SCA for dependencies, container image scanning) are performed.
+- If all checks pass, a Docker image is built and pushed to AWS ECR.
+- The pipeline uses kubectl or a GitOps tool to apply the updated Kubernetes deployment manifest to the EKS cluster, triggering a rolling update.
+
+## 1.11 Triggers
+
+- A `git push` command is executed on a repository branch configured with a workflow trigger.
+
+## 1.12 Outcomes
+
+- Code changes are automatically and safely deployed to a target environment with zero downtime.
+- Immediate feedback on build, test, or security failures is provided to the developer via GitHub.
+
+## 1.13 Business Rules
+
+- All pipeline stages, including tests and security scans, must pass before deployment can proceed (2.7.4).
+- Code coverage must be above the 80% target (2.5.2).
+- Security scans must not find any critical vulnerabilities.
+
+## 1.14 Error Scenarios
+
+- Unit or integration tests fail, halting the pipeline.
+- A critical vulnerability is discovered by a security scan, failing the build.
+- Deployment to Kubernetes fails due to misconfiguration or cluster issues.
+
+## 1.15 Integration Points
+
+- GitHub Actions (2.7.4).
+- AWS EKS (2.7.3).
+- AWS ECR (Container Registry).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-OP-001
+
+## 2.2 Name
+
+Automated CI/CD Pipeline for Staging Deployment
+
+## 2.3 Description
+
+A comprehensive sequence detailing the automated CI/CD pipeline triggered by a developer's code push. The pipeline, executed by GitHub Actions, encompasses code validation, testing, security scanning, containerization, and deployment to the AWS EKS staging cluster. This process enforces quality gates and security checks as defined in SRS sections 2.5.2 and 2.7.4.
+
+## 2.4 Participants
+
+### 2.4.1 Human Actor
+
+#### 2.4.1.1 Repository Id
+
+ACTOR-DEV
+
+#### 2.4.1.2 Display Name
+
+Developer
+
+#### 2.4.1.3 Type
+
+🔹 Human Actor
+
+#### 2.4.1.4 Technology
+
+Git Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #9A7BFF |
+| Stereotype | User |
+
+### 2.4.2.0 Version Control System
+
+#### 2.4.2.1 Repository Id
+
+REPO-CODE-HOST
+
+#### 2.4.2.2 Display Name
+
+GitHub Repository
+
+#### 2.4.2.3 Type
+
+🔹 Version Control System
+
+#### 2.4.2.4 Technology
+
+GitHub
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #2088FF |
+| Stereotype | VCS |
+
+### 2.4.3.0 CI/CD Platform
+
+#### 2.4.3.1 Repository Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.4.3.2 Display Name
+
+GitHub Actions
+
+#### 2.4.3.3 Type
+
+🔹 CI/CD Platform
+
+#### 2.4.3.4 Technology
+
+GitHub Actions
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #5BC0DE |
+| Stereotype | CI/CD |
+
+### 2.4.4.0 Container Registry
+
+#### 2.4.4.1 Repository Id
+
+REPO-CONTAINER-REGISTRY
+
+#### 2.4.4.2 Display Name
+
+AWS ECR
+
+#### 2.4.4.3 Type
+
+🔹 Container Registry
+
+#### 2.4.4.4 Technology
+
+Amazon Elastic Container Registry
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #FF9900 |
+| Stereotype | Registry |
+
+### 2.4.5.0 Container Orchestrator
+
+#### 2.4.5.1 Repository Id
+
+REPO-K8S-CLUSTER
+
+#### 2.4.5.2 Display Name
+
+AWS EKS Cluster (Staging)
+
+#### 2.4.5.3 Type
+
+🔹 Container Orchestrator
+
+#### 2.4.5.4 Technology
+
+Amazon Elastic Kubernetes Service
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | participant |
+| Color | #D9534F |
+| Stereotype | Orchestrator |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+ACTOR-DEV
+
+#### 2.5.1.2 Target Id
+
+REPO-CODE-HOST
+
+#### 2.5.1.3 Message
+
+1. `git push origin feature-branch`
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Push confirmation
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+SSH/HTTPS
+
+##### 2.5.1.10.2 Method
+
+git-receive-pack
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'commit_payload', 'description': 'Serialized Git objects representing the new commits.'}
+
+##### 2.5.1.10.4 Authentication
+
+SSH key or Personal Access Token (PAT) validated by GitHub.
+
+##### 2.5.1.10.5 Error Handling
+
+Git client handles connection errors, merge conflicts, and authentication failures.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+Dependent on network and payload size.
+
+###### 2.5.1.10.6.2 Throughput
+
+N/A
+
+### 2.5.2.0.0.0 Webhook
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-CODE-HOST
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.5.2.3.0.0 Message
+
+2. Trigger Workflow (on:push)
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Webhook
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+HTTPS
+
+##### 2.5.2.10.2.0 Method
+
+POST
+
+##### 2.5.2.10.3.0 Parameters
+
+- {'name': 'event_payload', 'description': 'JSON payload containing details of the push event (repository, branch, commit SHA).'}
+
+##### 2.5.2.10.4.0 Authentication
+
+Internal GitHub event bus.
+
+##### 2.5.2.10.5.0 Error Handling
+
+GitHub's internal queueing and retry mechanisms for webhook delivery.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+< 1s
+
+###### 2.5.2.10.6.2 Throughput
+
+High
+
+### 2.5.3.0.0.0 Process
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.5.3.3.0.0 Message
+
+3. Execute CI Pipeline Workflow
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Process
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+Internal
+
+##### 2.5.3.10.2.0 Method
+
+runWorkflow
+
+##### 2.5.3.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.3.10.4.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0 Error Handling
+
+Workflow-level error handling. A failure in any nested step fails the entire job.
+
+##### 2.5.3.10.6.0 Performance
+
+###### 2.5.3.10.6.1 Latency
+
+Pipeline duration target: < 10 minutes
+
+###### 2.5.3.10.6.2 Throughput
+
+N/A
+
+#### 2.5.3.11.0.0 Nested Interactions
+
+##### 2.5.3.11.1.0 Step
+
+###### 2.5.3.11.1.1 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.1.2 Target Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.1.3 Message
+
+3.1. [Job: build-and-test] Checkout code
+
+###### 2.5.3.11.1.4 Sequence Number
+
+3.1
+
+###### 2.5.3.11.1.5 Type
+
+🔹 Step
+
+###### 2.5.3.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.1.7 Return Message
+
+Source code available in runner workspace
+
+###### 2.5.3.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.1.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.1.10 Technical Details
+
+####### 2.5.3.11.1.10.1 Protocol
+
+Shell Command
+
+####### 2.5.3.11.1.10.2 Method
+
+actions/checkout@v4
+
+####### 2.5.3.11.1.10.3 Parameters
+
+*No items available*
+
+####### 2.5.3.11.1.10.4 Authentication
+
+Runner uses GITHUB_TOKEN for repository access.
+
+####### 2.5.3.11.1.10.5 Error Handling
+
+Fails job if repository is inaccessible.
+
+####### 2.5.3.11.1.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.2.0.0 Step
+
+###### 2.5.3.11.2.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.2.2.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.2.3.0 Message
+
+3.2. Run Linting and Static Analysis
+
+###### 2.5.3.11.2.4.0 Sequence Number
+
+3.2
+
+###### 2.5.3.11.2.5.0 Type
+
+🔹 Step
+
+###### 2.5.3.11.2.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.2.7.0 Return Message
+
+Pass/Fail status
+
+###### 2.5.3.11.2.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.2.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.2.10.0 Technical Details
+
+####### 2.5.3.11.2.10.1 Protocol
+
+Shell Command
+
+####### 2.5.3.11.2.10.2 Method
+
+npm run lint
+
+####### 2.5.3.11.2.10.3 Parameters
+
+*No items available*
+
+####### 2.5.3.11.2.10.4 Authentication
+
+N/A
+
+####### 2.5.3.11.2.10.5 Error Handling
+
+Fails job if linting rules are violated (non-zero exit code).
+
+####### 2.5.3.11.2.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.3.0.0 Step
+
+###### 2.5.3.11.3.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.3.2.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.3.3.0 Message
+
+3.3. Run Unit & Integration Tests (REQ-2.5.2)
+
+###### 2.5.3.11.3.4.0 Sequence Number
+
+3.3
+
+###### 2.5.3.11.3.5.0 Type
+
+🔹 Step
+
+###### 2.5.3.11.3.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.3.7.0 Return Message
+
+Test results and coverage report
+
+###### 2.5.3.11.3.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.3.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.3.10.0 Technical Details
+
+####### 2.5.3.11.3.10.1 Protocol
+
+Shell Command
+
+####### 2.5.3.11.3.10.2 Method
+
+npm test -- --coverage
+
+####### 2.5.3.11.3.10.3 Parameters
+
+*No items available*
+
+####### 2.5.3.11.3.10.4 Authentication
+
+N/A
+
+####### 2.5.3.11.3.10.5 Error Handling
+
+Fails job if any test fails or if coverage is below 80% threshold.
+
+####### 2.5.3.11.3.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.4.0.0 Step
+
+###### 2.5.3.11.4.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.4.2.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.4.3.0 Message
+
+3.4. Perform Security Scans (REQ-2.7.4)
+
+###### 2.5.3.11.4.4.0 Sequence Number
+
+3.4
+
+###### 2.5.3.11.4.5.0 Type
+
+🔹 Step
+
+###### 2.5.3.11.4.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.4.7.0 Return Message
+
+Vulnerability report
+
+###### 2.5.3.11.4.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.4.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.4.10.0 Technical Details
+
+####### 2.5.3.11.4.10.1 Protocol
+
+Shell Command
+
+####### 2.5.3.11.4.10.2 Method
+
+SAST (e.g., CodeQL), SCA (e.g., Snyk)
+
+####### 2.5.3.11.4.10.3 Parameters
+
+*No items available*
+
+####### 2.5.3.11.4.10.4 Authentication
+
+N/A
+
+####### 2.5.3.11.4.10.5 Error Handling
+
+Fails job if any critical or high-severity vulnerabilities are found.
+
+####### 2.5.3.11.4.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.5.0.0 Request
+
+###### 2.5.3.11.5.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.5.2.0 Target Id
+
+REPO-CONTAINER-REGISTRY
+
+###### 2.5.3.11.5.3.0 Message
+
+3.5. Build and Push Docker Image
+
+###### 2.5.3.11.5.4.0 Sequence Number
+
+3.5
+
+###### 2.5.3.11.5.5.0 Type
+
+🔹 Request
+
+###### 2.5.3.11.5.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.5.7.0 Return Message
+
+Image manifest digest
+
+###### 2.5.3.11.5.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.5.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.5.10.0 Technical Details
+
+####### 2.5.3.11.5.10.1 Protocol
+
+HTTPS (Docker Registry API)
+
+####### 2.5.3.11.5.10.2 Method
+
+`docker build`, `docker push`
+
+####### 2.5.3.11.5.10.3 Parameters
+
+- {'name': 'image_tag', 'description': 'e.g., `<account_id>.dkr.ecr.<region>.amazonaws.com/<repo>:<commit_sha>`'}
+
+####### 2.5.3.11.5.10.4 Authentication
+
+AWS IAM credentials with ECR Push access, obtained via OpenID Connect (OIDC).
+
+####### 2.5.3.11.5.10.5 Error Handling
+
+Fails job on build error, authentication failure, or push failure.
+
+####### 2.5.3.11.5.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.6.0.0 Step
+
+###### 2.5.3.11.6.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.6.2.0 Target Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.6.3.0 Message
+
+3.6. Scan Container Image for Vulnerabilities
+
+###### 2.5.3.11.6.4.0 Sequence Number
+
+3.6
+
+###### 2.5.3.11.6.5.0 Type
+
+🔹 Step
+
+###### 2.5.3.11.6.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.6.7.0 Return Message
+
+Vulnerability report
+
+###### 2.5.3.11.6.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.6.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.6.10.0 Technical Details
+
+####### 2.5.3.11.6.10.1 Protocol
+
+Shell Command
+
+####### 2.5.3.11.6.10.2 Method
+
+Image Scan (e.g., Trivy, Amazon ECR Scan)
+
+####### 2.5.3.11.6.10.3 Parameters
+
+- {'name': 'image_uri', 'description': 'URI of the newly pushed image in ECR.'}
+
+####### 2.5.3.11.6.10.4 Authentication
+
+AWS IAM credentials.
+
+####### 2.5.3.11.6.10.5 Error Handling
+
+Fails job if any critical or high-severity vulnerabilities are found in the image layers.
+
+####### 2.5.3.11.6.10.6 Performance
+
+*No data available*
+
+##### 2.5.3.11.7.0.0 Request
+
+###### 2.5.3.11.7.1.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+###### 2.5.3.11.7.2.0 Target Id
+
+REPO-K8S-CLUSTER
+
+###### 2.5.3.11.7.3.0 Message
+
+3.7. Deploy to Staging via Rolling Update
+
+###### 2.5.3.11.7.4.0 Sequence Number
+
+3.7
+
+###### 2.5.3.11.7.5.0 Type
+
+🔹 Request
+
+###### 2.5.3.11.7.6.0 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.7.7.0 Return Message
+
+Deployment status (Success/Fail)
+
+###### 2.5.3.11.7.8.0 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.7.9.0 Is Activation
+
+❌ No
+
+###### 2.5.3.11.7.10.0 Technical Details
+
+####### 2.5.3.11.7.10.1 Protocol
+
+HTTPS (Kubernetes API)
+
+####### 2.5.3.11.7.10.2 Method
+
+`kubectl apply -f k8s/deployment.yaml` or `helm upgrade`
+
+####### 2.5.3.11.7.10.3 Parameters
+
+- {'name': 'deployment_manifest', 'description': 'Updated Kubernetes manifest with the new image tag.'}
+
+####### 2.5.3.11.7.10.4 Authentication
+
+Kubeconfig file configured with credentials for the EKS cluster (via AWS IAM).
+
+####### 2.5.3.11.7.10.5 Error Handling
+
+Fails job if `kubectl apply` returns a non-zero exit code or deployment rollout status check fails. Kubernetes handles rolling back to the previous ReplicaSet on failure.
+
+####### 2.5.3.11.7.10.6 Performance
+
+*No data available*
+
+### 2.5.4.0.0.0.0 API Call
+
+#### 2.5.4.1.0.0.0 Source Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.5.4.2.0.0.0 Target Id
+
+REPO-CODE-HOST
+
+#### 2.5.4.3.0.0.0 Message
+
+4. Update Commit Status (Success)
+
+#### 2.5.4.4.0.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0.0 Type
+
+🔹 API Call
+
+#### 2.5.4.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.4.7.0.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0.0 Technical Details
+
+##### 2.5.4.10.1.0.0 Protocol
+
+HTTPS (GitHub API)
+
+##### 2.5.4.10.2.0.0 Method
+
+POST /repos/{owner}/{repo}/statuses/{sha}
+
+##### 2.5.4.10.3.0.0 Parameters
+
+- {'name': 'status_payload', 'description': "JSON body with `state: 'success'` and `context: 'ci/build-and-deploy'`."}
+
+##### 2.5.4.10.4.0.0 Authentication
+
+GITHUB_TOKEN.
+
+##### 2.5.4.10.5.0.0 Error Handling
+
+Logged as a pipeline warning if the API call fails; does not fail the deployment.
+
+##### 2.5.4.10.6.0.0 Performance
+
+###### 2.5.4.10.6.1.0 Latency
+
+< 500ms
+
+### 2.5.5.0.0.0.0 Notification
+
+#### 2.5.5.1.0.0.0 Source Id
+
+REPO-CODE-HOST
+
+#### 2.5.5.2.0.0.0 Target Id
+
+ACTOR-DEV
+
+#### 2.5.5.3.0.0.0 Message
+
+5. Notify on Pipeline Success
+
+#### 2.5.5.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0.0 Type
+
+🔹 Notification
+
+#### 2.5.5.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0.0 Technical Details
+
+##### 2.5.5.10.1.0.0 Protocol
+
+UI Update / Email
+
+##### 2.5.5.10.2.0.0 Method
+
+N/A
+
+##### 2.5.5.10.3.0.0 Parameters
+
+*No items available*
+
+##### 2.5.5.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.5.10.5.0.0 Error Handling
+
+Best-effort delivery.
+
+##### 2.5.5.10.6.0.0 Performance
+
+*No data available*
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+REQ-2.5.2: Code coverage check is a mandatory quality gate. The pipeline step must parse the coverage report (e.g., lcov) and fail if the line coverage is below 80%.
+
+#### 2.6.1.2.0.0.0 Position
+
+top-right
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+3.3
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+REQ-2.7.4: A multi-stage security scan is enforced. Failure at any stage (SAST, SCA, Image Scan) immediately halts the pipeline and reports a failure status.
+
+#### 2.6.2.2.0.0.0 Position
+
+top-right
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+REPO-CI-CD-PLATFORM
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+3.4
+
+### 2.6.3.0.0.0.0 Content
+
+#### 2.6.3.1.0.0.0 Content
+
+GitOps Pattern: While this shows a direct push from the CI pipeline, a mature GitOps approach would involve the pipeline creating a Pull Request to a configuration repository, with a tool like ArgoCD or FluxCD handling the sync to the cluster.
+
+#### 2.6.3.2.0.0.0 Position
+
+bottom-left
+
+#### 2.6.3.3.0.0.0 Participant Id
+
+*Not specified*
+
+#### 2.6.3.4.0.0.0 Sequence Number
+
+*Not specified*
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The GitHub Actions runner requires securely config... |
+| Performance Targets | The entire pipeline execution time (push to succes... |
+| Error Handling Strategy | If any pipeline step fails, the workflow must imme... |
+| Testing Considerations | The pipeline itself should be tested. Feature bran... |
+| Monitoring Requirements | Logs for every pipeline run must be captured and r... |
+| Deployment Considerations | The Kubernetes deployment manifest must define rea... |
+

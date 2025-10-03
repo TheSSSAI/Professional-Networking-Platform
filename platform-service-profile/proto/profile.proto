@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package profile;
+
+import "google/protobuf/timestamp.proto";
+import "proto/common.proto";
+
+service ProfileService {
+  // Queries
+  rpc GetProfileByUserId(GetProfileRequest) returns (ProfileResponse);
+  rpc GetProfilesByUserIds(GetProfilesRequest) returns (ProfilesResponse);
+  rpc CheckSlugAvailability(CheckSlugAvailabilityRequest) returns (CheckSlugAvailabilityResponse);
+
+  // Commands
+  rpc UpdateBasicInfo(UpdateBasicInfoRequest) returns (ProfileResponse);
+  rpc SetVisibility(SetVisibilityRequest) returns (ProfileResponse);
+
+  rpc AddWorkExperience(AddWorkExperienceRequest) returns (WorkExperience);
+  rpc UpdateWorkExperience(UpdateWorkExperienceRequest) returns (WorkExperience);
+  rpc RemoveWorkExperience(RemoveWorkExperienceRequest) returns (common.Empty);
+
+  rpc AddEducation(AddEducationRequest) returns (Education);
+  rpc UpdateEducation(UpdateEducationRequest) returns (Education);
+  rpc RemoveEducation(RemoveEducationRequest) returns (common.Empty);
+
+  rpc AddSkill(AddSkillRequest) returns (Skill);
+  rpc RemoveSkill(RemoveSkillRequest) returns (common.Empty);
+
+  rpc GenerateUploadUrl(GenerateUploadUrlRequest) returns (UploadUrlResponse);
+  rpc ConfirmMediaUpload(ConfirmMediaUploadRequest) returns (ProfileResponse);
+}
+
+// --- Enums ---
+
+enum Visibility {
+  PUBLIC = 0;
+  PRIVATE = 1;
+}
+
+// --- Core Message Types ---
+
+message ProfileResponse {
+  string userId = 1;
+  optional string name = 2;
+  optional string headline = 3;
+  optional string location = 4;
+  optional string profilePictureUrl = 5;
+  optional string bannerImageUrl = 6;
+  optional string customUrlSlug = 7;
+  Visibility visibility = 8;
+  repeated WorkExperience workExperiences = 9;
+  repeated Education educations = 10;
+  repeated UserProfileSkill skills = 11;
+  google.protobuf.Timestamp createdAt = 12;
+  google.protobuf.Timestamp updatedAt = 13;
+}
+
+message WorkExperience {
+  string id = 1;
+  string company = 2;
+  string title = 3;
+  google.protobuf.Timestamp startDate = 4;
+  optional google.protobuf.Timestamp endDate = 5;
+  optional string description = 6;
+}
+
+message Education {
+  string id = 1;
+  string institution = 2;
+  string degree = 3;
+  string fieldOfStudy = 4;
+  google.protobuf.Timestamp startDate = 5;
+  optional google.protobuf.Timestamp endDate = 6;
+}
+
+message Skill {
+  string id = 1;
+  string name = 2;
+}
+
+message UserProfileSkill {
+  string skillId = 1;
+  string name = 2; // Denormalized for convenience
+  int32 endorsementCount = 3;
+}
+
+
+// --- Request/Response Message Types ---
+
+message GetProfileRequest {
+  string targetUserId = 1;
+  string requestingUserId = 2; // For visibility checks
+}
+
+message GetProfilesRequest {
+  repeated string userIds = 1;
+  string requestingUserId = 2; // For visibility checks
+}
+
+message ProfilesResponse {
+  repeated ProfileResponse profiles = 1;
+}
+
+message CheckSlugAvailabilityRequest {
+  string slug = 1;
+}
+
+message CheckSlugAvailabilityResponse {
+  bool isAvailable = 1;
+}
+
+message UpdateBasicInfoRequest {
+  optional string name = 1;
+  optional string headline = 2;
+  optional string location = 3;
+  optional string customUrlSlug = 4;
+}
+
+message SetVisibilityRequest {
+  Visibility visibility = 1;
+}
+
+message AddWorkExperienceRequest {
+  string company = 1;
+  string title = 2;
+  google.protobuf.Timestamp startDate = 3;
+  optional google.protobuf.Timestamp endDate = 4;
+  optional string description = 5;
+}
+
+message UpdateWorkExperienceRequest {
+  string id = 1;
+  optional string company = 2;
+  optional string title = 3;
+  optional google.protobuf.Timestamp startDate = 4;
+  optional google.protobuf.Timestamp endDate = 5;
+  optional string description = 6;
+}
+
+message RemoveWorkExperienceRequest {
+  string id = 1;
+}
+
+message AddEducationRequest {
+  string institution = 1;
+  string degree = 2;
+  string fieldOfStudy = 3;
+  google.protobuf.Timestamp startDate = 4;
+  optional google.protobuf.Timestamp endDate = 5;
+}
+
+message UpdateEducationRequest {
+  string id = 1;
+  optional string institution = 2;
+  optional string degree = 3;
+  optional string fieldOfStudy = 4;
+  optional google.protobuf.Timestamp startDate = 5;
+  optional google.protobuf.Timestamp endDate = 6;
+}
+
+message RemoveEducationRequest {
+  string id = 1;
+}
+
+message AddSkillRequest {
+  string name = 1;
+}
+
+message RemoveSkillRequest {
+  string skillId = 1;
+}
+
+message GenerateUploadUrlRequest {
+  enum UploadType {
+    PROFILE_PICTURE = 0;
+    BANNER_IMAGE = 1;
+  }
+  UploadType uploadType = 1;
+  string fileType = 2; // e.g., "image/jpeg"
+  int64 fileSize = 3; // in bytes
+}
+
+message UploadUrlResponse {
+  string uploadUrl = 1;
+  string objectKey = 2;
+}
+
+message ConfirmMediaUploadRequest {
+  string objectKey = 1;
+  GenerateUploadUrlRequest.UploadType uploadType = 2;
+}

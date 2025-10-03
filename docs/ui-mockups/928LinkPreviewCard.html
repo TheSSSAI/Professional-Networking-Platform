@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: LinkPreviewCard</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--color-neutral-50);
+      color: var(--color-neutral-900);
+      padding: 2rem;
+    }
+    h1, h2, h3, p { margin: 0 0 1rem 0; }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.25rem; margin-top: 2rem; border-bottom: 1px solid var(--color-neutral-200); padding-bottom: 0.5rem; }
+    p.description { color: var(--color-neutral-600); margin-top: -1rem; margin-bottom: 2rem;}
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      /* Borders & Shadows */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .component-wrapper {
+      margin-top: var(--spacing-lg);
+    }
+
+    /* 4. Atomic Dependency Styles */
+    /* SkeletonLoader */
+    .skeleton {
+      background-color: var(--color-neutral-200);
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 150%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, var(--color-neutral-100), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    .skeleton--text {
+      height: 1em;
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-sm);
+    }
+    @keyframes shimmer {
+      100% {
+        left: 150%;
+      }
+    }
+
+    /* 5. LinkPreviewCard Component Styles */
+    /* Component Block */
+    .link-preview {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--border-radius-lg);
+      border: 1px solid var(--color-neutral-200);
+      overflow: hidden;
+      background-color: var(--color-white);
+      transition: box-shadow 150ms ease-in-out;
+    }
+
+    .link-preview:hover, .link-preview:focus-visible {
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+    
+    .link-preview:focus-visible {
+        outline: 2px solid var(--color-primary-500);
+        outline-offset: 2px;
+    }
+
+    /* Wrapper for composer context */
+    .link-preview-wrapper {
+      position: relative;
+      margin-top: var(--spacing-md);
+    }
+
+    /* Component Elements */
+    .link-preview__image-wrapper {
+      width: 100%;
+      padding-top: 52.35%; /* 1.91:1 aspect ratio for Open Graph */
+      position: relative;
+      background-color: var(--color-neutral-100);
+    }
+
+    .link-preview__image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .link-preview__content {
+      padding: var(--spacing-md);
+    }
+
+    .link-preview__title {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      margin: 0 0 var(--spacing-xs) 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .link-preview__description {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      margin: 0 0 var(--spacing-sm) 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .link-preview__source {
+      font-size: 12px;
+      color: var(--color-neutral-600);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0;
+      font-weight: var(--font-weight-regular);
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-preview__remove-btn {
+      position: absolute;
+      top: var(--spacing-sm);
+      right: var(--spacing-sm);
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 150ms ease;
+    }
+
+    .link-preview__remove-btn:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .link-preview__remove-btn:focus-visible {
+        outline: 2px solid var(--color-primary-500);
+        outline-offset: 2px;
+    }
+
+    .link-preview__remove-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Component State: Loading */
+    .link-preview--loading .link-preview__image-wrapper {
+      padding-top: 0;
+      height: 150px; /* Fixed height for skeleton */
+    }
+
+    @media (min-width: 768px) {
+      .link-preview--loading .link-preview__image-wrapper {
+        height: 200px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <main class="showcase">
+    <header>
+      <h1>LinkPreviewCard</h1>
+      <p class="description">Displays a rich preview of an external link. This component has loading, loaded, and error (non-rendering) states.</p>
+    </header>
+
+    <section>
+      <h3>Loading State</h3>
+      <div class="component-wrapper">
+        <div class="link-preview link-preview--loading" role="status" aria-label="Loading link preview">
+          <div class="link-preview__image-wrapper">
+              <div class="skeleton" style="width: 100%; height: 100%;"></div>
+          </div>
+          <div class="link-preview__content">
+            <div class="skeleton skeleton--text" style="width: 80%; font-size: var(--font-size-md);"></div>
+            <div class="skeleton skeleton--text" style="width: 60%; font-size: var(--font-size-md);"></div>
+            <div class="skeleton skeleton--text" style="width: 100%; font-size: var(--font-size-sm); margin-top: var(--spacing-xs);"></div>
+            <div class="skeleton skeleton--text" style="width: 90%; font-size: var(--font-size-sm);"></div>
+            <div class="skeleton skeleton--text" style="width: 30%; font-size: 12px; margin-top: var(--spacing-sm);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Loaded State (Full)</h3>
+      <div class="component-wrapper">
+        <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" class="link-preview">
+          <div class="link-preview__image-wrapper">
+            <img src="https://images.unsplash.com/photo-1616401784845-180882ba9ba8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" alt="Stripe office interior" class="link-preview__image">
+          </div>
+          <div class="link-preview__content">
+            <h4 class="link-preview__title">Stripe: Financial infrastructure for the internet</h4>
+            <p class="link-preview__description">Millions of businesses of all sizes—from startups to large enterprises—use Stripe’s software and APIs to accept payments, send payouts, and manage their businesses online.</p>
+            <span class="link-preview__source">stripe.com</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Loaded State (No Image)</h3>
+      <div class="component-wrapper">
+        <a href="#" class="link-preview">
+          <div class="link-preview__content">
+            <h4 class="link-preview__title">A Title Without an Accompanying Image</h4>
+            <p class="link-preview__description">This is how the card renders when the metadata fetcher finds a title and description but no suitable image. The layout adapts gracefully by simply omitting the image wrapper.</p>
+            <span class="link-preview__source">example.com</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h3>Usage in Composer (with Remove Button)</h3>
+      <div class="component-wrapper">
+        <div class="link-preview-wrapper">
+          <button class="link-preview__remove-btn" aria-label="Remove link preview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <a href="https://linear.app" target="_blank" rel="noopener noreferrer" class="link-preview">
+            <div class="link-preview__image-wrapper">
+              <img src="https://images.unsplash.com/photo-1605379399642-870262d3d051?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80" alt="Code on a screen" class="link-preview__image">
+            </div>
+            <div class="link-preview__content">
+              <h4 class="link-preview__title">Linear – The issue tracking tool you'll enjoy using</h4>
+              <p class="link-preview__description">Linear helps streamline software projects, sprints, tasks, and bug tracking. It's built for high-performance teams.</p>
+              <span class="link-preview__source">linear.app</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Error State</h3>
+      <div class="component-wrapper">
+          <p class="description" style="margin-top: 0;">In case of an error (e.g., 404, timeout), the component should fail gracefully and not render anything, as per the user story. The loading state simply disappears, and no card is shown.</p>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

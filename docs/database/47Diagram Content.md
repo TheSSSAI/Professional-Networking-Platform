@@ -1,0 +1,44 @@
+erDiagram
+    User {
+        Guid userId PK
+    }
+    UserProfile {
+        Guid userProfileId PK
+    }
+    WorkExperience {
+        Guid workExperienceId PK
+    }
+    Education {
+        Guid educationId PK
+    }
+    Skill {
+        Guid skillId PK
+    }
+    UserProfileSkill {
+        Guid userProfileId PK, FK
+        Guid skillId PK, FK
+    }
+    SkillEndorsement {
+        Guid skillEndorsementId PK
+    }
+    Role {
+        INT roleId PK
+    }
+    UserRole {
+        Guid userId PK, FK
+        INT roleId PK, FK
+    }
+
+    User ||--|| UserProfile : "HasOneProfile"
+    User ||--o{ SkillEndorsement : "GivesManySkillEndorsements"
+    User ||--o{ UserRole : "associatesWith"
+
+    UserProfile ||--o{ WorkExperience : "HasManyWorkExperiences"
+    UserProfile ||--o{ Education : "HasManyEducationEntries"
+    UserProfile ||--o{ UserProfileSkill : "associatesWith"
+    UserProfile ||--o{ SkillEndorsement : "ReceivesManySkillEndorsements"
+
+    Skill ||--o{ UserProfileSkill : "isAssociatedWith"
+    Skill ||--o{ SkillEndorsement : "HasManyEndorsements"
+
+    Role ||--o{ UserRole : "isAssociatedWith"

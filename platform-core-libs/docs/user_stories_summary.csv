@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"10","38","8","0","0","[""Identity & Access Management"",""User Profile & Network Management""]","2","[""AWS SES Configuration"",""Redis Instance Provisioning"",""PostgreSQL Schema Design""]"

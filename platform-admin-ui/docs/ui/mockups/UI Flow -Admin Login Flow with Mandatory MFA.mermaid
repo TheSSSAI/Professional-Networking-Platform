@@ -1,0 +1,50 @@
+sequenceDiagram
+    actor Administrator
+    participant "Client (Admin UI)" as Client
+    participant "API Gateway" as APIGateway
+    participant "Identity & Access Service" as IdentityService
+
+    Administrator->>Client: 1. Submits email & password
+    Client->>APIGateway: 2. POST /api/auth/login (credentials)
+
+    activate APIGateway
+    APIGateway->>IdentityService: 3. AuthenticateUser(email, password)
+    activate IdentityService
+    IdentityService->>IdentityService: 3a. Find user by email, verify role is 'Administrator', verify password
+    alt Credentials Valid & Role is Admin
+        IdentityService-->>APIGateway: 4a. MFA Required (generates temp MFA token)
+    else Invalid Credentials or Not Admin
+        IdentityService-->>APIGateway: 4b. 401 Unauthorized
+    end
+    deactivate IdentityService
+
+    alt MFA Required Path
+        APIGateway-->>Client: 5a. 200 OK { mfaRequired: true, mfaSessionToken: '...' }
+        Client->>Administrator: 6a. Renders MFA code input screen
+        Administrator->>Client: 7a. Submits 6-digit TOTP code
+        Client->>APIGateway: 8a. POST /api/auth/verify-mfa (mfaSessionToken, code)
+        
+        activate IdentityService
+        APIGateway->>IdentityService: 9a. VerifyMfaCode(mfaSessionToken, code)
+        alt MFA Code Valid
+            IdentityService-->>APIGateway: 10a. Success (issues session JWTs)
+        else MFA Code Invalid
+            IdentityService-->>APIGateway: 10b. 401 Unauthorized
+        end
+        deactivate IdentityService
+
+        alt Login Success
+            APIGateway-->>Client: 11a. 200 OK { accessToken, refreshToken }
+            Client->>Client: 12a. Stores tokens securely, establishes session
+            Client-->>Administrator: 13a. Redirect to Admin Dashboard
+        else Login Failure (MFA)
+            APIGateway-->>Client: 11b. 401 Unauthorized
+            Client-->>Administrator: 12b. Shows 'Invalid verification code' error
+        end
+
+    else Login Failure Path
+        APIGateway-->>Client: 5b. 401 Unauthorized
+        Client-->>Administrator: 6b. Shows 'Invalid credentials' error
+    end
+
+    deactivate APIGateway

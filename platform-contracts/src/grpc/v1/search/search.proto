@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package platform.contracts.search.v1;
+
+import "grpc/v1/common/pagination.proto";
+
+// SearchService provides RPCs for querying the platform's search engine.
+service SearchService {
+  // Searches for user profiles based on a query and filters.
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse);
+}
+
+message SearchFilters {
+  optional string location = 1;
+  optional string current_company = 2;
+  repeated int32 connection_degree = 3;
+}
+
+message UserSearchResult {
+  string user_id = 1;
+  string name = 2;
+  string headline = 3;
+  string profile_picture_url = 4;
+  optional int32 connection_degree = 5;
+  float score = 6;
+}
+
+// RPC: SearchUsers
+message SearchUsersRequest {
+  string searching_user_id = 1;
+  string query = 2;
+  optional SearchFilters filters = 3;
+  platform.contracts.common.v1.PaginationRequest pagination = 4;
+}
+
+message SearchUsersResponse {
+  repeated UserSearchResult results = 1;
+  platform.contracts.common.v1.PaginationResponse pagination = 2;
+}

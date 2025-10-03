@@ -1,0 +1,72 @@
+.gitignore
+# .gitignore for Terraform projects
+# This file prevents generated, sensitive, and environment-specific files from being committed to version control.
+
+# Local Terraform directories
+# These directories are created by `terraform init` and contain provider plugins and modules.
+# They should not be committed as they can be large and are specific to the OS/architecture.
+.terraform/
+!/.terraform/modules.json
+
+# Local Terraform state files
+# If you are not using a remote backend, these files contain the state of your infrastructure.
+# They are highly sensitive and should NEVER be committed. Even with a remote backend,
+# local copies may be created during operations.
+*.tfstate
+*.tfstate.backup
+
+# Crash log files
+# Created by Terraform in the event of a crash.
+crash.log
+crash.*.log
+
+# Terraform plan files
+# `terraform plan -out=...` creates a plan file. These can be large and may contain sensitive data
+# depending on the infrastructure. They are generally not committed, though some workflows may
+# use them as build artifacts. We will ignore them by default.
+*.tfplan
+
+# Terraform variable override files
+# Files like `terraform.tfvars` or `*.auto.tfvars` often contain environment-specific
+# or sensitive values. We ignore them to prevent committing secrets.
+# A `terraform.tfvars.example` file should be committed instead.
+*.tfvars
+*.auto.tfvars
+*.tfvars.json
+*.auto.tfvars.json
+
+# Sensitive files for credentials
+# Ignore any files that may contain provider credentials.
+# Best practice is to use environment variables or other secure methods.
+.aws/
+credentials.json
+secrets.tfvars
+
+# IDE and editor directories/files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+
+# Terraform Cloud/Enterprise credentials
+.terraform.d/credentials.json
+.terraformrc
+terraform.rc
+
+# Miscellaneous
+.DS_Store
+.test-tmp-*
+.terragrunt-cache/
+**/.terragrunt-cache/
+/tmp/

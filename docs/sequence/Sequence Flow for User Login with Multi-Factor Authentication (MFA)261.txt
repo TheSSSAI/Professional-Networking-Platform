@@ -1,0 +1,774 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-SF-002
+
+## 1.2 Name
+
+User Login with Multi-Factor Authentication (MFA)
+
+## 1.3 Description
+
+A user with MFA enabled logs in. After successfully providing their password, they are prompted to enter a Time-based One-Time Password (TOTP) from their authenticator app to complete the login.
+
+## 1.4 Type
+
+🔹 AuthenticationFlow
+
+## 1.5 Purpose
+
+To provide an additional layer of security for user accounts, as required by SRS-001-NFR (2.3.2).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-IDENTITY
+
+## 1.10 Key Interactions
+
+- User submits correct email and password.
+- Identity Service validates the password and detects that MFA is enabled for the account.
+- Instead of returning JWTs, the service returns a response indicating that a second factor is required.
+- The client SPA displays a form for the TOTP code.
+- User enters the code from their authenticator app and submits it.
+- Identity Service validates the TOTP code against the user's stored secret.
+- Upon successful validation, the Identity Service issues the JWT access and refresh tokens.
+
+## 1.11 Triggers
+
+- An MFA-enabled user attempts to log in.
+
+## 1.12 Outcomes
+
+- User is securely authenticated using two factors.
+- A secure session is established.
+
+## 1.13 Business Rules
+
+- Users must have the option to enable MFA via TOTP authenticator apps (2.3.2).
+- The TOTP validation must account for time drift.
+
+## 1.14 Error Scenarios
+
+- The user enters an incorrect TOTP code.
+- The login attempt times out at the second factor stage.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-SF-002-IMPL
+
+## 2.2 Name
+
+Implementation: User Login with Multi-Factor Authentication (MFA)
+
+## 2.3 Description
+
+Technical sequence for an MFA-enabled user login flow. The sequence details the two-phase authentication process: first, validating the password to generate a temporary MFA session token, and second, validating the TOTP code using this token to issue the final session JWTs. This flow fulfills the security requirement SRS-001-NFR (2.3.2).
+
+## 2.4 Participants
+
+### 2.4.1 Client Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client SPA
+
+#### 2.4.1.3 Type
+
+🔹 Client Application
+
+#### 2.4.1.4 Technology
+
+Next.js, React, TypeScript, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | Web Client |
+
+### 2.4.2.0 API Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 API Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | boundary |
+| Color | #FF8C00 |
+| Stereotype | Gateway |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-IDENTITY
+
+#### 2.4.3.2 Display Name
+
+Identity & Access Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+Node.js, NestJS, TypeScript, gRPC
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #9370DB |
+| Stereotype | Auth Service |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 GraphQL Request
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+Phase 1: POST /graphql (mutation: login)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 GraphQL Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+200 OK with { data: { login: { mfaRequired: true, mfaSessionToken: '...' } } }
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST |
+| Parameters | GraphQL body: `mutation Login($input: LoginInput!)... |
+| Authentication | None (public endpoint) |
+| Error Handling | Client handles network errors, server returns 400 ... |
+| Performance | P99 Latency < 500ms |
+
+### 2.5.2.0 gRPC Call
+
+#### 2.5.2.1 Source Id
+
+REPO-GW-API
+
+#### 2.5.2.2 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.2.3 Message
+
+Invoke Login(LoginRequest)
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 gRPC Call
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+LoginResponse { mfaRequired: true, mfaSessionToken: '...' }
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | AuthService.Login |
+| Parameters | `LoginRequest { email: 'user@example.com', passwor... |
+| Authentication | Internal service mesh authentication (e.g., mTLS) |
+| Error Handling | Handles `NOT_FOUND` for unknown user, `UNAUTHENTIC... |
+| Performance | P99 Latency < 400ms |
+
+#### 2.5.2.10 Nested Interactions
+
+##### 2.5.2.10.1 Database Query
+
+###### 2.5.2.10.1.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.1.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.1.3 Message
+
+[DB] Find user by email
+
+###### 2.5.2.10.1.4 Sequence Number
+
+2.1
+
+###### 2.5.2.10.1.5 Type
+
+🔹 Database Query
+
+###### 2.5.2.10.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.10.1.7 Return Message
+
+User record with hashed password and MFA status
+
+###### 2.5.2.10.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.10.1.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL/TCP |
+| Method | SELECT * FROM "User" WHERE "email" = $1 |
+| Parameters | ['user@example.com'] |
+| Authentication | Database credentials |
+| Error Handling | Returns `NOT_FOUND` if no user exists. |
+| Performance | P99 Latency < 30ms |
+
+##### 2.5.2.10.2.0 Internal Logic
+
+###### 2.5.2.10.2.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.2.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.2.3 Message
+
+Verify password and check MFA status
+
+###### 2.5.2.10.2.4 Sequence Number
+
+2.2
+
+###### 2.5.2.10.2.5 Type
+
+🔹 Internal Logic
+
+###### 2.5.2.10.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.10.2.7 Return Message
+
+Password valid, MFA enabled
+
+###### 2.5.2.10.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.10.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | bcrypt.compare(password, user.passwordHash) |
+| Parameters | Submitted password, stored hash |
+| Authentication | N/A |
+| Error Handling | If compare fails, throw `UNAUTHENTICATED`. If `use... |
+| Performance | bcrypt cost factor is set for response < 150ms |
+
+##### 2.5.2.10.3.0 Token Generation
+
+###### 2.5.2.10.3.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.3.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.2.10.3.3 Message
+
+Generate temporary MFA session token
+
+###### 2.5.2.10.3.4 Sequence Number
+
+2.3
+
+###### 2.5.2.10.3.5 Type
+
+🔹 Token Generation
+
+###### 2.5.2.10.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.2.10.3.7 Return Message
+
+Signed JWT (mfaSessionToken)
+
+###### 2.5.2.10.3.8 Has Return
+
+✅ Yes
+
+###### 2.5.2.10.3.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | JWT Signing |
+| Method | jwt.sign() |
+| Parameters | Payload: `{ sub: userId, type: 'mfa_session' }`, S... |
+| Authentication | N/A |
+| Error Handling | Handles signing errors. |
+| Performance | P99 Latency < 5ms |
+
+### 2.5.3.0.0.0 UI Update
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.3.0.0 Message
+
+Render TOTP input form
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 UI Update
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.8.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | React state update |
+| Parameters | Store `mfaSessionToken` in memory, update UI state... |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | UI render < 100ms |
+
+### 2.5.4.0.0.0 GraphQL Request
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-GW-API
+
+#### 2.5.4.3.0.0 Message
+
+Phase 2: POST /graphql (mutation: verifyMfa)
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 GraphQL Request
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+200 OK with { data: { verifyMfa: { accessToken: '...', refreshToken: '...' } } }
+
+#### 2.5.4.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST |
+| Parameters | GraphQL body: `mutation VerifyMfa($input: VerifyMf... |
+| Authentication | MFA Session Token (JWT) |
+| Error Handling | Handles 401 Unauthorized if token is invalid/expir... |
+| Performance | P99 Latency < 600ms |
+
+### 2.5.5.0.0.0 gRPC Call
+
+#### 2.5.5.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-SVC-IDENTITY
+
+#### 2.5.5.3.0.0 Message
+
+Invoke VerifyMfa(VerifyMfaRequest)
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 gRPC Call
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+VerifyMfaResponse { accessToken: '...', refreshToken: '...' }
+
+#### 2.5.5.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.5.9.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | AuthService.VerifyMfa |
+| Parameters | `VerifyMfaRequest { totpCode: '123456' }`. User co... |
+| Authentication | Internal service mesh auth; forwards MFA session t... |
+| Error Handling | Returns `UNAUTHENTICATED` for invalid token or TOT... |
+| Performance | P99 Latency < 500ms |
+
+#### 2.5.5.10.0.0 Nested Interactions
+
+##### 2.5.5.10.1.0 Security & Database
+
+###### 2.5.5.10.1.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.1.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.1.3 Message
+
+Validate MFA session token and retrieve user secret
+
+###### 2.5.5.10.1.4 Sequence Number
+
+5.1
+
+###### 2.5.5.10.1.5 Type
+
+🔹 Security & Database
+
+###### 2.5.5.10.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.10.1.7 Return Message
+
+Valid session, user's MFA secret retrieved
+
+###### 2.5.5.10.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.10.1.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process & SQL/TCP |
+| Method | jwt.verify() then SELECT "mfaSecret" FROM ... |
+| Parameters | Token from gRPC metadata. `userId` from token's `s... |
+| Authentication | Database credentials |
+| Error Handling | Throws `UNAUTHENTICATED` if token is invalid, expi... |
+| Performance | P99 Latency < 35ms |
+
+##### 2.5.5.10.2.0 Internal Logic
+
+###### 2.5.5.10.2.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.2.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.2.3 Message
+
+Verify TOTP code
+
+###### 2.5.5.10.2.4 Sequence Number
+
+5.2
+
+###### 2.5.5.10.2.5 Type
+
+🔹 Internal Logic
+
+###### 2.5.5.10.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.10.2.7 Return Message
+
+TOTP code is valid
+
+###### 2.5.5.10.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.10.2.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | totpLibrary.verify({ token, secret }) |
+| Parameters | Submitted `totpCode`, user's stored secret. Config... |
+| Authentication | N/A |
+| Error Handling | Throws `UNAUTHENTICATED` if code is invalid. Incre... |
+| Performance | P99 Latency < 10ms |
+
+##### 2.5.5.10.3.0 Token Generation
+
+###### 2.5.5.10.3.1 Source Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.3.2 Target Id
+
+REPO-SVC-IDENTITY
+
+###### 2.5.5.10.3.3 Message
+
+Issue final Access and Refresh Tokens
+
+###### 2.5.5.10.3.4 Sequence Number
+
+5.3
+
+###### 2.5.5.10.3.5 Type
+
+🔹 Token Generation
+
+###### 2.5.5.10.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.5.10.3.7 Return Message
+
+Signed Access Token and Refresh Token
+
+###### 2.5.5.10.3.8 Has Return
+
+✅ Yes
+
+###### 2.5.5.10.3.9 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | JWT Signing |
+| Method | jwt.sign() |
+| Parameters | Access Token: `{ sub: userId, roles: [...] }, expi... |
+| Authentication | N/A |
+| Error Handling | Handles signing errors. |
+| Performance | P99 Latency < 10ms |
+
+### 2.5.6.0.0.0 Session Management
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.6.3.0.0 Message
+
+Establish session and redirect
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 Session Management
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.8.0.0 Is Activation
+
+❌ No
+
+#### 2.5.6.9.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | In-Process |
+| Method | N/A |
+| Parameters | Store tokens securely (e.g., in-memory for access ... |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | N/A |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+The mfaSessionToken is a critical, short-lived JWT that bridges the two phases of the login. It is single-purpose and should not grant access to any other API resources.
+
+#### 2.6.1.2.0.0 Position
+
+top
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-SVC-IDENTITY
+
+#### 2.6.1.4.0.0 Sequence Number
+
+2
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+The client should ideally invalidate the mfaSessionToken from its state after a single use or upon receiving the final JWTs to prevent replay attempts.
+
+#### 2.6.2.2.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+6
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | The MFA session token MUST be a JWT with a short e... |
+| Performance Targets | The entire end-to-end login flow, including both p... |
+| Error Handling Strategy | If password validation fails, return a generic `40... |
+| Testing Considerations | E2E tests must cover: successful MFA login, incorr... |
+| Monitoring Requirements | Dashboards should track success and failure rates ... |
+| Deployment Considerations | The JWT secrets for the MFA session token and the ... |
+

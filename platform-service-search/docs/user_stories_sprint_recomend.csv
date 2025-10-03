@@ -1,0 +1,8 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""PWEB-US-001"",""PWEB-US-002""]","10","Establish the foundational user onboarding and authentication flows by implementing the Registration and Login UIs.","true"
+"2","[""PWEB-US-003"",""PWEB-US-004""]","10","Build the core profile viewing experience and complete the session lifecycle with a secure logout.","true"
+"3","[""PWEB-US-005""]","13","Enable users to build their professional identity by implementing full CRUD functionality for all profile sections.","true"
+"4","[""PWEB-US-006"",""PWEB-US-007"",""PWEB-US-012""]","14","Implement the core networking loop (send, view, and manage connection requests) and ensure the application is fully responsive.","true"
+"5","[""PWEB-US-008"",""PWEB-US-010""]","13","Launch content creation capabilities with rich post features and build the foundational real-time notification system.","true"
+"6","[""PWEB-US-009""]","13","Deliver the primary content consumption experience by building the news feed with full interaction capabilities.","true"
+"7","[""PWEB-US-011"",""PWEB-US-013""]","26","Launch real-time direct messaging and ensure the entire application meets WCAG 2.1 AA accessibility standards. (Note: This is a high point count and might need to be split).","true"

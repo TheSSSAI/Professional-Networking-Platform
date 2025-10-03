@@ -1,0 +1,110 @@
+# src/graphql/moderation.graphql
+
+# ==========================================
+# ENUMS & TYPES
+# ==========================================
+
+enum ModerationActionType {
+  DISMISS_REPORT
+  REMOVE_CONTENT
+  ISSUE_WARNING
+  SUSPEND_USER
+  BAN_USER
+}
+
+enum ReportStatus {
+  PENDING
+  DISMISSED
+  ACTION_TAKEN
+  CONTENT_DELETED
+}
+
+enum ContentType {
+  POST
+  COMMENT
+}
+
+type ReportedUser {
+  id: ID!
+  name: String!
+}
+
+type ReportedItem {
+  id: ID!
+  contentId: ID!
+  contentType: ContentType!
+  contentPreview: String!
+  reason: String!
+  status: ReportStatus!
+  reporter: ReportedUser!
+  author: ReportedUser!
+  reportCount: Int!
+  createdAt: DateTime!
+}
+
+type ModerationQueuePayload {
+  items: [ReportedItem!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+}
+
+# ==========================================
+# INPUTS
+# ==========================================
+
+input ModerationActionInput {
+  reportId: ID!
+  actionType: ModerationActionType!
+  reason: String # For warnings
+  suspensionDurationDays: Int # For suspensions
+}
+
+# ==========================================
+# PAYLOADS / RESPONSES
+# ==========================================
+
+type ActionResponse {
+  success: Boolean!
+  message: String
+}
+
+# ==========================================
+# QUERIES & MUTATIONS
+# ==========================================
+
+query GetModerationQueue($page: Int = 1, $limit: Int = 25, $sortBy: String = "createdAt", $sortOrder: String = "DESC") {
+  moderationQueue(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder) {
+    items {
+      id
+      contentId
+      contentType
+      contentPreview
+      reason
+      status
+      reporter {
+        id
+        name
+      }
+      author {
+        id
+        name
+      }
+      reportCount
+      createdAt
+    }
+    totalCount
+    pageInfo {
+      currentPage
+      totalPages
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}
+
+mutation TakeModerationAction($input: ModerationActionInput!) {
+  takeModerationAction(input: $input) {
+    success
+    message
+  }
+}

@@ -1,0 +1,41 @@
+flowchart TD
+    subgraph User Interaction
+        A[User focuses on Profile Field] --> B(User enters data)
+    end
+
+    subgraph Validation on Blur
+        B --> C{Field loses focus (onBlur event)}
+        C --> D[Run Client-Side Validation Logic]
+    end
+
+    subgraph Validation on Submit
+        M[User clicks 'Save'] --> D
+    end
+
+    D --> E{Is input valid?}
+
+    subgraph Invalid State
+        E -->|No| F[Show inline error message]
+        F --> G[Highlight field border]
+        G --> H[Disable form 'Save' button]
+        H --> B
+    end
+
+    subgraph Valid State
+        E -->|Yes| I[Clear any existing error message]
+        I --> J[Remove field border highlight]
+        J --> K{Are all other fields on the form valid?}
+        K -->|Yes| L[Enable form 'Save' button]
+        K -->|No| H
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#333
+    classDef successNode fill:#e8f5e9,stroke:#2e7d32,color:#333
+    classDef processNode fill:#e3f2fd,stroke:#1976d2,color:#333
+    classDef decision fill:#fffde7,stroke:#f57f17,color:#333
+    
+    class F,G errorNode
+    class I,J,L successNode
+    class D processNode
+    class E,K decision

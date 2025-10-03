@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism: PostComposer</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #F1F3F5;
+      color: #212529;
+    }
+    .showcase-container {
+        padding: 2rem;
+    }
+    .showcase-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .showcase-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .showcase-header p { font-size: 1.1rem; color: #6C757D; max-width: 60ch; margin: 0 auto; }
+    .showcase-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* 2. Design System Tokens */
+    :root {
+      --color-primary-50: #E3F2FD;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-primary-900: #0D47A1;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+      --color-white: #FFFFFF;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+
+    /* 3. Component Base: PostComposer Modal */
+    .post-composer-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(33, 37, 41, 0.6);
+      display: flex;
+      align-items: stretch; /* Full height on mobile */
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 200ms ease, visibility 200ms ease;
+    }
+    .post-composer-modal:target {
+      opacity: 1;
+      visibility: visible;
+    }
+    .post-composer-modal__content {
+      background-color: var(--color-white);
+      width: 100%;
+      height: 100%; /* Full height on mobile */
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 4. Component Elements */
+    .post-composer__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-bottom: 1px solid var(--color-neutral-200);
+      flex-shrink: 0;
+    }
+    .post-composer__header h3 {
+      font-size: 20px;
+      font-weight: var(--font-weight-semibold);
+      margin: 0;
+    }
+    .post-composer__close-btn {
+      display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: transparent; color: var(--color-neutral-600); cursor: pointer; text-decoration: none; transition: all 150ms ease;
+    }
+    .post-composer__close-btn:hover { background: var(--color-neutral-100); }
+
+    .post-composer__body {
+      padding: var(--spacing-lg);
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .post-composer__user-info {
+      display: flex; align-items: center; gap: var(--spacing-sm);
+    }
+    .user-badge__name { font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); }
+    .avatar--md { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background-color: var(--color-neutral-200); }
+
+    .post-composer__textarea {
+      width: 100%;
+      border: none;
+      padding: var(--spacing-md) 0;
+      font-family: inherit;
+      font-size: var(--font-size-md);
+      min-height: 120px;
+      resize: none;
+      line-height: 1.5;
+    }
+    .post-composer__textarea:focus {
+      outline: none;
+    }
+
+    .post-composer__attachments {
+      margin-top: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .post-composer__footer {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-top: 1px solid var(--color-neutral-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .post-composer__actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+    .btn--icon-only { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: transparent; color: var(--color-neutral-600); cursor: pointer; transition: all 150ms ease; }
+    .btn--icon-only:hover { background: var(--color-neutral-100); }
+    .btn--icon-only:disabled { color: var(--color-neutral-400); cursor: not-allowed; background: transparent; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: var(--spacing-sm) var(--spacing-md); border: 1px solid transparent; border-radius: 99px; font-weight: var(--font-weight-semibold); text-decoration: none; cursor: pointer; transition: all 150ms ease; min-height: 44px; }
+    .btn--primary { background: var(--color-primary-700); color: var(--color-white); }
+    .btn:disabled { background: var(--color-neutral-200); color: var(--color-neutral-600); cursor: not-allowed; border-color: var(--color-neutral-200); }
+
+    /* 5. Component States */
+    .post-composer__loader-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .post-composer-modal__content[data-state="submitting"] .post-composer__loader-overlay { display: flex; }
+    .post-composer-modal__content[data-state="submitting"] * { pointer-events: none; }
+
+    .spinner--lg { border: 4px solid var(--color-neutral-200); border-top-color: var(--color-primary-700); border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .post-composer__error-alert {
+      display: none;
+      margin: 0 var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      background-color: var(--color-semantic-error-bg);
+      color: var(--color-semantic-error);
+      border: 1px solid var(--color-semantic-error);
+      font-size: var(--font-size-sm);
+    }
+    .post-composer-modal__content[data-state="error"] .post-composer__error-alert { display: block; }
+
+    /* 6. Responsive Adaptations */
+    @media (min-width: 768px) {
+      .post-composer-modal {
+        padding-top: 5vh;
+        align-items: flex-start;
+      }
+      .post-composer-modal__content {
+        max-width: 600px;
+        width: 100%;
+        height: auto;
+        max-height: 90vh;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+    }
+
+    /* 7. Dependency Component Styles */
+    .file-upload--multi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--spacing-md); }
+    .file-upload--multi-item { position: relative; width: 100px; height: 100px; border-radius: var(--border-radius-md); overflow: hidden; background-color: var(--color-neutral-100); }
+    .file-upload--multi-item img { width: 100%; height: 100%; object-fit: cover; }
+    .file-upload__remove-btn { position: absolute; top: var(--spacing-sm); right: var(--spacing-sm); background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+
+    .link-preview { display: block; text-decoration: none; color: inherit; border-radius: var(--border-radius-lg); border: 1px solid var(--color-neutral-200); overflow: hidden; background-color: var(--color-white); }
+    .link-preview-wrapper { position: relative; }
+    .link-preview__image-wrapper { width: 100%; padding-top: 52.35%; position: relative; background-color: var(--color-neutral-100); }
+    .link-preview__image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .link-preview__content { padding: var(--spacing-md); }
+    .link-preview__title { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); margin: 0 0 var(--spacing-xs) 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+    .link-preview__description { font-size: var(--font-size-sm); color: var(--color-neutral-600); margin: 0 0 var(--spacing-sm) 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+    .link-preview__source { font-size: 12px; color: var(--color-neutral-600); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; font-weight: var(--font-weight-regular); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+  <div class="showcase-container">
+    <header class="showcase-header">
+      <h1>Organism: PostComposer</h1>
+      <p>This component provides the full interface for creating posts, including text, image uploads, and link previews. It adapts to a full-screen modal on mobile devices.</p>
+    </header>
+    <div class="showcase-actions">
+        <a href="#composer-default" class="btn btn--primary">Open Default Composer</a>
+        <a href="#composer-attachments" class="btn btn--secondary">Open with Attachments</a>
+        <a href="#composer-submitting" class="btn btn--secondary">Show Submitting State</a>
+        <a href="#composer-error" class="btn btn--secondary">Show Error State</a>
+    </div>
+  </div>
+
+  <!-- MODAL: Default State -->
+  <div id="composer-default" class="post-composer-modal" role="dialog" aria-modal="true" aria-labelledby="composer-title-default">
+    <div class="post-composer-modal__content" data-state="default">
+      <div class="post-composer__header">
+        <h3 id="composer-title-default">Create a post</h3>
+        <a href="#" class="post-composer__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </a>
+      </div>
+      <div class="post-composer__body">
+        <div class="post-composer__user-info">
+          <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar--md" />
+          <span class="user-badge__name">Jane Doe</span>
+        </div>
+        <textarea class="post-composer__textarea" placeholder="What do you want to talk about?"></textarea>
+      </div>
+      <div class="post-composer__footer">
+        <div class="post-composer__actions">
+          <button class="btn--icon-only" aria-label="Add image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          </button>
+          <button class="btn--icon-only" aria-label="Add link" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+          </button>
+        </div>
+        <button class="btn btn--primary" disabled>Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: With Attachments -->
+  <div id="composer-attachments" class="post-composer-modal" role="dialog" aria-modal="true" aria-labelledby="composer-title-attachments">
+    <div class="post-composer-modal__content" data-state="default">
+      <div class="post-composer__header">
+        <h3 id="composer-title-attachments">Create a post</h3>
+        <a href="#" class="post-composer__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </a>
+      </div>
+      <div class="post-composer__body">
+        <div class="post-composer__user-info">
+          <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar--md" />
+          <span class="user-badge__name">Jane Doe</span>
+        </div>
+        <textarea class="post-composer__textarea" placeholder="What do you want to talk about?">Sharing some insights from the latest tech conference and a great article I read!</textarea>
+        <div class="post-composer__attachments">
+          <div class="file-upload--multi-grid">
+            <div class="file-upload--multi-item">
+              <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=100&h=100&fit=crop" alt="Uploaded image 1">
+              <button class="file-upload__remove-btn" aria-label="Remove image 1">&times;</button>
+            </div>
+            <div class="file-upload--multi-item">
+              <img src="https://images.unsplash.com/photo-1550439062-609e1531270e?w=100&h=100&fit=crop" alt="Uploaded image 2">
+              <button class="file-upload__remove-btn" aria-label="Remove image 2">&times;</button>
+            </div>
+          </div>
+          <div class="link-preview-wrapper">
+            <button class="file-upload__remove-btn" aria-label="Remove link preview">&times;</button>
+            <a href="#" class="link-preview">
+              <div class="link-preview__image-wrapper">
+                <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=400&h=209&fit=crop" alt="Code on a screen" class="link-preview__image">
+              </div>
+              <div class="link-preview__content">
+                <h4 class="link-preview__title">The Future of Web Development: A Comprehensive Guide</h4>
+                <p class="link-preview__description">An in-depth look at emerging trends, from serverless architecture to the rise of WebAssembly.</p>
+                <span class="link-preview__source">tech-insights.com</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="post-composer__footer">
+        <div class="post-composer__actions">
+            <button class="btn--icon-only" aria-label="Add image">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+        </div>
+        <button class="btn btn--primary">Post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Submitting State -->
+  <div id="composer-submitting" class="post-composer-modal" role="dialog" aria-modal="true" aria-labelledby="composer-title-submitting">
+    <div class="post-composer-modal__content" data-state="submitting">
+      <div class="post-composer__loader-overlay" role="status" aria-label="Submitting post">
+        <div class="spinner--lg"></div>
+      </div>
+      <div class="post-composer__header">
+        <h3 id="composer-title-submitting">Create a post</h3>
+        <a href="#" class="post-composer__close-btn" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </a>
+      </div>
+      <div class="post-composer__body">
+        <div class="post-composer__user-info">
+          <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar--md" />
+          <span class="user-badge__name">Jane Doe</span>
+        </div>
+        <textarea class="post-composer__textarea" placeholder="What do you want to talk about?">This is some content being submitted.</textarea>
+      </div>
+      <div class="post-composer__footer">
+        <div class="post-composer__actions">
+            <button class="btn--icon-only" aria-label="Add image" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+        </div>
+        <button class="btn btn--primary" disabled>Posting...</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Error State -->
+  <div id="composer-error" class="post-composer-modal" role="dialog" aria-modal="true" aria-labelledby="composer-title-error">
+    <div class="post-composer-modal__content" data-state="error">
+      <div class="post-composer__header">
+        <h3 id="composer-title-error">Create a post</h3>
+        <a href="#" class="post-composer__close-btn" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </a>
+      </div>
+      <div class="post-composer__error-alert" role="alert">
+        <strong>Error:</strong> Could not submit post. Please check your connection and try again.
+      </div>
+      <div class="post-composer__body">
+        <div class="post-composer__user-info">
+          <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar--md" />
+          <span class="user-badge__name">Jane Doe</span>
+        </div>
+        <textarea class="post-composer__textarea" placeholder="What do you want to talk about?">This is the content that failed to post.</textarea>
+      </div>
+      <div class="post-composer__footer">
+        <div class="post-composer__actions">
+          <button class="btn--icon-only" aria-label="Add image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          </button>
+        </div>
+        <button class="btn btn--primary">Post</button>
+      </div>
+    </div>
+  </div>
+
+
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "modal"<h3>
+		<!--description--><normal> The primary variant, displayed as a modal dialog. This is the main interface for composing a post. </normal>
+		<!-- vrient 1 html -->
+        <div class="post-composer-modal__content" style="position: static; max-width: 400px; margin: 1rem auto; display: flex; max-height: none;">
+            <div class="post-composer__header">
+                <h3>Create a post (Modal)</h3>
+            </div>
+            <div class="post-composer__body">
+                <textarea class="post-composer__textarea" style="min-height: 60px;" placeholder="What do you want to talk about?"></textarea>
+            </div>
+            <div class="post-composer__footer">
+                <div class="post-composer__actions">...</div>
+                <button class="btn btn--primary" disabled>Post</button>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "inline"<h3>
+		<!--description--><normal> A simplified, inline version that acts as a trigger to open the full modal composer. Typically shown on the main feed. </normal>
+		<!-- vrient 1 html -->
+        <div class="post-composer-inline-trigger" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 8px; box-shadow: var(--shadow-md); max-width: 400px; margin: 1rem auto;">
+            <img src="https://i.pravatar.cc/48?u=jane-doe" alt="Jane Doe" class="avatar--md" />
+            <a href="#composer-default" style="flex-grow: 1; text-align: left; padding: 0.75rem 1rem; border: 1px solid #ced4da; border-radius: 99px; color: #6c757d; text-decoration: none;">Start a post...</a>
+        </div>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

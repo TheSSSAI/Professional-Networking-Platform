@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: PostCard</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--color-neutral-50);
+      color: var(--color-neutral-900);
+      padding: 2rem;
+    }
+    h1, h2, h3, p { margin: 0 0 1rem 0; }
+    h1 { font-size: 2.5rem; text-align: center; }
+    h2 { font-size: 1.75rem; margin-top: 2rem; border-bottom: 1px solid var(--color-neutral-200); padding-bottom: 0.5rem; }
+    p.description { text-align: center; color: var(--color-neutral-600); max-width: 65ch; margin: -1rem auto 2rem auto; }
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+      /* Borders & Shadows */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase { max-width: 650px; margin: 0 auto; }
+    .component-wrapper { margin-top: var(--spacing-lg); }
+
+    /* 4. Dependencies CSS */
+    .card { background-color: var(--color-white); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--color-neutral-200); }
+    .user-badge { display: inline-flex; align-items: center; gap: var(--spacing-md); text-decoration: none; color: inherit; max-width: 100%; overflow: hidden; }
+    .user-badge:hover .user-badge__name { color: var(--color-primary-700); text-decoration: underline; }
+    .user-badge:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; border-radius: var(--border-radius-sm); }
+    .user-badge__avatar { flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background-color: var(--color-neutral-200); }
+    .user-badge__info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .user-badge__name, .user-badge__headline { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-badge__name { font-weight: var(--font-weight-semibold); font-size: var(--font-size-md); color: var(--color-neutral-900); line-height: 1.3; }
+    .user-badge__headline { font-size: var(--font-size-sm); color: var(--color-neutral-600); line-height: 1.4; }
+    .action-menu { position: relative; display: inline-block; }
+    .action-menu__trigger { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background-color: transparent; border: none; border-radius: 50%; cursor: pointer; color: var(--color-neutral-600); transition: background-color 150ms ease-out; }
+    .action-menu__trigger:hover { background-color: var(--color-neutral-100); }
+    .action-menu__trigger:focus-visible { outline: 2px solid var(--color-primary-500); outline-offset: 2px; }
+    .action-menu__dropdown { position: absolute; top: calc(100% + var(--spacing-xs)); right: 0; z-index: 10; min-width: 200px; padding: var(--spacing-sm) 0; background-color: var(--color-white); border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--color-neutral-200); list-style: none; margin: 0; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: opacity 150ms ease, transform 150ms ease, visibility 150ms; }
+    .action-menu:focus-within > .action-menu__dropdown, .action-menu .action-menu__trigger:focus + .action-menu__dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+    .action-menu__item { display: flex; align-items: center; gap: var(--spacing-md); width: 100%; padding: var(--spacing-sm) var(--spacing-md); border: none; background-color: transparent; text-align: left; font-size: var(--font-size-sm); color: var(--color-neutral-900); cursor: pointer; text-decoration: none; }
+    .action-menu__item .icon { width: 18px; height: 18px; }
+    .action-menu__item:hover, .action-menu__item:focus-visible { background-color: var(--color-neutral-100); outline: none; }
+    .action-menu__item--destructive { color: var(--color-semantic-error); }
+    .action-menu__item--destructive:hover { background-color: var(--color-semantic-error-bg); }
+    .reaction-picker { position: relative; display: inline-flex; }
+    .reaction-picker__trigger { display: inline-flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border: none; border-radius: var(--border-radius-md); background-color: transparent; color: var(--color-neutral-600); font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); cursor: pointer; transition: background-color 150ms ease; }
+    .reaction-picker__trigger:hover, .reaction-picker__trigger:focus-visible { background-color: var(--color-neutral-100); outline: 2px solid var(--color-primary-500); }
+    .reaction-picker__trigger.is-active { color: var(--color-primary-700); }
+    .reaction-picker__trigger svg { width: 20px; height: 20px; }
+    .link-preview { display: block; text-decoration: none; color: inherit; border-radius: var(--border-radius-lg); border: 1px solid var(--color-neutral-200); overflow: hidden; margin-top: var(--spacing-md); }
+    .link-preview:hover { box-shadow: var(--shadow-md); }
+    .link-preview__image-wrapper { width: 100%; padding-top: 52.35%; position: relative; background-color: var(--color-neutral-100); }
+    .link-preview__image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .link-preview__content { padding: var(--spacing-md); }
+    .link-preview__title { font-weight: var(--font-weight-semibold); margin: 0 0 var(--spacing-xs) 0; }
+    .link-preview__description, .link-preview__source { font-size: var(--font-size-sm); color: var(--color-neutral-600); margin: 0; }
+    .link-preview__source { text-transform: uppercase; margin-top: var(--spacing-sm); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+
+    /* 5. PostCard Organism Styles */
+    .post-card { padding: var(--spacing-lg); }
+    .post-card__header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-md); gap: var(--spacing-md); }
+    .post-card__body { margin-bottom: var(--spacing-md); }
+    .post-card__content-text { color: var(--color-neutral-900); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; font-size: var(--font-size-md); }
+    .post-card__media-grid { display: grid; gap: 4px; border-radius: var(--border-radius-lg); overflow: hidden; margin-top: var(--spacing-md); cursor: pointer; }
+    .post-card__media-item img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .post-card__media-grid--count-1 { grid-template-columns: 1fr; max-height: 500px; }
+    .post-card__media-grid--count-2 { grid-template-columns: 1fr 1fr; aspect-ratio: 16/9; }
+    .post-card__media-grid--count-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; aspect-ratio: 4/3; }
+    .post-card__media-grid--count-3 .post-card__media-item:first-child { grid-row: span 2; }
+    .post-card__media-grid--count-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; aspect-ratio: 1/1; }
+    .post-card__stats { display: flex; gap: var(--spacing-md); font-size: var(--font-size-sm); color: var(--color-neutral-600); padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--color-neutral-200); }
+    .post-card__stats a { color: inherit; text-decoration: none; }
+    .post-card__stats a:hover { text-decoration: underline; color: var(--color-primary-700); }
+    .post-card__actions { display: flex; justify-content: space-around; margin-top: var(--spacing-xs); }
+    .post-card__action-btn { flex: 1; }
+    .post-card__comments { margin-top: var(--spacing-lg); background-color: var(--color-neutral-50); padding: var(--spacing-md); border-radius: var(--border-radius-md); font-size: var(--font-size-sm); color: var(--color-neutral-600); text-align: center; }
+  </style>
+</head>
+<body>
+
+  <main class="showcase">
+    <header>
+      <h1>Organism: PostCard</h1>
+      <p class="description">The PostCard is the main component for displaying user-generated content in the feed. It supports text, images, and link previews.</p>
+    </header>
+
+    <div id="variants"> 
+      <h2> Component Variations</h2>
+      <div> 
+        <h3>Variant Name : "Text-Only Post"</h3>
+        <!--description--><normal> The most basic post type, containing only a text message. </normal>
+        <!-- vrient 1 html -->
+        <div class="component-wrapper">
+          <article class="card post-card" aria-labelledby="post-author-1">
+            <header class="post-card__header">
+              <a href="#" class="user-badge" aria-label="View profile for Jane Doe">
+                <img src="https://i.pravatar.cc/48?u=jane" alt="Profile picture of Jane Doe" class="user-badge__avatar"/>
+                <div class="user-badge__info">
+                  <span id="post-author-1" class="user-badge__name">Jane Doe</span>
+                  <span class="user-badge__headline">Senior Software Engineer at Innovate Corp</span>
+                </div>
+              </a>
+              <div class="action-menu">
+                <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                </button>
+              </div>
+            </header>
+            <div class="post-card__body">
+              <p class="post-card__content-text">Excited to share that our team just launched a new feature that improves application performance by 20%! A big shout out to everyone involved in this massive effort. It's been a long journey, but the results speak for themselves.</p>
+            </div>
+            <div class="post-card__stats">
+              <a href="#">15 Likes</a>
+              <span>·</span>
+              <a href="#">4 Comments</a>
+            </div>
+            <footer class="post-card__actions">
+              <div class="reaction-picker post-card__action-btn">
+                <button class="reaction-picker__trigger" aria-label="Like this post">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                  <span>Like</span>
+                </button>
+              </div>
+              <button class="reaction-picker__trigger post-card__action-btn" aria-label="Comment on this post">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Comment</span>
+              </button>
+              <button class="reaction-picker__trigger post-card__action-btn" aria-label="Share this post">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                <span>Share</span>
+              </button>
+            </footer>
+            <div class="post-card__comments">
+              <p>Comment section placeholder</p>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div>
+        <h3>Variant Name : "Post with Images"</h3>
+        <!--description--><normal> A post that includes between one and four images, displayed in a responsive grid. </normal>
+        <!-- vrient 1 html -->
+        <div class="component-wrapper">
+          <article class="card post-card">
+            <header class="post-card__header">
+              <a href="#" class="user-badge"><img src="https://i.pravatar.cc/48?u=john" alt="Profile picture of John Smith" class="user-badge__avatar"/><div class="user-badge__info"><span class="user-badge__name">John Smith</span><span class="user-badge__headline">Product Manager at Tech Solutions</span></div></a>
+              <div class="action-menu"><button class="action-menu__trigger" type="button" aria-label="More options"><svg><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+            </header>
+            <div class="post-card__body">
+              <p class="post-card__content-text">Great team offsite this week! Here are a few shots from our brainstorming sessions.</p>
+              <div class="post-card__media-grid post-card__media-grid--count-4">
+                <div class="post-card__media-item"><img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=300&fit=crop" alt="Team brainstorming session 1"></div>
+                <div class="post-card__media-item"><img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=300&fit=crop" alt="Team brainstorming session 2"></div>
+                <div class="post-card__media-item"><img src="https://images.unsplash.com/photo-1556740738-b6a63e2775df?w=300&h=300&fit=crop" alt="Team brainstorming session 3"></div>
+                <div class="post-card__media-item"><img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&h=300&fit=crop" alt="Team brainstorming session 4"></div>
+              </div>
+            </div>
+            <div class="post-card__stats"><a href="#">42 Likes</a><span>·</span><a href="#">9 Comments</a></div>
+            <footer class="post-card__actions"><!-- Actions omitted for brevity --></footer>
+          </article>
+        </div>
+      </div>
+      <div>
+        <h3>Variant Name : "Post with Link Preview"</h3>
+        <!--description--><normal> A post that includes a URL, which generates a rich preview card. </normal>
+        <!-- vrient 1 html -->
+        <div class="component-wrapper">
+          <article class="card post-card">
+            <header class="post-card__header">
+              <a href="#" class="user-badge"><img src="https://i.pravatar.cc/48?u=alice" alt="Profile picture of Alice Williams" class="user-badge__avatar"/><div class="user-badge__info"><span class="user-badge__name">Alice Williams</span><span class="user-badge__headline">UX Designer | Human-Centered Design</span></div></a>
+              <div class="action-menu"><button class="action-menu__trigger" type="button" aria-label="More options"><svg><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button></div>
+            </header>
+            <div class="post-card__body">
+              <p class="post-card__content-text">This is a great article on the principles of modern UI design. Highly recommend for any aspiring designers! https://www.smashingmagazine.com/2023/01/principles-modern-ui-design/</p>
+              <a href="https://www.smashingmagazine.com" target="_blank" rel="noopener noreferrer" class="link-preview">
+                <div class="link-preview__image-wrapper">
+                  <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&fit=crop" alt="Code on a laptop screen" class="link-preview__image">
+                </div>
+                <div class="link-preview__content">
+                  <h4 class="link-preview__title">10 Principles of Modern UI Design</h4>
+                  <p class="link-preview__description">Discover the fundamental principles that guide effective and user-friendly interface design in today's digital landscape.</p>
+                  <span class="link-preview__source">smashingmagazine.com</span>
+                </div>
+              </a>
+            </div>
+            <div class="post-card__stats"><a href="#">8 Likes</a><span>·</span><a href="#">2 Comments</a></div>
+            <footer class="post-card__actions"><!-- Actions omitted for brevity --></footer>
+          </article>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ActionMenu Component</title>
+    <style>
+        /* 1. CSS Reset & Base Styles */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--color-neutral-50);
+            color: var(--color-neutral-900);
+            padding: 2rem;
+        }
+
+        /* 2. Design System Tokens */
+        :root {
+            /* Colors */
+            --color-primary-50: #E3F2FD;
+            --color-primary-500: #2196F3;
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-200: #E9ECEF;
+            --color-neutral-600: #6C757D;
+            --color-neutral-900: #212529;
+            --color-semantic-error: #D32F2F;
+            --color-semantic-error-bg: #FFEBEE;
+            --color-white: #FFFFFF;
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            /* Typography */
+            --font-size-sm: 14px;
+            --font-weight-regular: 400;
+            /* Borders & Shadows */
+            --border-radius-md: 8px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        /* 3. Showcase Layout Styles */
+        .showcase-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .showcase-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        .showcase-section {
+            background-color: var(--color-white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        .showcase-section h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--color-neutral-200);
+            padding-bottom: var(--spacing-sm);
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            align-items: center;
+        }
+        .component-instance {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-neutral-200);
+            border-radius: var(--border-radius-md);
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* 4. ActionMenu Component CSS */
+        .action-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .action-menu__trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--color-neutral-600);
+            transition: background-color 150ms ease-out;
+        }
+
+        .action-menu__trigger:hover {
+            background-color: var(--color-neutral-200);
+        }
+
+        .action-menu__trigger:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+            background-color: var(--color-neutral-100);
+        }
+
+        .action-menu__dropdown {
+            position: absolute;
+            top: calc(100% + var(--spacing-xs));
+            right: 0;
+            z-index: 10;
+            min-width: 200px;
+            padding: var(--spacing-sm) 0;
+            background-color: var(--color-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-neutral-200);
+            list-style: none;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 150ms;
+        }
+
+        /* Accessibility Magic: Show dropdown when the container or any element inside it receives focus */
+        .action-menu:focus-within > .action-menu__dropdown,
+        .action-menu .action-menu__trigger:focus + .action-menu__dropdown,
+        .action-menu .action-menu__trigger.pseudo-active + .action-menu__dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .action-menu__item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            background-color: transparent;
+            text-align: left;
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-regular);
+            color: var(--color-neutral-900);
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .action-menu__item .icon {
+            color: var(--color-neutral-600);
+            width: 18px;
+            height: 18px;
+        }
+
+        .action-menu__item:hover,
+        .action-menu__item:focus-visible {
+            background-color: var(--color-neutral-100);
+            outline: none;
+            color: var(--color-neutral-900);
+        }
+
+        .action-menu__item--destructive {
+            color: var(--color-semantic-error);
+        }
+
+        .action-menu__item--destructive .icon {
+            color: var(--color-semantic-error);
+        }
+
+        .action-menu__item--destructive:hover,
+        .action-menu__item--destructive:focus-visible {
+            background-color: var(--color-semantic-error-bg);
+            color: var(--color-semantic-error);
+        }
+
+        .action-menu__divider {
+            height: 1px;
+            margin: var(--spacing-sm) 0;
+            background-color: var(--color-neutral-200);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="showcase-container">
+    <header class="showcase-header">
+        <h1>ActionMenu Component</h1>
+        <p>A context menu for providing a list of actions related to an item.</p>
+    </header>
+
+    <main>
+        <section class="showcase-section">
+            <h3>States</h3>
+            <p>The menu's visibility is controlled by focus. Use your keyboard (Tab, Enter, Arrows) to interact.</p>
+            <div class="component-grid">
+                <div class="component-instance">
+                    <span>Default (Closed)</span>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for Post 123">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        </button>
+                        <ul class="action-menu__dropdown" role="menu">
+                            <li><button type="button" role="menuitem" class="action-menu__item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <span>Edit Post</span>
+                            </button></li>
+                            <li><button type="button" role="menuitem" class="action-menu__item action-menu__item--destructive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <span>Delete Post</span>
+                            </button></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="component-instance">
+                    <span>Open (Simulated)</span>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger pseudo-active" type="button" aria-haspopup="true" aria-expanded="true" aria-label="More options for Post 123">
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        </button>
+                        <ul class="action-menu__dropdown" role="menu">
+                            <li><button type="button" role="menuitem" class="action-menu__item">Menu Item 1</button></li>
+                            <li><button type="button" role="menuitem" class="action-menu__item">Menu Item 2</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="showcase-section">
+            <h3>Variants</h3>
+            <p>The content of the menu changes based on context (e.g., post vs. comment).</p>
+            <div class="component-grid">
+                <div class="component-instance">
+                    <span>Post Options</span>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this post">
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        </button>
+                        <ul class="action-menu__dropdown" role="menu">
+                             <li><button type="button" role="menuitem" class="action-menu__item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <span>Edit Post</span>
+                            </button></li>
+                            <li><button type="button" role="menuitem" class="action-menu__item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+                                <span>Copy Link to Post</span>
+                            </button></li>
+                            <hr class="action-menu__divider">
+                             <li><button type="button" role="menuitem" class="action-menu__item action-menu__item--destructive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <span>Delete Post</span>
+                            </button></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="component-instance">
+                    <span>Comment Options</span>
+                    <div class="action-menu">
+                        <button class="action-menu__trigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="More options for this comment">
+                           <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        </button>
+                        <ul class="action-menu__dropdown" role="menu">
+                             <li><button type="button" role="menuitem" class="action-menu__item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <span>Edit Comment</span>
+                            </button></li>
+                            <li><button type="button" role="menuitem" class="action-menu__item">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <span>Report Comment</span>
+                            </button></li>
+                            <hr class="action-menu__divider">
+                             <li><button type="button" role="menuitem" class="action-menu__item action-menu__item--destructive">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <span>Delete Comment</span>
+                            </button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: ConfirmationDialog</title>
+  <style>
+    /* 1. CSS Reset & Base Styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+    }
+    h1, h2, h3, h4, p { margin: 0; }
+
+    /* 2. Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-100: #BBDEFB;
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-primary-900: #0D47A1;
+      --color-neutral-50: #F8F9FA;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-semantic-error: #D32F2F;
+      --color-semantic-error-bg: #FFEBEE;
+      --color-white: #FFFFFF;
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-size-lg: 18px;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    /* 3. Showcase Layout Styles */
+    .showcase-container {
+      padding: var(--spacing-xl);
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+    .showcase-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+    .showcase-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .showcase-header p {
+        color: var(--color-neutral-600);
+    }
+    .variant-section {
+      background: var(--color-white);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+    .variant-section h3 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    .variant-section p {
+        font-size: var(--font-size-md);
+        color: var(--color-neutral-600);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* 4. Atomic Dependencies (Button) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border: 1px solid transparent;
+      border-radius: var(--border-radius-md);
+      font-weight: var(--font-weight-semibold);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 150ms ease;
+      min-height: 44px;
+      font-size: var(--font-size-sm);
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 2px;
+    }
+    .btn--primary {
+      background: var(--color-primary-700);
+      color: var(--color-white);
+    }
+    .btn--primary:hover {
+      background: var(--color-primary-900);
+    }
+    .btn--secondary {
+      background: var(--color-white);
+      color: var(--color-neutral-900);
+      border-color: var(--color-neutral-400);
+    }
+    .btn--secondary:hover {
+      background: var(--color-neutral-100);
+    }
+    .btn--danger {
+      background: var(--color-semantic-error);
+      color: var(--color-white);
+    }
+    .btn--danger:hover {
+      background: #b71c1c;
+    }
+
+    /* 5. ConfirmationDialog Component CSS */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(33, 37, 41, 0.6);
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-md);
+    }
+    .modal:target {
+      display: flex;
+    }
+    .confirmation-dialog {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+    .confirmation-dialog__header {
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+    }
+    .confirmation-dialog__icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirmation-dialog__icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    .confirmation-dialog__text-content {
+      padding-top: var(--spacing-xs);
+    }
+    .confirmation-dialog__title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutral-900);
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+    .confirmation-dialog__body {
+        padding: 0 var(--spacing-lg) var(--spacing-lg);
+        font-size: var(--font-size-sm);
+        color: var(--color-neutral-600);
+        line-height: 1.5;
+        margin: 0;
+    }
+    .confirmation-dialog__footer {
+      padding: var(--spacing-md) var(--spacing-lg);
+      background-color: var(--color-neutral-50);
+      border-top: 1px solid var(--color-neutral-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+      border-bottom-left-radius: var(--border-radius-lg);
+      border-bottom-right-radius: var(--border-radius-lg);
+    }
+    .confirmation-dialog--standard .confirmation-dialog__icon {
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-700);
+    }
+    .confirmation-dialog--destructive .confirmation-dialog__icon {
+      background-color: var(--color-semantic-error-bg);
+      color: var(--color-semantic-error);
+    }
+    @media (max-width: 768px) {
+      .confirmation-dialog__footer {
+        flex-direction: column-reverse;
+      }
+      .confirmation-dialog__footer .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="showcase-container">
+    <header class="showcase-header">
+      <h1>ConfirmationDialog</h1>
+      <p>A modal dialog used to confirm user actions, with variants for standard and destructive operations.</p>
+    </header>
+
+    <section class="variant-section">
+      <h3>Variants</h3>
+      <p>Click the links to open the dialogs. In a real application, this would be handled with JavaScript.</p>
+      <div style="display: flex; gap: 16px;">
+        <a href="#standard-dialog" class="btn btn--secondary">Open Standard Dialog</a>
+        <a href="#destructive-dialog" class="btn btn--secondary">Open Destructive Dialog</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL MARKUP (hidden by default) -->
+  <div id="standard-dialog" class="modal">
+    <div class="confirmation-dialog confirmation-dialog--standard" role="alertdialog" aria-modal="true" aria-labelledby="standard-title" aria-describedby="standard-body">
+      <div class="confirmation-dialog__header">
+        <div class="confirmation-dialog__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        </div>
+        <div class="confirmation-dialog__text-content">
+          <h2 id="standard-title" class="confirmation-dialog__title">Submit your profile?</h2>
+        </div>
+      </div>
+       <p id="standard-body" class="confirmation-dialog__body">
+          Your profile will be made public once submitted. You can always make changes later.
+       </p>
+      <div class="confirmation-dialog__footer">
+        <a href="#" class="btn btn--secondary">Cancel</a>
+        <a href="#" class="btn btn--primary">Confirm & Submit</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="destructive-dialog" class="modal">
+    <div class="confirmation-dialog confirmation-dialog--destructive" role="alertdialog" aria-modal="true" aria-labelledby="destructive-title" aria-describedby="destructive-body">
+      <div class="confirmation-dialog__header">
+        <div class="confirmation-dialog__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <div class="confirmation-dialog__text-content">
+          <h2 id="destructive-title" class="confirmation-dialog__title">Delete this post?</h2>
+        </div>
+      </div>
+       <p id="destructive-body" class="confirmation-dialog__body">
+          This action is permanent and cannot be undone. All associated comments and reactions will also be deleted.
+       </p>
+      <div class="confirmation-dialog__footer">
+        <a href="#" class="btn btn--secondary">Cancel</a>
+        <a href="#" class="btn btn--danger">Delete Post</a>
+      </div>
+    </div>
+  </div>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : destructive<h3>
+		<!--description--><normal> Used for actions that cause permanent data loss, such as deleting a post or removing a connection. The primary action button is styled with the semantic error/danger color to draw attention to the severity of the action. </normal>
+		<!-- vrient 1 html -->
+        <div class="confirmation-dialog confirmation-dialog--destructive" role="alertdialog" aria-modal="true" aria-labelledby="destructive-title-variant" aria-describedby="destructive-body-variant" style="max-width: 450px; margin: 1rem auto; position: static;">        <div class="confirmation-dialog__header">          <div class="confirmation-dialog__icon" aria-hidden="true">            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>          </div>          <div class="confirmation-dialog__text-content">            <h2 id="destructive-title-variant" class="confirmation-dialog__title">Delete this post?</h2>          </div>        </div>         <p id="destructive-body-variant" class="confirmation-dialog__body">            This action is permanent and cannot be undone. All associated comments and reactions will also be deleted.         </p>        <div class="confirmation-dialog__footer">          <button class="btn btn--secondary">Cancel</button>          <button class="btn btn--danger">Delete Post</button>        </div>      </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : standard<h3>
+		<!--description--><normal> Used for general confirmations that are not destructive, such as submitting a form or saving changes. The primary action button uses the standard primary color. </normal>
+		<!-- vrient 1 html -->
+        <div class="confirmation-dialog confirmation-dialog--standard" role="alertdialog" aria-modal="true" aria-labelledby="standard-title-variant" aria-describedby="standard-body-variant" style="max-width: 450px; margin: 1rem auto; position: static;">        <div class="confirmation-dialog__header">          <div class="confirmation-dialog__icon" aria-hidden="true">            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>          </div>          <div class="confirmation-dialog__text-content">            <h2 id="standard-title-variant" class="confirmation-dialog__title">Submit your profile?</h2>          </div>        </div>         <p id="standard-body-variant" class="confirmation-dialog__body">            Your profile will be made public once submitted. You can always make changes later.         </p>        <div class="confirmation-dialog__footer">          <button class="btn btn--secondary">Cancel</button>          <button class="btn btn--primary">Confirm &amp; Submit</button>        </div>      </div>     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

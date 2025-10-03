@@ -1,0 +1,51 @@
+// Copyright 2024 Your Company Name
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package platform.contracts.common.v1;
+
+option csharp_namespace = "Platform.Contracts.Common.V1";
+option go_package = "github.com/your-org/platform-contracts/gen/go/common/v1;commonv1";
+option java_multiple_files = true;
+option java_outer_classname = "PaginationProto";
+option java_package = "com.platform.contracts.common.v1";
+option php_namespace = "Platform\\Contracts\\Common\\V1";
+
+// PaginationRequest is a standard message for requesting a paginated list of resources.
+message PaginationRequest {
+  // The page number to retrieve. Must be >= 1.
+  // Defaults to 1 if not specified or set to 0.
+  int32 page_number = 1;
+
+  // The number of items to retrieve per page. Must be > 0.
+  // Defaults to a server-defined value (e.g., 25) if not specified or set to 0.
+  // The server may enforce a maximum page size.
+  int32 page_size = 2;
+}
+
+// PaginationResponse is a standard message for returning metadata with a paginated list.
+message PaginationResponse {
+  // The total number of items available across all pages.
+  int64 total_items = 1;
+
+  // The total number of pages available.
+  int32 total_pages = 2;
+
+  // The current page number being returned.
+  int32 current_page = 3;
+
+  // The number of items on the current page.
+  int32 page_size = 4;
+}

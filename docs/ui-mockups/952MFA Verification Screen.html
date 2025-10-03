@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MFA Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    input, button, textarea, select {
+      font: inherit;
+    }
+
+    /* Design System Tokens */
+    :root {
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+      --font-size-h2: 36px;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+      --color-primary-900: #0D47A1;
+      --color-primary-100: #BBDEFB;
+      --color-primary-50: #E3F2FD;
+
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-600: #6C757D;
+      --color-neutral-900: #212529;
+      --color-white: #FFFFFF;
+      
+      --color-error: #D32F2F;
+      --color-error-light-bg: #FFEBEE;
+
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --border-radius-md: 8px;
+    }
+
+    /* Screen Layout */
+    .screen-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: var(--spacing-md);
+    }
+    
+    .mfa-card {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      padding: var(--spacing-xl) var(--spacing-lg);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    /* Typography */
+    .mfa-card__title {
+      font-size: var(--font-size-h2);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutral-900);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .mfa-card__instruction {
+      font-size: var(--font-size-body);
+      color: var(--color-neutral-600);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    /* Form Components */
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+      text-align: left;
+    }
+
+    .form-group__label {
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--color-neutral-500);
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-body);
+      transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border: 2px solid var(--color-primary-700);
+      padding: 11px 15px; /* Adjust padding to keep size consistent */
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+    
+    /* Input Error State */
+    .text-input.is-error {
+       border: 2px solid var(--color-error);
+       padding: 11px 15px;
+    }
+
+    /* Alert Component */
+    .alert {
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-caption);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+    .alert.is-hidden {
+      display: none;
+    }
+    .alert--error {
+      background-color: var(--color-error-light-bg);
+      color: var(--color-error);
+      border: 1px solid var(--color-error);
+    }
+    .alert__icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Button Component */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 22px;
+      border: none;
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-semibold);
+      cursor: pointer;
+      transition: background-color 150ms ease-in-out, transform 150ms ease-in-out;
+      position: relative;
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-white);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-800);
+    }
+    .btn--primary:active {
+      background-color: var(--color-primary-900);
+      transform: scale(0.98);
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--color-primary-100);
+      outline-offset: 2px;
+    }
+
+    /* Button Loading State */
+    .btn.is-loading {
+      background-color: var(--color-primary-800);
+      cursor: wait;
+    }
+    .btn.is-loading .btn__text {
+      visibility: hidden;
+    }
+    .btn .loading-spinner {
+      display: none;
+    }
+    .btn.is-loading .loading-spinner {
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--color-white);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Screen Variations Wrapper */
+    .screen-variations {
+        margin-top: 64px;
+        padding: 32px;
+        background-color: #e9ecef;
+        border-radius: 8px;
+    }
+    .screen-variations h2 {
+        font-size: 24px;
+        margin-bottom: 24px;
+        color: #343a40;
+        border-bottom: 2px solid #ced4da;
+        padding-bottom: 8px;
+    }
+    .variation-group {
+        margin-bottom: 48px;
+    }
+    .variation-group h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    .variation-group normal {
+        display: block;
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 24px;
+    }
+    .variation-group .screen-container {
+      min-height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <main class="mfa-card" aria-labelledby="mfa-title">
+        <h1 id="mfa-title" class="mfa-card__title">Two-Factor Authentication</h1>
+        <p class="mfa-card__instruction">Enter the 6-digit code from your authenticator app.</p>
+        
+        <form>
+            <div id="error-alert" class="alert is-hidden" role="alert">
+                <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+                <span id="error-message-text"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="mfa-code" class="form-group__label">Verification Code</label>
+                <input 
+                    type="text" 
+                    id="mfa-code" 
+                    class="text-input" 
+                    maxlength="6" 
+                    inputmode="numeric" 
+                    pattern="[0-9]{6}" 
+                    autocomplete="one-time-code"
+                    aria-describedby="error-message-text"
+                    required
+                    autofocus
+                >
+            </div>
+            
+            <button type="submit" class="btn btn--primary">
+                <span class="btn__text">Verify</span>
+                <div class="loading-spinner"></div>
+            </button>
+        </form>
+    </main>
+  </div>
+
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    <h2>Screen Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Default State"</h3>
+      <normal>The standard appearance of the screen when first loaded, prompting the user for their MFA code.</normal>
+      <div class="screen-container">
+        <main class="mfa-card" aria-labelledby="mfa-title-default">
+            <h1 id="mfa-title-default" class="mfa-card__title">Two-Factor Authentication</h1>
+            <p class="mfa-card__instruction">Enter the 6-digit code from your authenticator app.</p>
+            <form>
+                <div class="alert is-hidden" role="alert"></div>
+                <div class="form-group">
+                    <label for="mfa-code-default" class="form-group__label">Verification Code</label>
+                    <input type="text" id="mfa-code-default" class="text-input" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" required>
+                </div>
+                <button type="submit" class="btn btn--primary">
+                    <span class="btn__text">Verify</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </form>
+        </main>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Error State"</h3>
+      <normal>Shown after the user submits an incorrect or expired code. The error message is displayed, and the input field is highlighted.</normal>
+      <div class="screen-container">
+        <main class="mfa-card" aria-labelledby="mfa-title-error">
+            <h1 id="mfa-title-error" class="mfa-card__title">Two-Factor Authentication</h1>
+            <p class="mfa-card__instruction">Enter the 6-digit code from your authenticator app.</p>
+            <form>
+                <div class="alert alert--error" role="alert">
+                    <svg class="alert__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+                    <span>Invalid verification code. Please try again.</span>
+                </div>
+                <div class="form-group">
+                    <label for="mfa-code-error" class="form-group__label">Verification Code</label>
+                    <input type="text" id="mfa-code-error" class="text-input is-error" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" required aria-invalid="true">
+                </div>
+                <button type="submit" class="btn btn--primary">
+                    <span class="btn__text">Verify</span>
+                    <div class="loading-spinner"></div>
+                </button>
+            </form>
+        </main>
+      </div>
+    </div>
+
+    <div class="variation-group">
+        <h3>Variant Name: "Submitting / Loading State"</h3>
+        <normal>Shown when the user has submitted the form and is waiting for a response from the server. The button is disabled and shows a loading spinner.</normal>
+        <div class="screen-container">
+          <main class="mfa-card" aria-labelledby="mfa-title-loading">
+              <h1 id="mfa-title-loading" class="mfa-card__title">Two-Factor Authentication</h1>
+              <p class="mfa-card__instruction">Enter the 6-digit code from your authenticator app.</p>
+              <form>
+                  <div class="alert is-hidden" role="alert"></div>
+                  <div class="form-group">
+                      <label for="mfa-code-loading" class="form-group__label">Verification Code</label>
+                      <input type="text" id="mfa-code-loading" class="text-input" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" required value="123456" disabled>
+                  </div>
+                  <button type="submit" class="btn btn--primary is-loading" disabled>
+                      <span class="btn__text">Verify</span>
+                      <div class="loading-spinner"></div>
+                  </button>
+              </form>
+          </main>
+        </div>
+      </div>
+  </div>
+</body>
+</html>

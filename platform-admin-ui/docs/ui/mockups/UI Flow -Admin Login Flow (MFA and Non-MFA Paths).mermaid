@@ -1,0 +1,40 @@
+sequenceDiagram
+    actor Admin
+    participant AdminFrontend as "Admin Frontend (SPA)"
+    participant APIGateway as "API Gateway"
+    participant IdentityService as "Identity & Access Service"
+
+    Admin->>AdminFrontend: 1. Submits email and password
+    activate AdminFrontend
+    AdminFrontend->>APIGateway: 2. POST /api/admin/login (credentials)
+    activate APIGateway
+
+    APIGateway->>IdentityService: 3. Forward login request
+    activate IdentityService
+    IdentityService->>IdentityService: 4. Validate credentials & user role (is admin?)
+    note right of IdentityService: If password or role is invalid, return 401/403. Flow terminates here.
+    IdentityService->>IdentityService: 5. Check if MFA is enabled for this admin account
+
+    alt MFA is enabled (US-082)
+        IdentityService-->>APIGateway: 6a. Respond with { mfaRequired: true }
+        APIGateway-->>AdminFrontend: 7a. Relay MFA required response
+        AdminFrontend->>Admin: 8a. Display MFA code input screen
+        Admin->>AdminFrontend: 9a. Enters 6-digit TOTP code
+        AdminFrontend->>APIGateway: 10a. POST /api/admin/verify-mfa (code)
+        APIGateway->>IdentityService: 11a. Forward MFA verification request
+        IdentityService->>IdentityService: 12a. Validate TOTP code
+        note right of IdentityService: If code is invalid, return error. Flow stays on MFA screen.
+        IdentityService-->>APIGateway: 13a. Respond with session tokens (Access & Refresh)
+        APIGateway-->>AdminFrontend: 14a. Relay session tokens
+        AdminFrontend->>Admin: 15a. Redirect to Admin Dashboard (/admin)
+
+    else MFA is NOT enabled (US-083)
+        IdentityService-->>APIGateway: 6b. Respond with { mfaSetupRequired: true }
+        APIGateway-->>AdminFrontend: 7b. Relay MFA setup required response
+        AdminFrontend->>Admin: 8b. Redirect to mandatory MFA setup page (/admin/setup-mfa)
+        note over Admin, AdminFrontend: User cannot access any part of the Admin Dashboard until MFA setup is complete.
+    end
+
+    deactivate IdentityService
+    deactivate APIGateway
+    deactivate AdminFrontend

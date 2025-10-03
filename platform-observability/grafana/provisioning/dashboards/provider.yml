@@ -1,0 +1,46 @@
+# This file is managed by the platform-observability repository and is part of the
+# "Configuration as Code" strategy for the observability stack.
+# It configures Grafana to automatically discover and load all dashboard JSON
+# models from the specified directory. This allows for version-controlled,
+# auditable, and automated management of all platform dashboards.
+#
+# REQ-1-083: This provider enables Grafana to load the dashboards required for visualization.
+#
+# Architectural Pattern: Grafana Provisioning
+# The 'file' provider type instructs Grafana to scan a directory on its filesystem.
+# In a Kubernetes environment, this path corresponds to a volume where a ConfigMap
+# containing all dashboard JSON files is mounted.
+#
+# Key Settings:
+# - disableDeletion: false -> If a dashboard file is removed from the source (Git repo -> ConfigMap),
+#   it will also be removed from Grafana. This keeps Grafana in sync with the source of truth.
+# - editable: false -> Prevents users from editing dashboards in the Grafana UI. This enforces
+#   the GitOps workflow, where all changes must be made through code reviews and commits
+#   in this repository, preventing configuration drift.
+
+apiVersion: 1
+
+providers:
+  - name: 'default-dashboards-provider'
+    # The organization ID to provision dashboards for. '1' is the default Main Org.
+    orgId: 1
+    # Optional: A folder name to group these dashboards in the Grafana UI.
+    # An empty string places them in the root 'General' folder.
+    folder: ''
+    # The type of provider. 'file' means Grafana will scan a directory for dashboards.
+    type: file
+    # If set to true, Grafana will not delete dashboards that are removed from the filesystem.
+    # Set to false to ensure a clean GitOps workflow where Git is the single source of truth.
+    disableDeletion: false
+    # If set to true, dashboards provisioned by this provider can be edited in the Grafana UI.
+    # Set to false to enforce that all changes are made via version control in this repository.
+    editable: false
+    # Options specific to the 'file' provider type.
+    options:
+      # The path to the directory where Grafana will look for dashboard JSON files.
+      # This path is inside the Grafana container. In a Kubernetes deployment, this directory
+      # will be a mount point for a ConfigMap that contains all dashboard JSON models
+      # from the 'grafana/dashboards/' directory of this repository.
+      path: /etc/grafana/provisioning/dashboards
+      # Whether to recursively scan sub-folders for dashboards.
+      foldersFromFilesStructure: false

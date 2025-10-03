@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FormGroup Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-300: #64B5F6;
+      --color-primary-700: #1976D2;
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-700: #495057;
+      --color-neutrals-gray-900: #212529;
+      --color-semantic-error: #D32F2F;
+      
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 1rem; /* 16px */
+      --font-size-caption: 0.875rem; /* 14px */
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* --- Base & Showcase Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-body);
+      color: var(--color-neutrals-gray-900);
+      background-color: var(--color-neutrals-gray-50);
+      padding: var(--space-4);
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .showcase {
+      background-color: var(--color-neutrals-white);
+      padding: var(--space-4);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-2);
+    }
+    p {
+      color: var(--color-neutrals-gray-700);
+      margin-bottom: var(--space-4);
+    }
+    .variant-section {
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--color-neutrals-gray-200);
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-3);
+    }
+     code {
+      background-color: var(--color-neutrals-gray-200);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.875em;
+    }
+
+    /* --- FormGroup Component CSS --- */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: var(--space-4);
+      max-width: 320px;
+      width: 100%;
+    }
+
+    .form-group__label {
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-700);
+      margin-bottom: var(--space-2);
+    }
+
+    .form-group__input {
+      width: 100%;
+      border: 1px solid var(--color-neutrals-gray-400);
+      background-color: var(--color-neutrals-white);
+      padding: 12px 16px;
+      border-radius: var(--border-radius-md);
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-body);
+      color: var(--color-neutrals-gray-900);
+      transition: all 0.2s ease;
+    }
+
+    .form-group__input:focus {
+      border-color: var(--color-primary-700);
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: 2px;
+    }
+
+    .form-group__error-message {
+      color: var(--color-semantic-error);
+      font-size: var(--font-size-caption);
+      margin-top: var(--space-1);
+      display: none; /* Hidden by default */
+    }
+
+    /* Error State */
+    .form-group--error .form-group__label {
+      color: var(--color-semantic-error);
+    }
+
+    .form-group--error .form-group__input {
+      border-color: var(--color-semantic-error);
+    }
+
+    .form-group--error .form-group__input:focus {
+      outline-color: var(--color-semantic-error);
+    }
+
+    .form-group--error .form-group__error-message {
+      display: block; /* Visible in error state */
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="showcase">
+      <h1>FormGroup Component</h1>
+      <p>A molecular component that combines a label, text input, and error message to create a standard, accessible form field.</p>
+      
+      <!-- Component Variations Section -->
+      <div class="variant-section">
+        <h2>Default State</h2>
+        <p>The standard appearance for a form field, ready for user input. The <code>:focus</code> state is also demonstrated here.</p>
+        <div class="form-group">
+          <label for="email-default" class="form-group__label">Email Address</label>
+          <input type="email" id="email-default" class="form-group__input" placeholder="you@example.com">
+          <span id="email-error-default" class="form-group__error-message">This is an error message.</span>
+        </div>
+      </div>
+
+      <div class="variant-section">
+        <h2>Error State</h2>
+        <p>This state is activated by adding the <code>.form-group--error</code> class to the parent container. This visually indicates an error and displays the associated error message. For accessibility, the input has <code>aria-invalid="true"</code> and is linked to the error message via <code>aria-describedby</code>.</p>
+        <div class="form-group form-group--error">
+          <label for="email-error" class="form-group__label">Email Address</label>
+          <input type="email" id="email-error" class="form-group__input" value="invalid-email" aria-invalid="true" aria-describedby="email-error-message">
+          <span id="email-error-message" class="form-group__error-message">Please enter a valid email address.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

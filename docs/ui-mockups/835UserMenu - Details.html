@@ -1,0 +1,592 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UserMenu - Component Specifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .component-type-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
+        }
+        
+        .section h3 {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .info-card p {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .variations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        .variation-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .variation-name {
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        
+        .variation-code {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #1e293b;
+            overflow-x: auto;
+            margin: 8px 0;
+            border-left: 4px solid #4f46e5;
+        }
+        
+        .variation-description {
+            font-size: 13px;
+            color: #64748b;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-category {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-category h4 {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .feature-category ul {
+            list-style: none;
+        }
+        
+        .feature-category li {
+            padding: 6px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-category li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        
+        .token {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 16px 0;
+            line-height: 1.4;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        
+        .stat {
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>UserMenu</h1>
+            <div class="component-type-badge">molecular Component</div>
+        </div>
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Variations</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">18</span>
+                <span class="stat-label">Design Tokens</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Breakpoints</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">5</span>
+                <span class="stat-label">A11y Features</span>
+            </div>
+        </div><div class="content">
+        <div class="section">
+            <h2>Component Information</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Component Id</h4>
+                    <p>MU-NAV-004</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Name</h4>
+                    <p>UserMenu</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Type</h4>
+                    <p>molecular</p>
+                </div>
+                <div class="info-card">
+                    <h4>Description</h4>
+                    <p>A dropdown menu component triggered by the user's avatar, providing access to profile-related actions like viewing the profile, accessing settings, and logging out. It is typically placed in the main application header.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Design System Alignment</h4>
+                    <p>Utilizes design system tokens for colors (neutrals, primary), spacing, border-radius, and typography. It combines atomic components like Avatar (conceptual), Link, and follows dropdown interaction patterns.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Organism Map</h4>
+                    <p>AdminLayout</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Design Tokens Used</h2>
+            <div class="tokens-grid"><div class="token">--color-primary-500</div><div class="token">--color-primary-700</div><div class="token">--color-white</div><div class="token">--color-neutral-100</div><div class="token">--color-neutral-200</div><div class="token">--color-neutral-500</div><div class="token">--color-neutral-700</div><div class="token">--color-neutral-900</div><div class="token">--color-danger-100</div><div class="token">--color-danger-500</div><div class="token">--color-danger-600</div><div class="token">--spacing-sm</div><div class="token">--spacing-md</div><div class="token">--border-radius-lg</div><div class="token">--font-weight-medium</div><div class="token">--font-weight-semibold</div><div class="token">--font-size-sm</div><div class="token">--focus-ring</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Responsive Specifications</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Mobile Adaptations</h4>
+                    <ul><li>The component is inherently responsive and works well on mobile. The dropdown may have a max-width to avoid taking up the full screen width on very small devices.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Tablet Adaptations</h4>
+                    <ul><li>No specific adaptations needed.</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Desktop Enhancements</h4>
+                    <ul><li>Hover states on menu items are more prominent on desktop.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Accessibility Features</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Keyboard Support</h4><p>The trigger is focusable with Tab. When open, menu items can be navigated with Tab. The menu can be opened/closed with Enter/Space on the trigger. It can be closed with the Escape key.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Screen Reader Support</h4><p>Using a `<details>` and `<summary>` element pair provides semantic open/close state announcement. Links within the menu are announced as standard links.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Focus Management</h4><p>Focus is naturally handled by the browser for the `<details>` element. A visible focus ring is applied to the trigger and menu items for keyboard users.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Aria Attributes</h4><ul><li>The `<summary>` element implicitly has `aria-expanded` and other relevant attributes, enhancing accessibility.</li><li>Menu items can be further enhanced with `role='menuitem'` within a `role='menu'` parent for stricter screen reader interpretation, though anchor tags are generally well-supported.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Color Contrast</h4><p>All text and icons have a contrast ratio of at least 4.5:1 against their backgrounds, meeting WCAG AA standards.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>CSS Implementation</h2>
+            <div class="code-block">/* Component: UserMenu */
+
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.user-menu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  border: 2px solid transparent;
+  background-color: transparent;
+  transition: border-color 0.2s ease;
+}
+
+.user-menu__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.user-menu__trigger:focus-visible {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: var(--focus-ring);
+}
+
+.user-menu__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-700);
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-neutral-200);
+  overflow: hidden;
+  z-index: 100;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+details[open] &gt; .user-menu__dropdown {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.user-menu__header {
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.user-menu__header .user-menu__avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.user-menu__info {
+  overflow: hidden;
+}
+
+.user-menu__name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__email {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu__nav {
+  padding: var(--spacing-sm) 0;
+}
+
+.user-menu__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.user-menu__link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-decoration: none;
+  color: var(--color-neutral-700);
+  font-weight: var(--font-weight-medium);
+  transition: background-color 0.2s ease;
+}
+
+.user-menu__link .icon {
+  color: var(--color-neutral-500);
+  width: 20px;
+  height: 20px;
+}
+
+.user-menu__link:hover,
+.user-menu__link:focus-visible {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  outline: none;
+}
+
+.user-menu__separator {
+  border: none;
+  border-top: 1px solid var(--color-neutral-200);
+  margin: var(--spacing-sm) 0;
+}
+
+.user-menu__link--danger:hover,
+.user-menu__link--danger:focus-visible {
+  background-color: var(--color-danger-100);
+  color: var(--color-danger-600);
+}
+
+.user-menu__link--danger .icon {
+    color: var(--color-danger-500);
+}
+
+.user-menu__link--danger:hover .icon,
+.user-menu__link--danger:focus-visible .icon {
+    color: var(--color-danger-600);
+}
+</div>
+        </div>
+        <div class="section">
+            <h2>Implementation Notes</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Embedded Css Architecture</h4>
+                    <p>All styles are embedded in a single `<style>` tag, using design system tokens defined in `:root`. BEM methodology (`.user-menu__element--modifier`) is used for clear and scoped styling.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Component Organization</h4>
+                    <p>The component is implemented using the semantic `<details>` and `<summary>` HTML elements to leverage native browser open/close functionality and accessibility features, avoiding the need for JavaScript for basic interaction.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Responsive Design</h4>
+                    <p>The component is designed to be flexible and adapt to its container. Its position is relative, and the dropdown is absolutely positioned relative to the trigger, making it suitable for various header layouts.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Accessibility Compliance</h4>
+                    <p>WCAG 2.1 AA compliant. The use of semantic elements, clear focus states, and proper color contrast ensures the component is accessible to a wide range of users.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Browser Support</h4>
+                    <p>Designed for modern browsers that support `<details>` and `<summary>` elements and CSS Custom Properties.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Usage Guidelines</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>When To Use</h4><p>Use in the main application header to provide logged-in users with access to their profile and account-related actions.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Content Guidelines</h4><p>Menu item text should be concise and action-oriented (e.g., 'View Profile', 'Settings', 'Log Out'). User name and email in the header should be truncated with an ellipsis if they overflow.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Placement Rules</h4><p>Typically placed on the far right of the main application header.</p>
+                </div>
+                <div class="info-card">
+                    <h4>Customization Options</h4><ul><li style="list-style: disc; margin-left: 16px; padding-left: 0;">The component can be populated with different links as needed.</li><li style="list-style: disc; margin-left: 16px; padding-left: 0;">A `.user-menu__link--danger` class is provided for destructive actions like 'Log Out'.</li></ul>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Testing Recommendations</h2>
+            <div class="feature-list">
+                <div class="feature-category">
+                    <h4>Browser Testing</h4><p>Test in latest versions of Chrome, Firefox, Safari, and Edge.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Device Testing</h4><p>Test on desktop, tablet, and mobile viewports to ensure the dropdown placement is correct and does not overflow the screen.</p>
+                </div>
+                <div class="feature-category">
+                    <h4>Accessibility Testing</h4><ul><li>Verify keyboard navigation: Tab to trigger, Enter/Space to open/close, Tab through links, Escape to close.</li><li>Test with a screen reader (NVDA, VoiceOver) to ensure open/close states and link text are announced correctly.</li><li>Check focus indicator visibility and color contrast.</li></ul>
+                </div>
+                <div class="feature-category">
+                    <h4>Performance Testing</h4><p>N/A for this component, as it has minimal performance impact.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

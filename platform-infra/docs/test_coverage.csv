@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Identity & Access Management Module","Critical","High","Low","[""Unit"",""Integration"",""E2E"",""Security"",""Performance""]","95","90","90","98","8","200","150","0.98","High","Low","Excellent","Good"
+"Profile Management Service","High","Medium","Medium","[""Unit"",""Integration"",""E2E"",""Security""]","85","80","70","90","24","160","200","0.9","High","Medium","Excellent","Good"
+"Feed Generation Service","Critical","High","Medium","[""Unit"",""Integration"",""E2E"",""Performance""]","90","95","60","85","16","120","100","0.95","High","Medium","Excellent","Good"
+"Search Service (OpenSearch)","High","High","Medium","[""Unit"",""Integration"",""E2E"",""Performance"",""Security""]","80","90","75","90","20","150","120","0.92","High","High","Excellent","Medium"

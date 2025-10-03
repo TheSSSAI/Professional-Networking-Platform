@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Header Component</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Design System Tokens */
+        :root {
+            --color-primary-500: #2196F3;
+            --color-primary-600: #1E88E5;
+            --color-primary-700: #1976D2;
+            --color-primary-900: #0D47A1;
+            --color-neutral-white: #FFFFFF;
+            --color-neutral-gray-50: #F8F9FA;
+            --color-neutral-gray-100: #F1F3F5;
+            --color-neutral-gray-500: #ADB5BD;
+            --color-neutral-gray-600: #6C757D;
+            --color-neutral-gray-800: #343A40;
+            --color-neutral-gray-900: #212529;
+            --color-semantic-error: #D32F2F;
+            --font-family-primary: 'Inter', sans-serif;
+            --font-size-h1: 48px;
+            --font-size-h2: 36px;
+            --font-size-h3: 28px;
+            --font-size-body: 16px;
+            --font-size-caption: 14px;
+            --font-weight-regular: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --spacing-1: 4px;
+            --spacing-2: 8px;
+            --spacing-3: 16px;
+            --spacing-4: 24px;
+            --spacing-5: 32px;
+            --spacing-6: 48px;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-full: 9999px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-speed: 150ms;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-neutral-gray-100);
+            color: var(--color-neutral-gray-900);
+            line-height: 1.5;
+        }
+        
+        .screen-container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: var(--spacing-5);
+        }
+
+        /* Button Component Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-2);
+            font-family: inherit;
+            font-size: var(--font-size-body);
+            font-weight: var(--font-weight-semibold);
+            padding: 10px 22px;
+            border-radius: var(--border-radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease-in-out;
+            text-decoration: none;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+
+        .btn--primary {
+            background-color: var(--color-primary-700);
+            color: var(--color-neutral-white);
+        }
+        .btn--primary:hover {
+            background-color: var(--color-primary-900);
+        }
+
+        .btn--secondary {
+            background-color: var(--color-neutral-white);
+            color: var(--color-primary-700);
+            border-color: var(--color-primary-700);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn--secondary:hover {
+            background-color: var(--color-neutral-gray-50);
+        }
+
+        .btn--icon {
+            padding: var(--spacing-2);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-full);
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            color: var(--color-neutral-gray-800);
+            border: 1px solid var(--color-neutral-gray-500);
+        }
+        .btn--icon:hover {
+             background-color: var(--color-neutral-white);
+        }
+        .btn--icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Profile Header Component Styles */
+        .profile-header {
+            background-color: var(--color-neutral-white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: visible; /* To allow avatar to pop out */
+            position: relative;
+        }
+        
+        .profile-header__banner {
+            position: relative;
+            background-color: var(--color-neutral-gray-500);
+            background-size: cover;
+            background-position: center;
+            height: 150px;
+            border-top-left-radius: var(--border-radius-lg);
+            border-top-right-radius: var(--border-radius-lg);
+        }
+        
+        .profile-header__content {
+            padding: var(--spacing-3);
+            position: relative;
+        }
+
+        .profile-header__avatar {
+            position: absolute;
+            top: 0;
+            left: var(--spacing-4);
+            transform: translateY(-50%);
+            width: 128px;
+            height: 128px;
+            border-radius: var(--border-radius-full);
+            border: 4px solid var(--color-neutral-white);
+            background-color: var(--color-neutral-gray-100);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .profile-header__avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-header__main {
+            padding-top: 64px; /* Space for the avatar */
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+        
+        .profile-header__info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-1);
+        }
+
+        .profile-header__name {
+            font-size: var(--font-size-h3);
+            font-weight: var(--font-weight-bold);
+            line-height: 1.2;
+        }
+
+        .profile-header__headline {
+            font-size: var(--font-size-body);
+            font-weight: var(--font-weight-regular);
+            color: var(--color-neutral-gray-800);
+        }
+        
+        .profile-header__meta {
+            font-size: var(--font-size-caption);
+            color: var(--color-neutral-gray-600);
+        }
+        
+        .profile-header__actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        /* Variants & States */
+        
+        /* -- Editing State */
+        .profile-header .upload-control {
+            display: none; /* Hidden by default */
+            position: absolute;
+        }
+
+        .profile-header--editing .upload-control {
+            display: inline-flex;
+        }
+
+        .profile-header__banner-upload {
+            top: var(--spacing-3);
+            right: var(--spacing-3);
+        }
+        
+        .profile-header__avatar-upload {
+            bottom: var(--spacing-1);
+            right: var(--spacing-1);
+            width: 32px;
+            height: 32px;
+        }
+        .profile-header__avatar-upload svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* -- Other Profile Variant */
+        .profile-header .actions--own,
+        .profile-header .actions--other {
+            display: none;
+        }
+
+        .profile-header--own .actions--own {
+            display: flex;
+        }
+        .profile-header--other .actions--other {
+            display: flex;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .profile-header__banner {
+                height: 200px;
+            }
+
+            .profile-header__content {
+                padding: var(--spacing-4) var(--spacing-5);
+            }
+
+            .profile-header__main {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding-top: 24px;
+                padding-left: 160px; /* Space for avatar + padding */
+            }
+
+            .profile-header__info {
+                 margin-top: 0;
+            }
+            
+            .profile-header__actions {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+        
+        /* Variations styling for demonstration page */
+        .screen-variations {
+            margin-top: var(--spacing-6);
+        }
+        .variation-group {
+            background-color: var(--color-neutral-white);
+            padding: var(--spacing-4);
+            border-radius: var(--border-radius-lg);
+            margin-bottom: var(--spacing-5);
+            box-shadow: var(--shadow-sm);
+        }
+        .variation-group h3 {
+            font-size: 20px;
+            margin-bottom: var(--spacing-1);
+        }
+        .variation-group p {
+            font-size: var(--font-size-caption);
+            color: var(--color-neutral-gray-600);
+            margin-bottom: var(--spacing-4);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="screen-container">
+    
+    <div class="screen-variations">
+        <div class="variation-group">
+            <h3>Variant: "Own Profile - Default State"</h3>
+            <p>This is how the profile header appears to the owner of the profile in its standard view state. Note the 'Edit Profile' action.</p>
+            
+            <header class="profile-header profile-header--own">
+                <div class="profile-header__banner" style="background-image: url('https://via.placeholder.com/1140x200/ADB5BD/FFFFFF?text=Banner');">
+                </div>
+                <div class="profile-header__content">
+                    <div class="profile-header__avatar">
+                        <img src="https://via.placeholder.com/128/343A40/FFFFFF?text=JD" alt="Profile picture of Jane Doe">
+                    </div>
+                    <div class="profile-header__main">
+                        <div class="profile-header__info">
+                            <h1 class="profile-header__name">Jane Doe</h1>
+                            <p class="profile-header__headline">Senior Frontend Engineer at Innovate Corp | React, TypeScript, and Design Systems</p>
+                            <p class="profile-header__meta">San Francisco, CA &middot; 500+ Connections</p>
+                        </div>
+                        <div class="profile-header__actions actions--own">
+                            <button type="button" class="btn btn--primary">Edit Profile</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </div>
+
+        <div class="variation-group">
+            <h3>Variant: "Own Profile - Editing State"</h3>
+            <p>When the profile owner clicks 'Edit', upload controls appear over the banner and profile picture, allowing them to change their images.</p>
+            
+            <header class="profile-header profile-header--own profile-header--editing">
+                <div class="profile-header__banner" style="background-image: url('https://via.placeholder.com/1140x200/ADB5BD/FFFFFF?text=Banner');">
+                    <button class="btn btn--icon upload-control profile-header__banner-upload" aria-label="Upload new banner image">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                    </button>
+                </div>
+                <div class="profile-header__content">
+                    <div class="profile-header__avatar">
+                        <img src="https://via.placeholder.com/128/343A40/FFFFFF?text=JD" alt="Profile picture of Jane Doe">
+                        <button class="btn btn--icon upload-control profile-header__avatar-upload" aria-label="Upload new profile picture">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                        </button>
+                    </div>
+                    <div class="profile-header__main">
+                        <div class="profile-header__info">
+                            <h1 class="profile-header__name">Jane Doe</h1>
+                            <p class="profile-header__headline">Senior Frontend Engineer at Innovate Corp | React, TypeScript, and Design Systems</p>
+                            <p class="profile-header__meta">San Francisco, CA &middot; 500+ Connections</p>
+                        </div>
+                        <div class="profile-header__actions actions--own">
+                            <button type="button" class="btn btn--secondary">Cancel</button>
+                            <button type="button" class="btn btn--primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </div>
+
+        <div class="variation-group">
+            <h3>Variant: "Other User's Profile"</h3>
+            <p>This is how the profile header appears to a visitor who is not the profile owner. The actions change to 'Connect', 'Message', etc.</p>
+
+            <header class="profile-header profile-header--other">
+                <div class="profile-header__banner" style="background-image: url('https://via.placeholder.com/1140x200/6C757D/FFFFFF?text=Banner');">
+                </div>
+                <div class="profile-header__content">
+                    <div class="profile-header__avatar">
+                        <img src="https://via.placeholder.com/128/495057/FFFFFF?text=JS" alt="Profile picture of John Smith">
+                    </div>
+                    <div class="profile-header__main">
+                        <div class="profile-header__info">
+                            <h1 class="profile-header__name">John Smith</h1>
+                            <p class="profile-header__headline">Product Manager at Global Tech</p>
+                            <p class="profile-header__meta">New York, NY &middot; 500+ Connections</p>
+                        </div>
+                        <div class="profile-header__actions actions--other">
+                            <button type="button" class="btn btn--primary">Connect</button>
+                            <button type="button" class="btn btn--secondary">Message</button>
+                            <button type="button" class="btn btn--icon" aria-label="More Actions">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </div>
+        
+    </div>
+</div>
+
+</body>
+</html>

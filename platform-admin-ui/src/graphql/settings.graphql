@@ -1,0 +1,44 @@
+# src/graphql/settings.graphql
+
+# ==========================================
+# TYPES
+# ==========================================
+
+type FeatureFlag {
+  id: ID!
+  name: String!
+  description: String!
+  isEnabled: Boolean!
+}
+
+
+# ==========================================
+# INPUTS
+# ==========================================
+
+input UpdateFeatureFlagInput {
+  id: ID!
+  isEnabled: Boolean!
+}
+
+# ==========================================
+# QUERIES & MUTATIONS
+# ==========================================
+
+query GetFeatureFlags {
+  featureFlags {
+    id
+    name
+    description
+    isEnabled
+  }
+}
+
+mutation UpdateFeatureFlag($input: UpdateFeatureFlagInput!) {
+  updateFeatureFlag(input: $input) {
+    id
+    name
+    description
+    isEnabled
+  }
+}

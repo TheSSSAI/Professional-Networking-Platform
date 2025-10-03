@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------
+// ENUMS
+// -------------------
+
+enum UserStatus {
+  INACTIVE
+  ACTIVE
+  DEACTIVATED
+  BANNED
+
+  @@map("user_status")
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+
+  @@map("token_type")
+}
+
+// -------------------
+// MODELS
+// -------------------
+
+// REQ-1-001, REQ-1-002, REQ-1-055, REQ-1-092
+// Central entity for the identity service, storing core identity and credential information.
+model User {
+  id        String @id @default(uuid())
+  email     String @unique
+  passwordHash String
+  status    UserStatus @default(INACTIVE)
+  dateOfBirth DateTime @map("date_of_birth")
+
+  mfaSecret   String?
+  mfaEnabled  Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  roles         UserRole[]
+  tokens        UserToken[]
+  deletionRequest AccountDeletionRequest?
+  auditLogs     UserSecurityAuditLog[]
+
+  @@map("users")
+}
+
+// Role for RBAC
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  users UserRole[]
+
+  @@map("roles")
+}
+
+// Join table for User and Role (many-to-many)
+model UserRole {
+  userId String @map("user_id")
+  roleId Int    @map("role_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+
+// REQ-1-001, REQ-1-003
+// Stores short-lived tokens for single-use actions like email verification and password reset.
+model UserToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      TokenType
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_tokens")
+}
+
+// REQ-1-007
+// Tracks requests for permanent account deletion.
+model AccountDeletionRequest {
+  id               String   @id @default(uuid())
+  userId           String   @unique @map("user_id")
+  scheduledPurgeAt DateTime @map("scheduled_purge_at")
+  status           String // e.g., 'PENDING', 'CANCELLED'
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
+}
+
+// REQ-1-059
+// Immutable audit trail for security-sensitive actions performed by users on their own accounts.
+model UserSecurityAuditLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  action    String
+  ipAddress String   @map("ip_address")
+  userAgent String   @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_security_audit_logs")
+}

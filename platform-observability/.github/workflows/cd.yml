@@ -1,0 +1,83 @@
+# Continuous Deployment Workflow
+#
+# Triggered on: Pushes to the `main` branch.
+#
+# Purpose: To automatically deploy validated observability configurations to the Kubernetes (EKS) cluster.
+# This implements a GitOps workflow where the `main` branch represents the desired state of the monitoring stack.
+#
+# Security:
+#   - Uses OIDC to securely authenticate with AWS, avoiding long-lived secrets in GitHub.
+#
+# Jobs:
+#   deploy-to-staging:
+#     1. Assumes an AWS IAM Role via OIDC.
+#     2. Configures `kubectl` to connect to the staging EKS cluster.
+#     3. Deploys configurations as Kubernetes ConfigMaps using a `kustomization.yml` file (assumed to exist).
+#     4. Triggers a rollout of the relevant deployments (Prometheus, Grafana) to apply the new configurations.
+
+name: CD - Deploy Observability Configs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.yml'
+      - '**.json'
+
+permissions:
+  id-token: write # Required for OIDC authentication with AWS
+  contents: read
+
+jobs:
+  deploy-to-staging:
+    name: Deploy to Staging Cluster
+    runs-on: ubuntu-latest
+    environment: staging # Assumes a 'staging' environment is configured in GitHub settings
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_STAGING }} # Stored in GitHub secrets
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up kubectl
+        uses: aws-actions/setup-kubectl@v1
+        with:
+          version: 'v1.28.2'
+          
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME_STAGING }} --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy configurations using Kustomize and kubectl
+        # This step assumes a kustomization.yml exists at the root or a specified path,
+        # which generates ConfigMaps from the configuration files.
+        # Example kustomization.yml would look like:
+        #
+        # apiVersion: kustomize.config.k8s.io/v1beta1
+        # kind: Kustomization
+        # namespace: monitoring
+        # configMapGenerator:
+        # - name: prometheus-config
+        #   files:
+        #   - prometheus/prometheus.yml
+        # - name: prometheus-rules
+        #   files:
+        #   - prometheus/rules/api.rules.yml
+        #   - prometheus/rules/system.rules.yml
+        #   ... and so on
+        run: |
+          # Assuming kustomization.yml is in a './k8s' directory
+          kubectl apply -k ./k8s/staging
+          
+      - name: Trigger rollout of deployments
+        run: |
+          # This ensures that the pods pick up the updated ConfigMaps
+          kubectl rollout restart deployment/prometheus -n monitoring
+          kubectl rollout restart deployment/grafana -n monitoring
+          kubectl rollout restart statefulset/alertmanager -n monitoring

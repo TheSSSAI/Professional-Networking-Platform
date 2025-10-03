@@ -1,0 +1,704 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-EP-001
+
+## 1.2 Name
+
+Profile Update and Search Index Synchronization (CQRS)
+
+## 1.3 Description
+
+When a user updates their profile, the change is saved to the primary PostgreSQL database. An event is then published to an SNS topic. A subscribed SQS queue for the Search Service receives the event, which triggers an update to its denormalized OpenSearch index.
+
+## 1.4 Type
+
+🔹 EventProcessing
+
+## 1.5 Purpose
+
+To maintain eventual consistency between the write model (PostgreSQL) and the read model (OpenSearch) for user search, implementing CQRS as per SRS-001-F6.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SVC-PROFILE
+- REPO-EVENT-BUS
+- REPO-SVC-SEARCH
+
+## 1.10 Key Interactions
+
+- User Profile Service successfully saves profile updates to its PostgreSQL database.
+- User Profile Service publishes a 'UserProfileUpdated' event to an AWS SNS topic.
+- The Search Service's dedicated AWS SQS queue, subscribed to the topic, receives the event.
+- The Search Service's SQS consumer processes the event, transforms the profile data into a denormalized search document.
+- Search Service indexes the new document in the OpenSearch cluster, overwriting the previous version.
+
+## 1.11 Triggers
+
+- A user successfully saves changes to their profile (name, headline, experience, skills, etc.).
+
+## 1.12 Outcomes
+
+- The user's updated information becomes searchable on the platform with minimal delay.
+- The search index is kept in sync with the source of truth.
+
+## 1.13 Business Rules
+
+- The search index must respect profile visibility settings (1.6.2).
+- For private profiles, only a minimal subset of data (Name, Profile Picture) is indexed and searchable by non-connections (1.6.2).
+
+## 1.14 Error Scenarios
+
+- Event fails to be published to SNS.
+- Search service consumer fails to process the event after several retries, and the message is moved to a Dead Letter Queue (DLQ).
+- OpenSearch is unavailable for indexing.
+
+## 1.15 Integration Points
+
+- AWS OpenSearch Service (2.6.5).
+- AWS SNS/SQS for the Event Bus.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-EP-001
+
+## 2.2 Name
+
+Profile Update and Search Index Synchronization (CQRS)
+
+## 2.3 Description
+
+Implementation sequence for the CQRS pattern to synchronize user profile updates from the primary write database (PostgreSQL) to the read-optimized search index (OpenSearch). The process is asynchronous and event-driven, ensuring loose coupling and resilience. It starts after the User Profile Service successfully persists data, publishes a 'UserProfileUpdated' event to an AWS SNS topic, which is then consumed by the Search Service via a dedicated SQS queue to update the search index.
+
+## 2.4 Participants
+
+### 2.4.1 Microservice
+
+#### 2.4.1.1 Repository Id
+
+user-profile-service-003
+
+#### 2.4.1.2 Display Name
+
+User Profile Service
+
+#### 2.4.1.3 Type
+
+🔹 Microservice
+
+#### 2.4.1.4 Technology
+
+Node.js, NestJS, TypeScript
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | DDD: User Profile Bounded Context |
+
+### 2.4.2.0 Database
+
+#### 2.4.2.1 Repository Id
+
+REPO-INFRA-POSTGRES
+
+#### 2.4.2.2 Display Name
+
+PostgreSQL Database
+
+#### 2.4.2.3 Type
+
+🔹 Database
+
+#### 2.4.2.4 Technology
+
+AWS RDS for PostgreSQL 16
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #3CB371 |
+| Stereotype | Write Model |
+
+### 2.4.3.0 MessageBroker
+
+#### 2.4.3.1 Repository Id
+
+REPO-INFRA-EVENTBUS
+
+#### 2.4.3.2 Display Name
+
+AWS Event Bus (SNS/SQS)
+
+#### 2.4.3.3 Type
+
+🔹 MessageBroker
+
+#### 2.4.3.4 Technology
+
+AWS SNS, AWS SQS
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #FF8C00 |
+| Stereotype | Pub/Sub |
+
+### 2.4.4.0 Microservice
+
+#### 2.4.4.1 Repository Id
+
+search-service-009
+
+#### 2.4.4.2 Display Name
+
+Search Service
+
+#### 2.4.4.3 Type
+
+🔹 Microservice
+
+#### 2.4.4.4 Technology
+
+Node.js, NestJS, TypeScript
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | DDD: Search Bounded Context |
+
+### 2.4.5.0 SearchIndex
+
+#### 2.4.5.1 Repository Id
+
+REPO-INFRA-OPENSEARCH
+
+#### 2.4.5.2 Display Name
+
+OpenSearch Cluster
+
+#### 2.4.5.3 Type
+
+🔹 SearchIndex
+
+#### 2.4.5.4 Technology
+
+AWS OpenSearch Service
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #DA70D6 |
+| Stereotype | Read Model |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 DatabaseWrite
+
+#### 2.5.1.1 Source Id
+
+user-profile-service-003
+
+#### 2.5.1.2 Target Id
+
+REPO-INFRA-POSTGRES
+
+#### 2.5.1.3 Message
+
+COMMIT Transaction (UPDATE/INSERT UserProfile, WorkExperience, etc.)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 DatabaseWrite
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+Success
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | SQL |
+| Method | UPDATE UserProfile SET ...; INSERT INTO WorkExperi... |
+| Parameters | SQL parameters containing validated and sanitized ... |
+| Authentication | Database credentials managed by AWS Secrets Manage... |
+| Error Handling | Standard ACID transaction. On failure, transaction... |
+| Performance | P99 latency < 50ms for transaction commit. |
+
+### 2.5.2.0 EventPublication
+
+#### 2.5.2.1 Source Id
+
+user-profile-service-003
+
+#### 2.5.2.2 Target Id
+
+REPO-INFRA-EVENTBUS
+
+#### 2.5.2.3 Message
+
+PUBLISH UserProfileUpdated Event v1.0 to SNS Topic 'profile-events-topic'
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 EventPublication
+
+#### 2.5.2.6 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7 Return Message
+
+
+
+#### 2.5.2.8 Has Return
+
+❌ No
+
+#### 2.5.2.9 Is Activation
+
+❌ No
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK for JS v3 (SNS) |
+| Method | sns.publish({ TopicArn, Message, MessageAttributes... |
+| Parameters | Message body contains { userId, updatedFields: [..... |
+| Authentication | EKS Pod IAM Role with 'sns:Publish' permissions fo... |
+| Error Handling | SDK-level retry with exponential backoff for trans... |
+| Performance | P99 latency < 20ms for publish call. |
+
+### 2.5.3.0 MessageDelivery
+
+#### 2.5.3.1 Source Id
+
+REPO-INFRA-EVENTBUS
+
+#### 2.5.3.2 Target Id
+
+search-service-009
+
+#### 2.5.3.3 Message
+
+DELIVER Event via SQS Queue 'search-profile-updated-queue'
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 MessageDelivery
+
+#### 2.5.3.6 Is Synchronous
+
+❌ No
+
+#### 2.5.3.7 Return Message
+
+
+
+#### 2.5.3.8 Has Return
+
+❌ No
+
+#### 2.5.3.9 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK for JS v3 (SQS) |
+| Method | sqs.receiveMessage() |
+| Parameters | SQS message wrapper contains the full SNS event pa... |
+| Authentication | EKS Pod IAM Role with 'sqs:ReceiveMessage', 'sqs:D... |
+| Error Handling | SQS provides at-least-once delivery guarantee. Con... |
+| Performance | Event appears in queue typically in <100ms from SN... |
+
+### 2.5.4.0 InternalProcessing
+
+#### 2.5.4.1 Source Id
+
+search-service-009
+
+#### 2.5.4.2 Target Id
+
+search-service-009
+
+#### 2.5.4.3 Message
+
+PROCESS Event: Transform Data and Ensure Idempotency
+
+#### 2.5.4.4 Sequence Number
+
+4
+
+#### 2.5.4.5 Type
+
+🔹 InternalProcessing
+
+#### 2.5.4.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7 Return Message
+
+
+
+#### 2.5.4.8 Has Return
+
+❌ No
+
+#### 2.5.4.9 Is Activation
+
+❌ No
+
+#### 2.5.4.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Logic |
+| Method | handleUserProfileUpdated(event) |
+| Parameters | Deserialized event payload. |
+| Authentication | N/A |
+| Error Handling | On transient error (e.g., failed gRPC call to Prof... |
+| Performance | P95 processing time < 100ms. |
+
+#### 2.5.4.11 Nested Interactions
+
+##### 2.5.4.11.1 RpcCall
+
+###### 2.5.4.11.1.1 Source Id
+
+search-service-009
+
+###### 2.5.4.11.1.2 Target Id
+
+user-profile-service-003
+
+###### 2.5.4.11.1.3 Message
+
+gRPC: GetFullProfileForIndexing(userId)
+
+###### 2.5.4.11.1.4 Sequence Number
+
+4.1
+
+###### 2.5.4.11.1.5 Type
+
+🔹 RpcCall
+
+###### 2.5.4.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.1.7 Return Message
+
+Full UserProfile DTO
+
+###### 2.5.4.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.4.11.1.9 Is Activation
+
+❌ No
+
+###### 2.5.4.11.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | UserProfileService.getFullProfile |
+| Parameters | { userId: '...' } |
+| Authentication | mTLS within Kubernetes cluster service mesh. |
+| Error Handling | Circuit breaker and retry (3 attempts, exponential... |
+| Performance | P95 latency < 30ms. |
+
+##### 2.5.4.11.2.0 DataTransformation
+
+###### 2.5.4.11.2.1 Source Id
+
+search-service-009
+
+###### 2.5.4.11.2.2 Target Id
+
+search-service-009
+
+###### 2.5.4.11.2.3 Message
+
+TRANSFORM to Search Document, applying visibility rules (SRS-001-F6)
+
+###### 2.5.4.11.2.4 Sequence Number
+
+4.2
+
+###### 2.5.4.11.2.5 Type
+
+🔹 DataTransformation
+
+###### 2.5.4.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.4.11.2.7 Return Message
+
+OpenSearch Document
+
+###### 2.5.4.11.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.4.11.2.9 Is Activation
+
+❌ No
+
+###### 2.5.4.11.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | Internal Logic |
+| Method | mapProfileToSearchDocument(profileDto) |
+| Parameters | Full profile data. |
+| Authentication | N/A |
+| Error Handling | Pure function, errors indicate a bug. |
+| Performance | Negligible. |
+
+### 2.5.5.0.0.0 DatabaseWrite
+
+#### 2.5.5.1.0.0 Source Id
+
+search-service-009
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-INFRA-OPENSEARCH
+
+#### 2.5.5.3.0.0 Message
+
+INDEX Document
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 DatabaseWrite
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+200 OK / 201 Created
+
+#### 2.5.5.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.5.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | PUT /user_profiles/_doc/{userId} |
+| Parameters | JSON body of the denormalized and transformed sear... |
+| Authentication | IAM Role with fine-grained access policy for the O... |
+| Error Handling | Retry with backoff on 5xx server errors or throttl... |
+| Performance | P99 indexing latency < 200ms. |
+
+### 2.5.6.0.0.0 MessageAcknowledgement
+
+#### 2.5.6.1.0.0 Source Id
+
+search-service-009
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-INFRA-EVENTBUS
+
+#### 2.5.6.3.0.0 Message
+
+```sql
+DELETE Message from SQS Queue
+```
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 MessageAcknowledgement
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.6.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | AWS SDK for JS v3 (SQS) |
+| Method | sqs.deleteMessage({ ReceiptHandle }) |
+| Parameters | The ReceiptHandle from the received message. |
+| Authentication | EKS Pod IAM Role with 'sqs:DeleteMessage' permissi... |
+| Error Handling | Log error if delete fails. The message will become... |
+| Performance | P99 latency < 20ms. |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Idempotency is critical. The Search Service consumer must handle duplicate events without causing side effects. This can be achieved by checking an event ID against a short-lived Redis cache before processing.
+
+#### 2.6.1.2.0.0 Position
+
+TopRight
+
+#### 2.6.1.3.0.0 Participant Id
+
+search-service-009
+
+#### 2.6.1.4.0.0 Sequence Number
+
+4
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+A Dead Letter Queue (DLQ) is configured for 'search-profile-updated-queue'. A CloudWatch alarm will fire if DLQ message count > 0, notifying the on-call engineer to investigate the poison pill message.
+
+#### 2.6.2.2.0.0 Position
+
+BottomRight
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-INFRA-EVENTBUS
+
+#### 2.6.2.4.0.0 Sequence Number
+
+3
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+The transformation logic at step 4.2 must strictly enforce business rule REQ-1-032. For private profiles, only a minimal subset of data (Name, Profile Picture) is included in the indexed document.
+
+#### 2.6.3.2.0.0 Position
+
+Right
+
+#### 2.6.3.3.0.0 Participant Id
+
+search-service-009
+
+#### 2.6.3.4.0.0 Sequence Number
+
+4.2
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | All communication with AWS services (SNS, SQS, RDS... |
+| Performance Targets | End-to-end latency from profile update commit to d... |
+| Error Handling Strategy | 1. **SNS Publish**: SDK-level retry with backoff. ... |
+| Testing Considerations | 1. **Integration Test**: An end-to-end test that u... |
+| Monitoring Requirements | 1. **User Profile Service**: `sns_publish_latency`... |
+| Deployment Considerations | The SNS topic, SQS queue, DLQ, and subscription mu... |
+

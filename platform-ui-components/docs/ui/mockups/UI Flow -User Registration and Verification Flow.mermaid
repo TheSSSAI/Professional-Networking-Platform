@@ -1,0 +1,52 @@
+flowchart TD
+    subgraph "Phase 1: User Registration (Client-side)"
+        A[User fills Registration Form <br/>(Email, Password)] --> B(Submits Form)
+        B --> C{Client-side Validation <br/>(Format, Password Complexity)}
+        C -->|Invalid| D[Show inline validation errors]
+        D --> A
+    end
+
+    subgraph "Phase 2: Account Creation (Server-side)"
+        C -->|Valid| E[POST /api/auth/register]
+        E --> F((Identity Service))
+        F --> G{Server-side Validation <br/>- Duplicate Email? <br/>- Password Complexity?}
+        G -->|Invalid| H[Return 4xx Error (e.g., 409 Conflict)]
+        H --> I[UI shows specific server error message]
+        I --> A
+    end
+
+    subgraph "Phase 3: Asynchronous Email Dispatch"
+        G -->|Valid| J[1. Create User in DB (status: 'inactive')]
+        J --> K[2. Generate Secure Verification Token with Expiry]
+        K --> L[3. Publish 'UserRegistered' Event]
+        L --> M[API returns 201 Created to Client]
+        M --> N[UI shows 'Success! Please check your email' message]
+        
+        L --> O((Event Bus))
+        O --> P((Notifications Service))
+        P --> Q{Send Verification Email via AWS SES}
+        Q -->|Failure| R[Log Critical Error & Queue for Retry]
+    end
+
+    subgraph "Phase 4: Account Activation"
+        S[User clicks verification link in email] --> T[GET /auth/verify?token=...]
+        T --> U((Identity Service))
+        U --> V{Validate Token <br/>- Exists? <br/>- Not Expired? <br/>- Not Used?}
+        V -->|Invalid| W[Show 'Invalid/Expired Link' error page]
+        W --> X[Provide option to resend verification email]
+        
+        V -->|Valid| Y[1. Update User status to 'active']
+        Y --> Z[2. Invalidate Verification Token]
+        Z --> AA[Redirect to Login Page with 'Verification Successful' message]
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef successNode fill:#e8f5e9,stroke:#2e7d32,color:#000
+    classDef processNode fill:#e3f2fd,stroke:#1565c0,color:#000
+    classDef systemNode fill:#f3e5f5,stroke:#8e24aa,color:#000
+
+    class D,I,W,R errorNode
+    class J,K,Y,Z,N,AA successNode
+    class A,B,E,S,T processNode
+    class F,L,O,P,Q,U systemNode

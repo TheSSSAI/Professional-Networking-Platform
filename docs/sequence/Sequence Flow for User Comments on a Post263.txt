@@ -1,0 +1,721 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-FF-002
+
+## 1.2 Name
+
+User Comments on a Post
+
+## 1.3 Description
+
+A user writes and submits a comment on a post. The comment is saved, displayed under the post, and a notification is sent to the post's author.
+
+## 1.4 Type
+
+🔹 FeatureFlow
+
+## 1.5 Purpose
+
+To facilitate discussion and engagement on content, as per SRS-001-F4 (1.4.4).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-ENGAGEMENT
+- REPO-EVENT-BUS
+- REPO-SVC-NOTIFICATIONS
+
+## 1.10 Key Interactions
+
+- User types a comment and clicks 'Post'.
+- Client sends the comment content and post ID to the API Gateway.
+- Request is routed to the Engagement Service.
+- Engagement Service validates the comment (max 1500 chars) and saves it.
+- Engagement Service publishes a 'CommentAdded' event.
+- Notifications Service consumes the event and notifies the post author.
+- Client receives the successful response and adds the new comment to the UI.
+
+## 1.11 Triggers
+
+- User submits a comment.
+
+## 1.12 Outcomes
+
+- The comment is saved and displayed.
+- The post author is notified.
+
+## 1.13 Business Rules
+
+- Comment text must not exceed 1500 characters (1.4.4).
+- Users can edit or delete their own comments (1.4.7).
+
+## 1.14 Error Scenarios
+
+- Comment fails validation.
+- The post being commented on has been deleted.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-FF-002
+
+## 2.2 Name
+
+Implementation: User Comments on a Post
+
+## 2.3 Description
+
+Provides a detailed technical specification for the feature where a user adds a comment to a post. The sequence covers the synchronous API request/response flow for comment creation and the subsequent asynchronous, event-driven flow for generating notifications to the post author. This design prioritizes responsiveness for the commenting user while ensuring reliable, decoupled notification delivery.
+
+## 2.4 Participants
+
+### 2.4.1 Client
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client Application
+
+#### 2.4.1.3 Type
+
+🔹 Client
+
+#### 2.4.1.4 Technology
+
+Next.js, React, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #E6F7FF |
+| Stereotype | UI |
+
+### 2.4.2.0 Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #FFFBE6 |
+| Stereotype | GraphQL |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.4.3.2 Display Name
+
+Engagement Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, TypeScript, gRPC, Prisma
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #F6FFED |
+| Stereotype | Domain Logic |
+
+### 2.4.4.0 MessageBroker
+
+#### 2.4.4.1 Repository Id
+
+REPO-EVENT-BUS
+
+#### 2.4.4.2 Display Name
+
+Event Bus
+
+#### 2.4.4.3 Type
+
+🔹 MessageBroker
+
+#### 2.4.4.4 Technology
+
+AWS SNS/SQS
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #FCF |
+| Stereotype | Async |
+
+### 2.4.5.0 Microservice
+
+#### 2.4.5.1 Repository Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.4.5.2 Display Name
+
+Notifications Service
+
+#### 2.4.5.3 Type
+
+🔹 Microservice
+
+#### 2.4.5.4 Technology
+
+NestJS, TypeScript, gRPC
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | component |
+| Color | #F6FFED |
+| Stereotype | Consumer |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 Request
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.1.3 Message
+
+1. Send GraphQL Mutation: addComment(postId, content)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 Request
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+8. Return 200 OK with new Comment data and optimistic UI update is confirmed.
+
+#### 2.5.1.8 Has Return
+
+✅ Yes
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+HTTPS/GraphQL
+
+##### 2.5.1.10.2 Method
+
+POST /graphql
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'Mutation', 'schema': {'type': 'GraphQL', 'definition': 'mutation AddComment($postId: ID!, $content: String!) { addComment(postId: $postId, content: $content) { id content author { id name avatarUrl } createdAt } }'}}
+
+##### 2.5.1.10.4 Authentication
+
+Required: 'Authorization: Bearer <JWT_ACCESS_TOKEN>' header.
+
+##### 2.5.1.10.5 Error Handling
+
+Handles 4xx/5xx responses from the Gateway. Displays user-friendly error messages (e.g., 'Failed to post comment').
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+Client-perceived latency for this operation should be < 500ms.
+
+###### 2.5.1.10.6.2 Notes
+
+An optimistic UI update should be implemented to add the comment to the list immediately.
+
+### 2.5.2.0.0.0 gRPC Call
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-GW-API
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.2.3.0.0 Message
+
+2. Forward validated request: addComment(AddCommentRequest)
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 gRPC Call
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+7. Return successful AddCommentResponse with created Comment entity.
+
+#### 2.5.2.8.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.2.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+gRPC
+
+##### 2.5.2.10.2.0 Method
+
+EngagementService.addComment
+
+##### 2.5.2.10.3.0 Parameters
+
+- {'name': 'AddCommentRequest', 'schema': {'type': 'protobuf', 'definition': 'message AddCommentRequest { string post_id = 1; string content = 2; string user_id = 3; }'}}
+
+##### 2.5.2.10.4.0 Authentication
+
+User ID is extracted from the validated JWT and passed securely to the service.
+
+##### 2.5.2.10.5.0 Error Handling
+
+Propagates gRPC status codes (e.g., INVALID_ARGUMENT, NOT_FOUND) as GraphQL errors.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+Internal latency should be P95 < 50ms.
+
+### 2.5.3.0.0.0 Internal Processing
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.3.3.0.0 Message
+
+3. [Business Logic] Validate comment (length, permissions, post existence).
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Internal Processing
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+N/A
+
+##### 2.5.3.10.2.0 Method
+
+validateComment(content, postId, userId)
+
+##### 2.5.3.10.3.0 Parameters
+
+###### 2.5.3.10.3.1 content
+
+####### 2.5.3.10.3.1.1 Name
+
+content
+
+####### 2.5.3.10.3.1.2 Type
+
+🔹 string
+
+###### 2.5.3.10.3.2.0 postId
+
+####### 2.5.3.10.3.2.1 Name
+
+postId
+
+####### 2.5.3.10.3.2.2 Type
+
+🔹 string
+
+###### 2.5.3.10.3.3.0 userId
+
+####### 2.5.3.10.3.3.1 Name
+
+userId
+
+####### 2.5.3.10.3.3.2 Type
+
+🔹 string
+
+##### 2.5.3.10.4.0.0 Authentication
+
+N/A
+
+##### 2.5.3.10.5.0.0 Error Handling
+
+Throws 'InvalidArgumentException' if content exceeds 1500 chars. Throws 'NotFoundException' if post does not exist. Throws 'PermissionDeniedException' if user is blocked.
+
+##### 2.5.3.10.6.0.0 Performance
+
+###### 2.5.3.10.6.1.0 Latency
+
+Validation should be < 10ms.
+
+### 2.5.4.0.0.0.0 Database Write
+
+#### 2.5.4.1.0.0.0 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.4.2.0.0.0 Target Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.4.3.0.0.0 Message
+
+4. [Persistence] Save comment to PostgreSQL database.
+
+#### 2.5.4.4.0.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0.0 Type
+
+🔹 Database Write
+
+#### 2.5.4.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0.0 Return Message
+
+Returns the newly created Comment entity.
+
+#### 2.5.4.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0.0 Technical Details
+
+##### 2.5.4.10.1.0.0 Protocol
+
+SQL
+
+##### 2.5.4.10.2.0.0 Method
+
+prisma.comment.create(...)
+
+##### 2.5.4.10.3.0.0 Parameters
+
+- {'name': 'data', 'schema': {'type': 'JSON', 'definition': '{ content: string, postId: string, authorId: string }'}}
+
+##### 2.5.4.10.4.0.0 Authentication
+
+Database connection credentials managed via IAM roles and secrets.
+
+##### 2.5.4.10.5.0.0 Error Handling
+
+Handles potential database errors (e.g., foreign key constraint violation).
+
+##### 2.5.4.10.6.0.0 Performance
+
+###### 2.5.4.10.6.1.0 Latency
+
+DB write operation should be P95 < 30ms.
+
+### 2.5.5.0.0.0.0 Event Publication
+
+#### 2.5.5.1.0.0.0 Source Id
+
+REPO-SVC-ENGAGEMENT
+
+#### 2.5.5.2.0.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.5.3.0.0.0 Message
+
+5. [Async] Publish 'CommentAdded' event.
+
+#### 2.5.5.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0.0 Type
+
+🔹 Event Publication
+
+#### 2.5.5.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0.0 Technical Details
+
+##### 2.5.5.10.1.0.0 Protocol
+
+AWS SDK (SNS)
+
+##### 2.5.5.10.2.0.0 Method
+
+sns.publish()
+
+##### 2.5.5.10.3.0.0 Parameters
+
+- {'name': 'EventPayload', 'schema': {'type': 'JSON', 'definition': "{ eventVersion: '1.0', commentId: string, postId: string, postAuthorId: string, commenterId: string, commenterName: string, commentContentSnippet: string, timestamp: ISO8601 }"}}
+
+##### 2.5.5.10.4.0.0 Authentication
+
+IAM role with sns:Publish permissions.
+
+##### 2.5.5.10.5.0.0 Error Handling
+
+Logs publication failures. A failure here should not fail the primary API request.
+
+##### 2.5.5.10.6.0.0 Performance
+
+###### 2.5.5.10.6.1.0 Notes
+
+This is a fire-and-forget operation to decouple notification from comment creation.
+
+### 2.5.6.0.0.0.0 Event Consumption
+
+#### 2.5.6.1.0.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.6.2.0.0.0 Target Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.5.6.3.0.0.0 Message
+
+6. [Async] Consume 'CommentAdded' event from dedicated SQS queue.
+
+#### 2.5.6.4.0.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0.0 Type
+
+🔹 Event Consumption
+
+#### 2.5.6.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.6.7.0.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.6.10.0.0.0 Technical Details
+
+##### 2.5.6.10.1.0.0 Protocol
+
+AWS SDK (SQS)
+
+##### 2.5.6.10.2.0.0 Method
+
+Message processing handler
+
+##### 2.5.6.10.3.0.0 Parameters
+
+- {'name': 'SQSMessage', 'schema': {'type': 'JSON', 'definition': "Contains the 'CommentAdded' event payload."}}
+
+##### 2.5.6.10.4.0.0 Authentication
+
+IAM role with sqs:ReceiveMessage and sqs:DeleteMessage permissions.
+
+##### 2.5.6.10.5.0.0 Error Handling
+
+Handler must be idempotent. On transient failure, message visibility timeout allows for retries. On permanent failure, message is moved to a Dead Letter Queue (DLQ).
+
+##### 2.5.6.10.6.0.0 Performance
+
+###### 2.5.6.10.6.1.0 Latency
+
+End-to-end event propagation (publish to consume) should be P95 < 2 seconds.
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+The 'CommentAdded' event payload is denormalized with data like 'postAuthorId' and 'commenterName'. This follows the choreography pattern, allowing the Notifications Service to be fully independent and avoid making synchronous gRPC calls back to other services to fetch data, which improves its resilience and performance.
+
+#### 2.6.1.2.0.0.0 Position
+
+bottom
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-EVENT-BUS
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+5
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+The Notifications Service internal logic will check the post author's notification preferences before attempting to send any notification (e.g., via WebSocket push or email). This logic is encapsulated within the service.
+
+#### 2.6.2.2.0.0.0 Position
+
+right
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+REPO-SVC-NOTIFICATIONS
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+6
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | 1. **Authentication**: All API requests via REPO-G... |
+| Performance Targets | 1. **API Latency**: The synchronous addComment mut... |
+| Error Handling Strategy | 1. **Validation Errors**: If comment validation fa... |
+| Testing Considerations | 1. **Unit Tests**: Cover the validation logic in R... |
+| Monitoring Requirements | 1. **Metrics**: 
+   - `comments_created_total`: A ... |
+| Deployment Considerations | This feature can be deployed incrementally. The En... |
+

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reported Content Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      /* Colors */
+      --color-background: #F8F9FA;
+      --color-surface: #FFFFFF;
+      --color-border: #E9ECEF;
+      --color-text-primary: #212529;
+      --color-text-secondary: #6C757D;
+      --color-text-tertiary: #ADB5BD;
+      --color-primary: #007BFF;
+      --color-primary-hover: #0069D9;
+      --color-secondary: #6C757D;
+      --color-secondary-hover: #5A6268;
+      --color-danger: #DC3545;
+      --color-danger-hover: #C82333;
+      --color-warning: #FFC107;
+      --color-success: #28A745;
+      --color-info-background: #EBF2FF;
+      --color-danger-background: #F8D7DA;
+
+      /* Typography */
+      --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-size-xs: 0.75rem;  /* 12px */
+      --font-size-sm: 0.875rem; /* 14px */
+      --font-size-md: 1rem;     /* 16px */
+      --font-size-lg: 1.125rem; /* 18px */
+      --font-size-xl: 1.25rem;  /* 20px */
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+      --line-height-base: 1.5;
+
+      /* Spacing */
+      --space-xs: 0.25rem;  /* 4px */
+      --space-sm: 0.5rem;   /* 8px */
+      --space-md: 1rem;     /* 16px */
+      --space-lg: 1.5rem;   /* 24px */
+      --space-xl: 2rem;     /* 32px */
+
+      /* Borders & Shadows */
+      --border-radius-sm: 0.25rem;
+      --border-radius-md: 0.5rem;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-family-sans);
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+      padding: var(--space-xl);
+      line-height: var(--line-height-base);
+    }
+
+    /* Typography Component Styles */
+    .typography {
+        color: var(--color-text-primary);
+    }
+    .typography--secondary {
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-sm);
+    }
+    .typography--primary-name {
+        font-weight: var(--font-weight-semibold);
+    }
+    .typography--timestamp {
+        font-size: var(--font-size-xs);
+        color: var(--color-text-tertiary);
+    }
+    .typography--h2 {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--space-sm);
+    }
+    .typography--link {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+    }
+    .typography--link:hover {
+        text-decoration: underline;
+    }
+
+    /* Avatar Component Styles */
+    .avatar {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--color-border);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Card Component Styles */
+    .card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    
+    /* Button Component Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-sm) var(--space-md);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      border-radius: var(--border-radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+      text-decoration: none;
+    }
+    .btn--primary {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border-color: var(--color-primary);
+    }
+    .btn--primary:hover {
+      background-color: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+    }
+    .btn--secondary {
+      background-color: var(--color-surface);
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+    }
+    .btn--secondary:hover {
+      background-color: var(--color-background);
+    }
+    .btn--danger {
+      background-color: var(--color-danger);
+      color: var(--color-surface);
+      border-color: var(--color-danger);
+    }
+    .btn--danger:hover {
+      background-color: var(--color-danger-hover);
+      border-color: var(--color-danger-hover);
+    }
+
+    /* Screen-Specific Styles: Reported Content Viewer */
+    .report-viewer-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .report-viewer {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .report-viewer__section {
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .report-viewer__section:last-child {
+        border-bottom: none;
+    }
+    
+    .report-viewer__metadata {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .metadata-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    
+    .metadata-item__header {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .metadata-item__user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .metadata-item__user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .metadata-item__reason {
+      background-color: var(--color-danger-background);
+      border: 1px solid var(--color-danger);
+      color: var(--color-danger);
+      font-weight: var(--font-weight-medium);
+      padding: var(--space-sm);
+      border-radius: var(--border-radius-sm);
+    }
+    
+    .report-viewer__content-wrapper {
+      background-color: var(--color-background);
+      padding: var(--space-md);
+      border-radius: var(--border-radius-sm);
+    }
+    
+    .report-viewer__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+      background-color: var(--color-background);
+      padding: var(--space-md) var(--space-lg);
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Reported Content Styles (Post Variant) */
+    .reported-post {
+        background-color: var(--color-surface);
+        padding: var(--space-md);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--color-border);
+    }
+    .reported-post__header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-md);
+    }
+    .reported-post__author-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .reported-post__body {
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-base);
+        color: var(--color-text-secondary);
+        white-space: pre-wrap;
+    }
+
+    /* Reported Content Styles (Comment Variant) */
+    .reported-comment {
+        background-color: var(--color-surface);
+        padding: var(--space-md);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--color-border);
+    }
+    .reported-comment__context {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        margin-bottom: var(--space-md);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px dashed var(--color-border);
+    }
+    .reported-comment__body {
+        display: flex;
+        gap: var(--space-sm);
+    }
+    .reported-comment__content {
+        background-color: var(--color-info-background);
+        padding: var(--space-sm);
+        border-radius: var(--border-radius-md);
+        width: 100%;
+    }
+    .reported-comment__author {
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-sm);
+    }
+     .reported-comment__text {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+    }
+
+    /* Skeleton Loader */
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    .skeleton {
+      background-color: #e0e0e0;
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 60%, rgba(255,255,255,0));
+      animation: shimmer 2s infinite;
+    }
+    .skeleton--text { height: 1em; border-radius: var(--border-radius-sm); }
+    .skeleton--avatar { width: 40px; height: 40px; border-radius: 50%; }
+    .skeleton--card { height: 200px; border-radius: var(--border-radius-sm); }
+
+    /* Error State */
+    .error-state {
+        text-align: center;
+        padding: var(--space-xl);
+        color: var(--color-danger);
+    }
+    .error-state__icon {
+        font-size: 2rem;
+        margin-bottom: var(--space-sm);
+    }
+    .error-state__message {
+        font-weight: var(--font-weight-medium);
+    }
+  </style>
+</head>
+<body>
+  <div class="report-viewer-container">
+    <h1 class="typography--h2" style="margin-bottom: var(--space-md);">Review Reported Content</h1>
+    
+    <article class="card report-viewer" aria-labelledby="viewer-title">
+      <section class="report-viewer__section" aria-labelledby="details-title">
+        <h2 id="details-title" class="typography--h2">Report Details</h2>
+        <dl class="report-viewer__metadata">
+          <div class="metadata-item">
+            <dt class="metadata-item__header">Reporter</dt>
+            <dd class="metadata-item__user">
+              <div class="avatar">
+                <img src="https://i.pravatar.cc/40?u=reporter" alt="Avatar of Jane Doe">
+              </div>
+              <div class="metadata-item__user-info">
+                <a href="#" class="typography typography--link typography--primary-name">Jane Doe</a>
+                <span class="typography typography--secondary">Senior Analyst at DataCorp</span>
+              </div>
+            </dd>
+          </div>
+
+          <div class="metadata-item">
+            <dt class="metadata-item__header">Content Author</dt>
+            <dd class="metadata-item__user">
+              <div class="avatar">
+                <img src="https://i.pravatar.cc/40?u=author" alt="Avatar of John Smith">
+              </div>
+              <div class="metadata-item__user-info">
+                <a href="#" class="typography typography--link typography--primary-name">John Smith</a>
+                <span class="typography typography--secondary">Lead Developer at Innovate Inc.</span>
+              </div>
+            </dd>
+          </div>
+
+          <div class="metadata-item">
+            <dt class="metadata-item__header">Reason</dt>
+            <dd class="metadata-item__reason">
+              Misinformation
+            </dd>
+          </div>
+
+          <div class="metadata-item">
+            <dt class="metadata-item__header">Reported On</dt>
+            <dd class="typography typography--secondary">Jan 18, 2025, 14:30 UTC</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="report-viewer__section" aria-labelledby="content-title">
+        <h2 id="content-title" class="typography--h2">Reported Content</h2>
+        <div class="report-viewer__content-wrapper">
+          
+          <!-- This is where the 'post' or 'comment' variant would be rendered -->
+          <div class="reported-post">
+            <header class="reported-post__header">
+              <div class="avatar">
+                <img src="https://i.pravatar.cc/40?u=author" alt="Avatar of John Smith">
+              </div>
+              <div class="reported-post__author-info">
+                <span class="typography typography--primary-name">John Smith</span>
+                <span class="typography typography--secondary">Lead Developer at Innovate Inc.</span>
+                <span class="typography typography--timestamp">2d ago</span>
+              </div>
+            </header>
+            <div class="reported-post__body">
+              Excited to announce our latest product launch! We've been working hard on this for months. Check out the future of project management at example.com. This is a game-changer for distributed teams and will redefine productivity in the remote work era.
+            </div>
+          </div>
+
+        </div>
+      </section>
+      
+      <footer class="report-viewer__actions">
+        <button class="btn btn--secondary" type="button">Dismiss Report</button>
+        <button class="btn btn--secondary" type="button">Issue Warning</button>
+        <button class="btn btn--danger" type="button">Remove Content</button>
+      </footer>
+    </article>
+  </div>
+
+  <!-- Screen Variations Section -->
+  <div class="screen-variations" style="margin-top: var(--space-xl);">
+    <h2 class="typography--h2" style="text-align: center; margin-bottom: var(--space-lg);">Screen Variations</h2>
+    
+    <!-- VARIANT: COMMENT -->
+    <div class="report-viewer-container" style="margin-bottom: var(--space-xl);">
+      <h3>Variant: Reported Comment</h3>
+      <p class="typography--secondary" style="margin-bottom: var(--space-sm);">Shows the viewer when the reported item is a comment. Note the added context of the parent post.</p>
+      <article class="card report-viewer">
+        <section class="report-viewer__section">
+            <!-- (Metadata would be here, same as above) -->
+        </section>
+        <section class="report-viewer__section">
+          <h2 class="typography--h2">Reported Content</h2>
+          <div class="report-viewer__content-wrapper">
+            <div class="reported-comment">
+              <p class="reported-comment__context">
+                In response to a post by <a href="#" class="typography--link">Alice Johnson</a>: "What are your thoughts on the new AI frameworks..."
+              </p>
+              <div class="reported-comment__body">
+                <div class="avatar">
+                  <img src="https://i.pravatar.cc/40?u=author" alt="Avatar of John Smith">
+                </div>
+                <div class="reported-comment__content">
+                  <p class="reported-comment__author">John Smith</p>
+                  <p class="reported-comment__text">This is completely inaccurate. The framework doesn't support that feature and you're misleading people.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="report-viewer__actions">
+          <button class="btn btn--secondary" type="button">Dismiss Report</button>
+          <button class="btn btn--secondary" type="button">Issue Warning</button>
+          <button class="btn btn--danger" type="button">Remove Content</button>
+        </footer>
+      </article>
+    </div>
+
+    <!-- STATE: LOADING -->
+    <div class="report-viewer-container" style="margin-bottom: var(--space-xl);">
+        <h3>State: Loading</h3>
+        <p class="typography--secondary" style="margin-bottom: var(--space-sm);">Shows the skeleton loader while report details are being fetched.</p>
+        <article class="card report-viewer">
+          <section class="report-viewer__section">
+            <div class="typography--h2 skeleton skeleton--text" style="width: 200px; margin-bottom: var(--space-lg);"></div>
+            <div class="report-viewer__metadata">
+              <div class="metadata-item">
+                <div class="metadata-item__header skeleton skeleton--text" style="width: 80px;"></div>
+                <div class="metadata-item__user">
+                  <div class="skeleton skeleton--avatar"></div>
+                  <div class="metadata-item__user-info" style="width: 150px;">
+                    <div class="skeleton skeleton--text" style="width: 100%;"></div>
+                    <div class="skeleton skeleton--text" style="width: 70%; margin-top: var(--space-xs);"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="metadata-item">
+                <div class="metadata-item__header skeleton skeleton--text" style="width: 100px;"></div>
+                 <div class="metadata-item__user">
+                  <div class="skeleton skeleton--avatar"></div>
+                  <div class="metadata-item__user-info" style="width: 150px;">
+                    <div class="skeleton skeleton--text" style="width: 100%;"></div>
+                    <div class="skeleton skeleton--text" style="width: 70%; margin-top: var(--space-xs);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="report-viewer__section">
+            <div class="typography--h2 skeleton skeleton--text" style="width: 250px;"></div>
+            <div class="report-viewer__content-wrapper">
+              <div class="skeleton skeleton--card"></div>
+            </div>
+          </section>
+           <footer class="report-viewer__actions">
+            <div class="btn btn--secondary" style="width: 120px; color: transparent; background-color: var(--color-border); border-color: var(--color-border);">...</div>
+            <div class="btn btn--secondary" style="width: 120px; color: transparent; background-color: var(--color-border); border-color: var(--color-border);">...</div>
+            <div class="btn btn--danger" style="width: 140px; color: transparent; background-color: var(--color-border); border-color: var(--color-border);">...</div>
+          </footer>
+        </article>
+    </div>
+
+    <!-- STATE: ERROR -->
+    <div class="report-viewer-container" style="margin-bottom: var(--space-xl);">
+        <h3>State: Error</h3>
+        <p class="typography--secondary" style="margin-bottom: var(--space-sm);">Shows an error message if the report details fail to load.</p>
+        <article class="card report-viewer">
+          <div class="error-state">
+              <div class="error-state__icon" role="img" aria-label="Error">⚠️</div>
+              <p class="error-state__message">Could not load report details.</p>
+              <p class="typography--secondary">Please try again later or contact support.</p>
+          </div>
+        </article>
+    </div>
+  </div>
+
+</body>
+</html>

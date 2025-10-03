@@ -1,0 +1,75 @@
+// This schema defines the data model for the Admin Service.
+// It includes models for content reports (moderation queue), the immutable admin audit log,
+// and system-wide feature flags, as per requirements REQ-1-041, REQ-1-044, and REQ-1-045.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum for the status of a content report in the moderation queue.
+enum ReportStatus {
+  PENDING
+  DISMISSED
+  ACTION_TAKEN
+}
+
+// Enum for the types of actions an administrator can perform.
+enum AdminActionType {
+  DISMISS_REPORT
+  REMOVE_CONTENT
+  ISSUE_WARNING
+  SUSPEND_USER
+  BAN_USER
+  TRIGGER_PASSWORD_RESET
+  UPDATE_FEATURE_FLAG
+}
+
+// Model for a content report item in the moderation queue.
+// Implements REQ-1-041.
+model ContentReport {
+  id           String       @id @default(uuid())
+  contentId    String // The ID of the reported content (e.g., post ID, comment ID)
+  contentType  String // e.g., 'POST', 'COMMENT'
+  reporterId   String // The ID of the user who made the report
+  authorId     String // The ID of the user who created the content
+  reason       String
+  status       ReportStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  resolvedAt   DateTime?
+  resolvedById String? // ID of the admin who resolved the report
+
+  // Optimizing queue fetching by indexing on status and creation time.
+  @@index([status, createdAt])
+}
+
+// Model for the immutable admin audit log.
+// Implements REQ-1-044. This table should have restricted DB permissions (INSERT, SELECT only).
+model AdminAuditLog {
+  id         String          @id @default(uuid())
+  adminId    String // ID of the administrator performing the action
+  actionType AdminActionType
+  targetId   String? // The ID of the entity being acted upon (e.g., user ID, post ID)
+  targetType String? // The type of the entity (e.g., 'USER', 'POST')
+  reason     String?
+  details    Json? // Flexible JSONB field to store action-specific context
+  timestamp  DateTime        @default(now())
+
+  // Optimizing log retrieval by indexing on the admin and timestamp.
+  @@index([adminId, timestamp])
+}
+
+// Model for system-wide feature flags.
+// Implements REQ-1-045.
+model FeatureFlag {
+  key         String  @id @unique
+  description String?
+  isEnabled   Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

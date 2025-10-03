@@ -1,0 +1,55 @@
+flowchart TD
+    subgraph User Interaction
+        A[User navigates to /register] --> B[Fills registration form];
+        B --> C{Client-side Validation};
+        C -->|Fails| D[Shows inline errors];
+        D --> B;
+        C -->|Passes| E[Submits form];
+    end
+
+    subgraph Backend: Registration
+        E --> F(POST /api/auth/register);
+        F --> G{Server Validation: Email unique? Password complex?};
+        G -->|Fails| H[API responds with 4xx Error];
+        G -->|Passes| I[Create User record with 'inactive' status];
+        I --> J[Generate & Store Verification Token];
+        J --> K[Dispatch 'SendVerificationEmail' event];
+        K --> L[API responds with 201 Created];
+    end
+
+    subgraph Frontend Response
+        H --> M[Displays server error to user e.g., 'Email already exists'];
+        M --> B;
+        L --> N[Displays 'Success! Check your email to verify.'];
+    end
+
+    subgraph User: Email Verification
+        subgraph Async Email Delivery
+            K -.-> P((Email Service));
+            P --> Q[Sends verification email];
+        end
+        Q --> R[User receives email & clicks verification link];
+    end
+    
+    subgraph Backend: Verification
+        R --> S(GET /auth/verify?token=...);
+        S --> T{Token valid, unexpired, and unused?};
+        T -->|No| U[API responds with error];
+        T -->|Yes| V[Update user status to 'active'];
+        V --> W[Invalidate token];
+        W --> X[API responds with success redirect];
+    end
+
+    subgraph Frontend: Final Step
+        U --> Y[Displays 'Invalid or expired link' error page];
+        X --> Z[Redirects to Login page with 'Account verified!' message];
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#212121
+    classDef successNode fill:#e8f5e9,stroke:#4caf50,color:#212121
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#212121
+    
+    class D,H,M,U,Y errorNode
+    class I,J,V,W,Z,N,L successNode
+    class F,G,P,S,T,K processNode

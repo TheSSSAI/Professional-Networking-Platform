@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FormGroup Component</title>
+  <style>
+    /* CSS Reset & Basic Setup */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background-color: var(--color-neutral-100); color: var(--color-neutral-900); padding: var(--spacing-xl); }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #0077B5;
+      --color-danger-500: #DC2626;
+      --color-danger-600: #B91C1C;
+      --color-neutral-900: #111827;
+      --color-neutral-700: #374151;
+      --color-neutral-500: #6B7280;
+      --color-neutral-300: #D1D5DB;
+      --color-neutral-100: #F9FAFB;
+      --color-white: #FFFFFF;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Typography */
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-weight-medium: 500;
+
+      /* Borders */
+      --border-radius-md: 6px;
+      --focus-ring: 0 0 0 3px rgba(0, 119, 181, 0.3);
+    }
+
+    /* Showcase Styles */
+    .showcase-container {
+      background-color: var(--color-white);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .showcase-container h2 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-neutral-300);
+      padding-bottom: var(--spacing-md);
+    }
+    .variant {
+        margin-bottom: var(--spacing-xl);
+    }
+    .variant h3 {
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* FormGroup Molecular Component CSS */
+
+    /* Base styles for dependent atoms (Label, Input, ErrorMessage) */
+    .form-group__label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-700);
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+    }
+
+    .form-group__input-wrapper {
+      position: relative;
+    }
+
+    .form-group__input {
+      width: 100%;
+      border: 1px solid var(--color-neutral-300);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-base);
+      line-height: 1.5;
+      color: var(--color-neutral-900);
+      min-height: 44px; /* Touch-friendly */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      -webkit-appearance: none;
+    }
+
+    .form-group__input::placeholder {
+      color: var(--color-neutral-500);
+    }
+
+    .form-group__input:focus-visible {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: var(--focus-ring);
+    }
+
+    .form-group__error-message {
+      display: none;
+      color: var(--color-danger-600);
+      font-size: var(--font-size-sm);
+      margin-top: var(--spacing-xs);
+    }
+
+    /* Component Base */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: var(--spacing-md);
+    }
+
+    /* Component Error State */
+    .form-group--error .form-group__label {
+      color: var(--color-danger-600);
+    }
+
+    .form-group--error .form-group__input {
+      border-color: var(--color-danger-500);
+    }
+
+    .form-group--error .form-group__input:focus-visible {
+      border-color: var(--color-danger-500);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3);
+    }
+
+    .form-group--error .form-group__error-message {
+      display: block;
+    }
+
+    /* Optional: Password variant support */
+    .form-group__input-wrapper .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--color-neutral-500);
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .form-group__input-wrapper .password-toggle:hover {
+        background-color: var(--color-neutral-100);
+    }
+    .form-group__input-wrapper .password-toggle:focus-visible {
+        outline: 2px solid var(--color-primary-500);
+        outline-offset: 1px;
+    }
+    .form-group__input-wrapper .password-toggle svg {
+        width: 20px;
+        height: 20px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="showcase-container">
+    <h2>FormGroup Component</h2>
+
+    <div class="variant">
+        <h3>Variant: Standard (Default State)</h3>
+        <p style="font-size: 0.9rem; color: var(--color-neutral-500); margin-top:-8px; margin-bottom: 16px;">
+            Standard input group for collecting user data like email or name.
+        </p>
+        <div class="form-group">
+            <label for="email-default" class="form-group__label">Email Address</label>
+            <div class="form-group__input-wrapper">
+                <input type="email" id="email-default" class="form-group__input" placeholder="you@example.com">
+            </div>
+        </div>
+    </div>
+    
+    <div class="variant">
+        <h3>Variant: Password Input (Default State)</h3>
+        <p style="font-size: 0.9rem; color: var(--color-neutral-500); margin-top:-8px; margin-bottom: 16px;">
+            A form group configured for a password, including a show/hide toggle.
+        </p>
+        <div class="form-group">
+            <label for="password-default" class="form-group__label">Password</label>
+            <div class="form-group__input-wrapper">
+                <input type="password" id="password-default" class="form-group__input" placeholder="Enter your password">
+                <button type="button" class="password-toggle" aria-label="Show password">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639l4.433-4.433a.998.998 0 0 1 1.414 0l4.433 4.433c.39.39.39 1.024 0 1.414l-4.433 4.433a.998.998 0 0 1-1.414 0l-4.433-4.433Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>                      
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="variant">
+        <h3>State: Error</h3>
+        <p style="font-size: 0.9rem; color: var(--color-neutral-500); margin-top:-8px; margin-bottom: 16px;">
+            Demonstrates the visual state when validation fails. The label, border, and error message all use the danger color.
+        </p>
+        <div class="form-group form-group--error">
+            <label for="mfa-error" class="form-group__label">MFA Code</label>
+            <div class="form-group__input-wrapper">
+                <input 
+                    type="text" 
+                    id="mfa-error" 
+                    class="form-group__input" 
+                    value="12345" 
+                    aria-invalid="true" 
+                    aria-describedby="mfa-error-message"
+                >
+            </div>
+            <p id="mfa-error-message" class="form-group__error-message">
+                Invalid verification code. Please try again.
+            </p>
+        </div>
+    </div>
+
+  </div>
+</body>
+</html>

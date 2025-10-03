@@ -1,0 +1,598 @@
+
+{
+  "component_inventory": {
+    "atomic_components": [
+      {
+        "component_name": "Button",
+        "category": "form_controls",
+        "variants": ["primary", "secondary", "text", "danger", "icon_only"],
+        "states": ["default", "hover", "active", "focus", "disabled", "loading"],
+        "responsive_needs": "Ensure minimum touch target size of 44x44px.",
+        "dependencies": ["Icon", "LoadingSpinner"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "TextInput",
+        "category": "form_controls",
+        "variants": ["default", "password", "email", "search"],
+        "states": ["default", "focus", "error", "disabled"],
+        "responsive_needs": "Full width in mobile form layouts.",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "TextArea",
+        "category": "form_controls",
+        "variants": ["default", "comment_input"],
+        "states": ["default", "focus", "error", "disabled"],
+        "responsive_needs": "Auto-resizing height.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "Checkbox",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["checked", "unchecked", "disabled"],
+        "responsive_needs": "Adequate touch target.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "RadioButton",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["checked", "unchecked", "disabled"],
+        "responsive_needs": "Adequate touch target.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "ToggleSwitch",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["on", "off", "disabled"],
+        "responsive_needs": "Adequate touch target.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "Avatar",
+        "category": "data_display",
+        "variants": ["small", "medium", "large", "default_initials"],
+        "states": ["default"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "Badge",
+        "category": "data_display",
+        "variants": ["notification_count", "status"],
+        "states": ["default"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "Alert",
+        "category": "feedback",
+        "variants": ["success", "error", "warning", "info"],
+        "states": ["visible", "hidden"],
+        "responsive_needs": "Adapts to container width.",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "LoadingSpinner",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["spinning"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "SkeletonLoader",
+        "category": "feedback",
+        "variants": ["text", "circle", "rectangle"],
+        "states": ["loading"],
+        "responsive_needs": "Composable to mimic various layouts.",
+        "dependencies": [],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "5 hours"
+      },
+      {
+        "component_name": "Modal",
+        "category": "feedback",
+        "variants": ["small", "medium", "large"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Full-screen on mobile, centered dialog on desktop.",
+        "dependencies": ["Icon"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "Card",
+        "category": "layout",
+        "variants": ["default", "outlined"],
+        "states": ["default", "hover"],
+        "responsive_needs": "Padding adjusted for mobile.",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "Link",
+        "category": "navigation",
+        "variants": ["default", "subtle"],
+        "states": ["default", "hover", "active"],
+        "responsive_needs": "None",
+        "dependencies": [],
+        "complexity_level": "low",
+        "implementation_priority": 1,
+        "estimated_effort": "1 hour"
+      },
+      {
+        "component_name": "Accordion",
+        "category": "data_display",
+        "variants": ["default"],
+        "states": ["expanded", "collapsed"],
+        "responsive_needs": "None",
+        "dependencies": ["Icon"],
+        "complexity_level": "low",
+        "implementation_priority": 4,
+        "estimated_effort": "3 hours"
+      }
+    ],
+    "molecular_components": [
+      {
+        "component_name": "FormGroup",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["default", "error", "success"],
+        "responsive_needs": "Vertical stacking of label and input.",
+        "dependencies": ["TextInput", "TextArea", "Label", "ErrorMessage"],
+        "complexity_level": "low",
+        "implementation_priority": 2,
+        "estimated_effort": "2 hours"
+      },
+      {
+        "component_name": "SearchBar",
+        "category": "navigation",
+        "variants": ["global_header", "page_specific"],
+        "states": ["default", "focused", "loading"],
+        "responsive_needs": "Collapses to an icon on mobile header.",
+        "dependencies": ["TextInput", "Icon", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "UserBadge",
+        "category": "data_display",
+        "variants": ["small", "large_with_headline"],
+        "states": ["default"],
+        "responsive_needs": "Text truncation.",
+        "dependencies": ["Avatar", "Link"],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "ActionMenu",
+        "category": "navigation",
+        "variants": ["post_options", "comment_options"],
+        "states": ["open", "closed"],
+        "responsive_needs": "None",
+        "dependencies": ["Icon", "Button", "DropdownMenu"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "FileUpload",
+        "category": "form_controls",
+        "variants": ["profile_picture", "banner", "post_images"],
+        "states": ["idle", "uploading", "success", "error"],
+        "responsive_needs": "Clear feedback on mobile.",
+        "dependencies": ["Button", "Icon", "ProgressBar", "ImagePreview"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "ReactionPicker",
+        "category": "form_controls",
+        "variants": ["default"],
+        "states": ["default", "expanded_on_hover", "expanded_on_long_press"],
+        "responsive_needs": "Handle long-press for touch devices.",
+        "dependencies": ["Button", "Icon", "Tooltip", "Popover"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "AutocompleteInput",
+        "category": "form_controls",
+        "variants": ["skills", "location", "company"],
+        "states": ["default", "focused", "loading", "error"],
+        "responsive_needs": "Dropdown should be full-width on mobile.",
+        "dependencies": ["TextInput", "DropdownMenu", "LoadingSpinner"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "UserMenu",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["open", "closed"],
+        "responsive_needs": "None",
+        "dependencies": ["Avatar", "DropdownMenu", "Link"],
+        "complexity_level": "medium",
+        "implementation_priority": 2,
+        "estimated_effort": "4 hours"
+      },
+      {
+        "component_name": "Pagination",
+        "category": "navigation",
+        "variants": ["standard", "simple"],
+        "states": ["default"],
+        "responsive_needs": "Compact version for mobile (e.g., 'Prev/Next' only).",
+        "dependencies": ["Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "5 hours"
+      },
+      {
+        "component_name": "LinkPreviewCard",
+        "category": "data_display",
+        "variants": ["default"],
+        "states": ["loading", "loaded", "error"],
+        "responsive_needs": "Adapts to container width.",
+        "dependencies": ["Card", "SkeletonLoader", "Image"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "5 hours"
+      }
+    ],
+    "organism_components": [
+      {
+        "component_name": "AppHeader",
+        "category": "layout",
+        "variants": ["authenticated", "guest"],
+        "states": ["default", "mobile_nav_open"],
+        "responsive_needs": "Collapses navigation into a hamburger menu.",
+        "dependencies": ["Logo", "SearchBar", "NavigationLinks", "UserMenu", "NotificationBell"],
+        "complexity_level": "high",
+        "implementation_priority": 2,
+        "estimated_effort": "10 hours"
+      },
+      {
+        "component_name": "AppFooter",
+        "category": "layout",
+        "variants": ["default"],
+        "states": ["default"],
+        "responsive_needs": "Vertical stacking of links on mobile.",
+        "dependencies": ["Link"],
+        "complexity_level": "low",
+        "implementation_priority": 3,
+        "estimated_effort": "3 hours"
+      },
+      {
+        "component_name": "PostCard",
+        "category": "data_display",
+        "variants": ["text_only", "with_images", "with_link_preview"],
+        "states": ["default"],
+        "responsive_needs": "Adapts to single-column layout.",
+        "dependencies": ["Card", "UserBadge", "ActionMenu", "ReactionPicker", "CommentThread"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "12 hours"
+      },
+      {
+        "component_name": "PostComposer",
+        "category": "forms",
+        "variants": ["modal", "inline"],
+        "states": ["default", "submitting", "error"],
+        "responsive_needs": "Becomes a full-screen modal on mobile.",
+        "dependencies": ["Card", "Avatar", "TextArea", "Button", "FileUpload", "LinkPreviewCard"],
+        "complexity_level": "high",
+        "implementation_priority": 4,
+        "estimated_effort": "16 hours"
+      },
+      {
+        "component_name": "CommentThread",
+        "category": "data_display",
+        "variants": ["default"],
+        "states": ["loading", "loaded"],
+        "responsive_needs": "Adapts to container width.",
+        "dependencies": ["CommentInput", "CommentList", "UserBadge"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "ProfileHeader",
+        "category": "data_display",
+        "variants": ["own_profile", "other_profile"],
+        "states": ["default", "editing"],
+        "responsive_needs": "Adjusts layout for smaller screens.",
+        "dependencies": ["Avatar", "Button", "FileUpload", "ActionMenu"],
+        "complexity_level": "high",
+        "implementation_priority": 3,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "ProfileSection",
+        "category": "layout",
+        "variants": ["experience", "education", "skills"],
+        "states": ["view", "edit", "empty"],
+        "responsive_needs": "Vertical stacking of list items.",
+        "dependencies": ["Card", "Button", "Icon", "ListItem"],
+        "complexity_level": "medium",
+        "implementation_priority": 4,
+        "estimated_effort": "8 hours"
+      },
+      {
+        "component_name": "ConfirmationDialog",
+        "category": "feedback",
+        "variants": ["destructive", "standard"],
+        "states": ["open", "closed"],
+        "responsive_needs": "Adapts to screen size.",
+        "dependencies": ["Modal", "Button"],
+        "complexity_level": "medium",
+        "implementation_priority": 3,
+        "estimated_effort": "5 hours"
+      },
+      {
+        "component_name": "NotificationCenter",
+        "category": "feedback",
+        "variants": ["default"],
+        "states": ["open", "closed", "loading", "empty"],
+        "responsive_needs": "May cover more screen real estate on mobile.",
+        "dependencies": ["Popover", "NotificationItem", "LoadingSpinner"],
+        "complexity_level": "medium",
+        "implementation_priority": 5,
+        "estimated_effort": "6 hours"
+      },
+      {
+        "component_name": "ChatWindow",
+        "category": "data_display",
+        "variants": ["default"],
+        "states": ["loading", "active", "disconnected"],
+        "responsive_needs": "Full screen on mobile.",
+        "dependencies": ["MessageBubble", "MessageInput", "UserBadge", "LoadingSpinner"],
+        "complexity_level": "high",
+        "implementation_priority": 6,
+        "estimated_effort": "12 hours"
+      },
+      {
+        "component_name": "ConversationList",
+        "category": "navigation",
+        "variants": ["default"],
+        "states": ["loading", "loaded", "empty"],
+        "responsive_needs": "Takes full screen width before a conversation is selected.",
+        "dependencies": ["ListItem", "UserBadge", "SkeletonLoader"],
+        "complexity_level": "medium",
+        "implementation_priority": 6,
+        "estimated_effort": "6 hours"
+      }
+    ]
+  },
+  "screen_inventory": [
+    {
+      "screen_name": "Login Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "error"],
+      "required_components": ["TextInput", "Button", "Alert", "Link"],
+      "platform_optimizations": "Centered layout, keyboard-friendly.",
+      "implementation_priority": 1,
+      "estimated_effort": "4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Registration Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "error", "success"],
+      "required_components": ["TextInput", "Button", "Alert", "Checkbox"],
+      "platform_optimizations": "Multi-step or clear form layout.",
+      "implementation_priority": 1,
+      "estimated_effort": "6 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Forgot Password Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "success"],
+      "required_components": ["TextInput", "Button", "Alert"],
+      "platform_optimizations": "Simple, focused user flow.",
+      "implementation_priority": 1,
+      "estimated_effort": "3 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Reset Password Screen",
+      "screen_type": "authentication",
+      "variants": ["desktop", "mobile"],
+      "states": ["default", "submitting", "error", "success"],
+      "required_components": ["TextInput", "Button", "Alert"],
+      "platform_optimizations": "Clear password complexity rules visible.",
+      "implementation_priority": 1,
+      "estimated_effort": "4 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Email Verification Status Screen",
+      "screen_type": "feedback",
+      "variants": ["success", "error_expired", "error_invalid"],
+      "states": ["default"],
+      "required_components": ["Alert", "Button", "Icon"],
+      "platform_optimizations": "Clear call to action (e.g., 'Go to Login').",
+      "implementation_priority": 2,
+      "estimated_effort": "3 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Home / News Feed Screen",
+      "screen_type": "dashboard",
+      "variants": ["desktop", "tablet", "mobile"],
+      "states": ["loading", "loaded", "error", "empty"],
+      "required_components": ["AppHeader", "PostComposer", "PostCard", "SkeletonLoader", "Alert"],
+      "platform_optimizations": "Desktop: 3-column layout (profile summary, feed, widgets). Mobile: single-column layout.",
+      "implementation_priority": 3,
+      "estimated_effort": "16 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "User Profile Screen",
+      "screen_type": "detail_page",
+      "variants": ["own_profile", "other_user_public", "other_user_private_minimal"],
+      "states": ["loading", "loaded", "error", "editing"],
+      "required_components": ["AppHeader", "ProfileHeader", "ProfileSection", "PostCard", "ConfirmationDialog"],
+      "platform_optimizations": "Responsive layout for all sections.",
+      "implementation_priority": 3,
+      "estimated_effort": "20 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Network Management Screen",
+      "screen_type": "list_page",
+      "variants": ["my_connections", "pending_invitations"],
+      "states": ["loading", "loaded", "empty"],
+      "required_components": ["AppHeader", "Card", "UserBadge", "Button", "Pagination"],
+      "platform_optimizations": "Grid view on desktop, list view on mobile.",
+      "implementation_priority": 4,
+      "estimated_effort": "10 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Search Results Screen",
+      "screen_type": "list_page",
+      "variants": ["default"],
+      "states": ["loading", "loaded", "empty"],
+      "required_components": ["AppHeader", "FilterSidebar", "UserBadge", "Pagination"],
+      "platform_optimizations": "Filters move to a modal on mobile.",
+      "implementation_priority": 5,
+      "estimated_effort": "12 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Messaging Screen",
+      "screen_type": "application",
+      "variants": ["desktop", "mobile"],
+      "states": ["loading", "loaded", "empty_conversation"],
+      "required_components": ["AppHeader", "ConversationList", "ChatWindow"],
+      "platform_optimizations": "Desktop: two-pane layout. Mobile: single-pane view, switching between list and chat.",
+      "implementation_priority": 6,
+      "estimated_effort": "24 hours",
+      "user_flow_criticality": "high"
+    },
+    {
+      "screen_name": "Settings Screen",
+      "screen_type": "settings_page",
+      "variants": ["account", "security", "notifications", "privacy"],
+      "states": ["default", "saving"],
+      "required_components": ["AppHeader", "SettingsLayout", "FormGroup", "ToggleSwitch", "Button"],
+      "platform_optimizations": "Clear navigation between settings sections.",
+      "implementation_priority": 5,
+      "estimated_effort": "14 hours",
+      "user_flow_criticality": "medium"
+    },
+    {
+      "screen_name": "Help Center / FAQ Screen",
+      "screen_type": "static_page",
+      "variants": ["default"],
+      "states": ["default"],
+      "required_components": ["AppHeader", "AppFooter", "Accordion"],
+      "platform_optimizations": "Simple, readable layout.",
+      "implementation_priority": 6,
+      "estimated_effort": "4 hours",
+      "user_flow_criticality": "low"
+    },
+    {
+      "screen_name": "Not Found (404) Screen",
+      "screen_type": "error_page",
+      "variants": ["default"],
+      "states": ["default"],
+      "required_components": ["AppHeader", "AppFooter", "Alert", "Button"],
+      "platform_optimizations": "Clear message with a link back to the homepage.",
+      "implementation_priority": 2,
+      "estimated_effort": "2 hours",
+      "user_flow_criticality": "medium"
+    }
+  ],
+  "implementation_plan": {
+    "phase_1_foundation": {
+      "components": ["Button", "TextInput", "Avatar", "LoadingSpinner", "Alert", "Modal", "Card", "Link", "Icon"],
+      "rationale": "Build the foundational atomic components that are dependencies for almost all other components and establish the core visual language.",
+      "estimated_duration": "1 sprint"
+    },
+    "phase_2_authentication_and_layout": {
+      "components": ["FormGroup", "UserMenu", "AppHeader", "AppFooter", "SkeletonLoader", "ConfirmationDialog"],
+      "screens": ["Login Screen", "Registration Screen", "Forgot Password Screen", "Reset Password Screen", "Email Verification Status Screen", "Not Found (404) Screen"],
+      "rationale": "Implement the complete authentication flow and the main application shell. This gates access to the app and provides the structure for all subsequent screens.",
+      "estimated_duration": "2 sprints"
+    },
+    "phase_3_core_experience_profile_and_feed": {
+      "components": ["PostCard", "PostComposer", "ProfileHeader", "ProfileSection", "FileUpload", "ActionMenu", "UserBadge"],
+      "screens": ["Home / News Feed Screen", "User Profile Screen"],
+      "rationale": "Develop the primary user engagement loop: viewing profiles and interacting with the news feed. This delivers the core value of the platform.",
+      "estimated_duration": "2 sprints"
+    },
+    "phase_4_networking_and_interaction": {
+      "components": ["ReactionPicker", "CommentThread", "AutocompleteInput", "Pagination", "LinkPreviewCard", "ConnectionRequestCard", "Badge"],
+      "screens": ["Network Management Screen", "Search Results Screen"],
+      "rationale": "Build out the social and networking features, including connection management, search, and content interactions like reacting and commenting.",
+      "estimated_duration": "2 sprints"
+    },
+    "phase_5_communication_and_settings": {
+      "components": ["NotificationCenter", "NotificationItem", "ChatWindow", "ConversationList", "ToggleSwitch", "Accordion"],
+      "screens": ["Messaging Screen", "Settings Screen", "Help Center / FAQ Screen"],
+      "rationale": "Implement direct messaging, notifications, and all user-configurable settings to complete the feature set.",
+      "estimated_duration": "2 sprints"
+    }
+  },
+  "platform_implementation_strategy": {
+    "target_platform": "Web (Next.js Single Page Application)",
+    "implementation_approach": "mobile_first",
+    "responsive_strategy": "A mobile-first approach is mandatory, using MUI's breakpoint system for media queries. Components will be designed to be intrinsically responsive, and screens will use a flexible grid that adapts from single-column to multi-column layouts.",
+    "progressive_enhancement": "Core content and functionality will be available with server-side rendering (SSR) from Next.js. Client-side hydration will add real-time updates, optimistic UI, and advanced interactions.",
+    "browser_support": "Latest two versions of Chrome, Firefox, Safari, and Edge.",
+    "accessibility_integration": "WCAG 2.1 AA compliance is a mandatory requirement for every component and screen, enforced through automated CI checks and manual testing."
+  },
+  "quality_assurance_plan": {
+    "component_testing": "Each component will be developed in isolation using Storybook for visual testing and documentation. Unit tests with Jest and React Testing Library will cover logic and state changes, aiming for >80% coverage.",
+    "integration_testing": "GraphQL queries and mutations will be tested against mock servers using Apollo Client's testing utilities. WebSocket events will be tested with mock clients and servers.",
+    "responsive_testing": "Storybook's viewport addon and browser developer tools will be used for component-level testing. E2E tests with Cypress/Playwright will run against key breakpoints. Visual regression testing (e.g., Percy) will be used to catch unintended layout changes.",
+    "accessibility_testing": "Automated audits using `axe-core` will be integrated into the CI/CD pipeline. Manual testing (keyboard-only navigation, screen reader checks with NVDA/VoiceOver) is required for complex interactive components and critical user flows.",
+    "performance_testing": "Lighthouse scores and Core Web Vitals (LCP, FID, CLS) will be monitored for key pages (Login, Feed, Profile). Next.js analytics and external tools like WebPageTest will be used for performance profiling."
+  }
+}

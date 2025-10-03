@@ -1,0 +1,5 @@
+"component_name","business_criticality","technical_complexity","change_frequency","test_types_required","unit_test_coverage","integration_test_coverage","e2e_test_coverage","automation_percentage","manual_test_effort","automated_test_effort","total_test_cases","risk_mitigation_score","quality_confidence","maintenance_overhead","tool_compatibility","team_skill_alignment"
+"Authentication Service (`AuthService`)","Critical","High","Medium","[""Unit"",""Integration"",""Security"",""Performance""]","95","98","100","100","","80","50","0.98","High","Medium","Excellent","Good"
+"MFA Service (`MfaService`)","High","High","Low","[""Unit"",""Integration"",""Security""]","92","95","100","100","","40","25","0.95","High","Low","Excellent","Good"
+"Account Lifecycle Management","High","Medium","Low","[""Unit"",""Integration"",""E2E""]","85","90","95","100","","35","20","0.9","High","Low","Excellent","Good"
+"CI/CD & DevOps Automation","Critical","High","Medium","[""Integration"",""Security""]","","100","","100","4","30","15","0.95","High","Medium","Excellent","High"

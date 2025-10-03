@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  posts-service:
+    container_name: posts-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '50052:50052' # gRPC port
+    env_file:
+      - .env
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./proto:/usr/src/app/proto
+    depends_on:
+      - postgres
+    networks:
+      - platform-network
+
+  postgres:
+    container_name: posts-postgres
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-platform_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-platform_password}
+      POSTGRES_DB: ${POSTGRES_DB:-platform_posts_db}
+    ports:
+      - '5433:5432' # Expose on a different host port to avoid conflicts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - platform-network
+
+networks:
+  platform-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,677 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-EP-002
+
+## 1.2 Name
+
+News Feed Generation via Fan-out-on-Write
+
+## 1.3 Description
+
+When a user creates a new post, a 'PostCreated' event is published. The Feed Service consumes this event, makes a synchronous gRPC call to retrieve the user's connections, and then pushes the new post's ID into the Redis-based feed list for each connection.
+
+## 1.4 Type
+
+🔹 EventProcessing
+
+## 1.5 Purpose
+
+To implement a highly performant and scalable news feed using a push model (fan-out-on-write), as specified in SRS-001-F4 (1.4.2).
+
+## 1.6 Complexity
+
+High
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-SVC-POSTS
+- REPO-EVENT-BUS
+- REPO-SVC-FEED
+- REPO-SVC-CONNECTIONS
+
+## 1.10 Key Interactions
+
+- Posts Service successfully saves a new post to its PostgreSQL database.
+- Posts Service publishes a 'PostCreated' event with the post ID and author ID to the event bus.
+- Feed Service consumes the event from its dedicated queue.
+- Feed Service makes a synchronous, low-latency gRPC call to the Connections Service to get a list of the author's first-degree connection IDs.
+- Feed Service iterates through the connection IDs and executes a Redis command (LPUSH) to add the new post ID to the top of each connection's feed list.
+- The Redis list for each user is trimmed to maintain a maximum length.
+
+## 1.11 Triggers
+
+- A user creates a new post.
+
+## 1.12 Outcomes
+
+- The new post appears in the news feed of all the author's connections upon their next feed load.
+- News feed retrieval for a user is an extremely fast O(1) read from a single Redis list.
+
+## 1.13 Business Rules
+
+- The fan-out operation targets only first-degree connections.
+- The feed list in Redis should be capped to a reasonable size (e.g., 500 items) using LTRIM.
+
+## 1.14 Error Scenarios
+
+- Connections Service is unavailable, preventing retrieval of the fan-out list. The event processing will fail and be retried.
+- Redis is unavailable, failing the entire batch of feed updates.
+- The process is slow for users with a very large number of connections (super-nodes), requiring potential optimization.
+
+## 1.15 Integration Points
+
+- Redis via AWS ElastiCache for feed lists (2.6.6).
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-EP-002
+
+## 2.2 Name
+
+Event-Driven News Feed Generation (Fan-out-on-Write)
+
+## 2.3 Description
+
+A detailed technical sequence for the asynchronous generation of user news feeds. The process is triggered by a 'PostCreated' event published by the Posts Service. The Feed Service consumes this event, enriches it with the author's connection data via a synchronous gRPC call to the Connections Service, and then writes the new post ID to the cached feed list of each connection in Redis. This push-based 'fan-out-on-write' pattern ensures that reading a user's news feed is an extremely fast, low-latency operation.
+
+## 2.4 Participants
+
+### 2.4.1 Microservice
+
+#### 2.4.1.1 Repository Id
+
+REPO-SVC-POSTS
+
+#### 2.4.1.2 Display Name
+
+Posts Service
+
+#### 2.4.1.3 Type
+
+🔹 Microservice
+
+#### 2.4.1.4 Technology
+
+Node.js, NestJS, TypeScript, Prisma
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1f77b4 |
+| Stereotype | «Service» |
+
+### 2.4.2.0 MessageBroker
+
+#### 2.4.2.1 Repository Id
+
+REPO-EVENT-BUS
+
+#### 2.4.2.2 Display Name
+
+Event Bus
+
+#### 2.4.2.3 Type
+
+🔹 MessageBroker
+
+#### 2.4.2.4 Technology
+
+AWS SNS (Topic) / AWS SQS (Queue)
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | queue |
+| Color | #ff7f0e |
+| Stereotype | «Infrastructure» |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-FEED
+
+#### 2.4.3.2 Display Name
+
+Feed Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+Node.js, NestJS, TypeScript
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #2ca02c |
+| Stereotype | «Service» |
+
+### 2.4.4.0 Microservice
+
+#### 2.4.4.1 Repository Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.4.4.2 Display Name
+
+Connections Service
+
+#### 2.4.4.3 Type
+
+🔹 Microservice
+
+#### 2.4.4.4 Technology
+
+Node.js, NestJS, TypeScript, gRPC
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #d62728 |
+| Stereotype | «Service» |
+
+### 2.4.5.0 Cache
+
+#### 2.4.5.1 Repository Id
+
+REPO-CACHE-STORE
+
+#### 2.4.5.2 Display Name
+
+Cache Store
+
+#### 2.4.5.3 Type
+
+🔹 Cache
+
+#### 2.4.5.4 Technology
+
+AWS ElastiCache for Redis
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #9467bd |
+| Stereotype | «Cache» |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 EventPublication
+
+#### 2.5.1.1 Source Id
+
+REPO-SVC-POSTS
+
+#### 2.5.1.2 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.1.3 Message
+
+Publish PostCreated Event (v1.0)
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 EventPublication
+
+#### 2.5.1.6 Is Synchronous
+
+❌ No
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+AWS SDK for SNS
+
+##### 2.5.1.10.2 Method
+
+SNS.publish()
+
+##### 2.5.1.10.3 Parameters
+
+###### 2.5.1.10.3.1 TopicArn
+
+####### 2.5.1.10.3.1.1 Name
+
+TopicArn
+
+####### 2.5.1.10.3.1.2 Value
+
+arn:aws:sns:region:account-id:post-events-topic
+
+###### 2.5.1.10.3.2.0 Message
+
+####### 2.5.1.10.3.2.1 Name
+
+Message
+
+####### 2.5.1.10.3.2.2 Value
+
+JSON payload containing event envelope and data
+
+###### 2.5.1.10.3.3.0 MessageAttributes
+
+####### 2.5.1.10.3.3.1 Name
+
+MessageAttributes
+
+####### 2.5.1.10.3.3.2 Value
+
+{ eventType: 'PostCreated' }
+
+##### 2.5.1.10.4.0.0 Authentication
+
+IAM Role with sns:Publish permissions
+
+##### 2.5.1.10.5.0.0 Error Handling
+
+Retry on transient AWS SDK errors (e.g., throttling). Log permanent failures for investigation.
+
+##### 2.5.1.10.6.0.0 Performance
+
+P99 latency < 100ms
+
+#### 2.5.1.11.0.0.0 Nested Interactions
+
+*No items available*
+
+### 2.5.2.0.0.0.0 MessageDelivery
+
+#### 2.5.2.1.0.0.0 Source Id
+
+REPO-EVENT-BUS
+
+#### 2.5.2.2.0.0.0 Target Id
+
+REPO-SVC-FEED
+
+#### 2.5.2.3.0.0.0 Message
+
+Deliver event from SQS queue 'feed-generation-queue'
+
+#### 2.5.2.4.0.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0.0 Type
+
+🔹 MessageDelivery
+
+#### 2.5.2.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.2.7.0.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10.0.0.0 Technical Details
+
+##### 2.5.2.10.1.0.0 Protocol
+
+AWS SDK for SQS (Long Polling)
+
+##### 2.5.2.10.2.0.0 Method
+
+SQS Consumer receives message batch
+
+##### 2.5.2.10.3.0.0 Parameters
+
+- {'name': 'QueueUrl', 'value': 'https://sqs.region.amazonaws.com/account-id/feed-generation-queue'}
+
+##### 2.5.2.10.4.0.0 Authentication
+
+IAM Role with sqs:ReceiveMessage and sqs:DeleteMessage permissions
+
+##### 2.5.2.10.5.0.0 Error Handling
+
+SQS client handles connection and polling retries. The handler logic is responsible for processing the message.
+
+##### 2.5.2.10.6.0.0 Performance
+
+Near real-time delivery from SNS to SQS.
+
+#### 2.5.2.11.0.0.0 Nested Interactions
+
+*No items available*
+
+### 2.5.3.0.0.0.0 SynchronousRequest
+
+#### 2.5.3.1.0.0.0 Source Id
+
+REPO-SVC-FEED
+
+#### 2.5.3.2.0.0.0 Target Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.5.3.3.0.0.0 Message
+
+gRPC: ConnectionsService.GetFirstDegreeConnectionIds(request)
+
+#### 2.5.3.4.0.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0.0 Type
+
+🔹 SynchronousRequest
+
+#### 2.5.3.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0.0 Return Message
+
+response: { connectionIds: ['uuid', 'uuid', ...] }
+
+#### 2.5.3.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.3.9.0.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10.0.0.0 Technical Details
+
+##### 2.5.3.10.1.0.0 Protocol
+
+gRPC
+
+##### 2.5.3.10.2.0.0 Method
+
+GetFirstDegreeConnectionIds
+
+##### 2.5.3.10.3.0.0 Parameters
+
+- {'name': 'request', 'value': '{ userId: string (from event payload) }'}
+
+##### 2.5.3.10.4.0.0 Authentication
+
+Internal network trust; mTLS for transport encryption.
+
+##### 2.5.3.10.5.0.0 Error Handling
+
+Call is wrapped in a circuit breaker. Retries on status UNAVAILABLE. Any other gRPC error (e.g., NOT_FOUND, INTERNAL) will cause the event processing to fail, triggering SQS redelivery.
+
+##### 2.5.3.10.6.0.0 Performance
+
+P99 latency must be < 50ms to avoid blocking the event handler.
+
+#### 2.5.3.11.0.0.0 Nested Interactions
+
+*No items available*
+
+### 2.5.4.0.0.0.0 DataWrite
+
+#### 2.5.4.1.0.0.0 Source Id
+
+REPO-SVC-FEED
+
+#### 2.5.4.2.0.0.0 Target Id
+
+REPO-CACHE-STORE
+
+#### 2.5.4.3.0.0.0 Message
+
+Execute Redis pipeline for each connection
+
+#### 2.5.4.4.0.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0.0 Type
+
+🔹 DataWrite
+
+#### 2.5.4.6.0.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0.0 Return Message
+
+Pipeline execution status
+
+#### 2.5.4.8.0.0.0 Has Return
+
+✅ Yes
+
+#### 2.5.4.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0.0 Technical Details
+
+##### 2.5.4.10.1.0.0 Protocol
+
+Redis Protocol
+
+##### 2.5.4.10.2.0.0 Method
+
+redis.pipeline().lpush(...).ltrim(...).exec()
+
+##### 2.5.4.10.3.0.0 Parameters
+
+###### 2.5.4.10.3.1.0 LPUSH
+
+####### 2.5.4.10.3.1.1 Name
+
+LPUSH
+
+####### 2.5.4.10.3.1.2 Value
+
+key: 'user:feed:<connectionId>', value: '<postId>'
+
+###### 2.5.4.10.3.2.0 LTRIM
+
+####### 2.5.4.10.3.2.1 Name
+
+LTRIM
+
+####### 2.5.4.10.3.2.2 Value
+
+key: 'user:feed:<connectionId>', start: 0, stop: 499
+
+##### 2.5.4.10.4.0.0 Authentication
+
+Redis AUTH command with credentials from a secret store.
+
+##### 2.5.4.10.5.0.0 Error Handling
+
+The entire pipeline is transactional. If Redis is unavailable, the operation fails, and the SQS message is not acknowledged, leading to a retry. Individual command errors within the pipeline should be logged.
+
+##### 2.5.4.10.6.0.0 Performance
+
+A single pipeline should be used for all connections of a single author to minimize round trips. For authors with >1000 connections, batch the pipeline executions.
+
+#### 2.5.4.11.0.0.0 Nested Interactions
+
+*No items available*
+
+### 2.5.5.0.0.0.0 MessageAcknowledgement
+
+#### 2.5.5.1.0.0.0 Source Id
+
+REPO-SVC-FEED
+
+#### 2.5.5.2.0.0.0 Target Id
+
+REPO-EVENT-BUS
+
+#### 2.5.5.3.0.0.0 Message
+
+Acknowledge and delete message from SQS
+
+#### 2.5.5.4.0.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0.0 Type
+
+🔹 MessageAcknowledgement
+
+#### 2.5.5.6.0.0.0 Is Synchronous
+
+❌ No
+
+#### 2.5.5.7.0.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0.0 Is Activation
+
+❌ No
+
+#### 2.5.5.10.0.0.0 Technical Details
+
+##### 2.5.5.10.1.0.0 Protocol
+
+AWS SDK for SQS
+
+##### 2.5.5.10.2.0.0 Method
+
+SQS.deleteMessage()
+
+##### 2.5.5.10.3.0.0 Parameters
+
+- {'name': 'ReceiptHandle', 'value': 'Receipt handle from the consumed message'}
+
+##### 2.5.5.10.4.0.0 Authentication
+
+IAM Role
+
+##### 2.5.5.10.5.0.0 Error Handling
+
+If this final step fails, the message may be redelivered. The handler MUST be idempotent to prevent duplicate feed entries. This can be achieved using Redis SETS (SADD) instead of LISTS (LPUSH) or by checking for the postId's existence before pushing.
+
+##### 2.5.5.10.6.0.0 Performance
+
+P99 latency < 100ms.
+
+#### 2.5.5.11.0.0.0 Nested Interactions
+
+*No items available*
+
+## 2.6.0.0.0.0.0 Notes
+
+### 2.6.1.0.0.0.0 Content
+
+#### 2.6.1.1.0.0.0 Content
+
+Idempotency is CRITICAL. The Feed Service event handler must ensure that processing the same 'PostCreated' event multiple times does not result in duplicate post IDs in a user's feed. Using a Redis transaction to check for existence before LPUSH or using a different data structure like a ZSET could achieve this.
+
+#### 2.6.1.2.0.0.0 Position
+
+bottom
+
+#### 2.6.1.3.0.0.0 Participant Id
+
+REPO-SVC-FEED
+
+#### 2.6.1.4.0.0.0 Sequence Number
+
+2
+
+### 2.6.2.0.0.0.0 Content
+
+#### 2.6.2.1.0.0.0 Content
+
+Super-Node Optimization: For users with a very large number of connections (>5000), the fan-out process can be slow and resource-intensive. A potential optimization is to handle these asynchronously in a separate job or to adopt a hybrid push-pull model for these specific users.
+
+#### 2.6.2.2.0.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0.0 Participant Id
+
+REPO-SVC-FEED
+
+#### 2.6.2.4.0.0.0 Sequence Number
+
+4
+
+## 2.7.0.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Event payloads must be sanitized and should not co... |
+| Performance Targets | End-to-end event processing latency (from SNS publ... |
+| Error Handling Strategy | The SQS queue 'feed-generation-queue' MUST be conf... |
+| Testing Considerations | Unit tests should mock gRPC and Redis clients. Int... |
+| Monitoring Requirements | Key metrics to monitor: SQS `ApproximateNumberOfMe... |
+| Deployment Considerations | The Feed Service should be configured to autoscale... |
+

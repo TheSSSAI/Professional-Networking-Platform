@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"17","72","13","4","0","[""Core Project Setup & DevOps"",""User Registration and Verification"",""User Authentication & Session Management"",""Account Recovery (Password Reset)"",""Advanced Security (MFA)"",""Account Lifecycle Management"",""Observability and Auditing""]","4","[""AWS SES Configuration"",""PostgreSQL and Redis Infrastructure"",""Event Bus Infrastructure""]"

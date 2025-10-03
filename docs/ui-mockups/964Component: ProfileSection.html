@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component: ProfileSection</title>
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    body, h1, h2, h3, h4, p, ul, li { margin: 0; padding: 0; }
+    ul { list-style: none; }
+    button { background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit; }
+    input { font: inherit; }
+
+    /* Design System Tokens */
+    :root {
+      --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --color-primary-700: #1976D2;
+      --color-primary-600: #1E88E5;
+      --color-primary-100: #BBDEFB;
+      --color-primary-50: #E3F2FD;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-600: #6C757D;
+      --color-neutral-400: #CED4DA;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-50: #F8F9FA;
+      --color-white: #FFFFFF;
+      --color-error: #D32F2F;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      line-height: 1.5;
+      padding: var(--spacing-xl);
+    }
+    
+    .screen-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .screen-header {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 1px solid var(--color-neutral-400);
+    }
+
+    .screen-header h1 {
+        font-size: 36px;
+        font-weight: 700;
+    }
+
+    /* Component Primitives (Dependencies) */
+    .card {
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      font-weight: 600;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+    
+    .btn:focus-visible {
+        outline: 2px solid var(--color-primary-600);
+        outline-offset: 2px;
+    }
+
+    .btn--primary {
+        background-color: var(--color-primary-700);
+        color: var(--color-white);
+    }
+    .btn--primary:hover {
+        background-color: #1565C0;
+    }
+
+    .btn--secondary {
+        background-color: transparent;
+        color: var(--color-neutral-700);
+        border: 1px solid var(--color-neutral-400);
+    }
+    .btn--secondary:hover {
+        background-color: var(--color-neutral-50);
+    }
+
+    .btn--icon {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+        color: var(--color-neutral-600);
+    }
+    .btn--icon:hover {
+        background-color: var(--color-neutral-200);
+        color: var(--color-neutral-900);
+    }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      background-color: currentColor;
+    }
+    .icon--plus { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    .icon--pencil { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    .icon--trash { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    .icon--x { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    .icon--work { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    .icon--education { mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z'/%3E%3C/svg%3E") no-repeat center / contain; }
+    
+    .text-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--color-neutral-400);
+      border-radius: var(--border-radius-md);
+      font-size: 16px;
+    }
+    .text-input:focus {
+      outline: none;
+      border-color: var(--color-primary-700);
+      box-shadow: 0 0 0 2px var(--color-primary-100);
+    }
+    
+    /* ProfileSection Component Styles */
+    .profile-section__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .profile-section__header h2 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .profile-section__actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+    
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+    
+    .item-list__item {
+      display: flex;
+      gap: var(--spacing-md);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+    .item-list__item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-list__icon {
+      flex-shrink: 0;
+      color: var(--color-neutral-700);
+      margin-top: var(--spacing-xs);
+    }
+    .item-list__icon .icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .item-list__content {
+      flex-grow: 1;
+    }
+
+    .item-list__content h4 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .item-list__content .subtitle {
+      font-size: 14px;
+      color: var(--color-neutral-700);
+    }
+    
+    .item-list__content .dates {
+      font-size: 14px;
+      color: var(--color-neutral-600);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .item-list__content .description {
+      font-size: 14px;
+      color: var(--color-neutral-700);
+    }
+
+    .item-list__actions {
+      display: none; /* Hidden in view state */
+      flex-shrink: 0;
+    }
+
+    /* Edit State */
+    .profile-section--edit .item-list__actions {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl) 0;
+      color: var(--color-neutral-600);
+    }
+    
+    .empty-state__title {
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Skills Variant Specific Styles */
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+    }
+    
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 1px solid var(--color-neutral-400);
+      border-radius: 20px;
+      background-color: var(--color-neutral-50);
+    }
+    
+    .skill-item__name {
+      font-weight: 500;
+    }
+
+    .skill-item__endorsements {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .skill-item__count {
+      font-weight: 600;
+      color: var(--color-primary-700);
+    }
+    
+    .skill-item__action {
+      border-left: 1px solid var(--color-neutral-400);
+      padding-left: var(--spacing-md);
+    }
+
+    .skill-item__action .btn--icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .skills-edit-form {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    .skills-edit-form .text-input {
+        flex-grow: 1;
+    }
+
+    .skill-item--edit .skill-item__action {
+        display: none;
+    }
+    .skill-item--edit .remove-skill-btn {
+        display: inline-flex;
+    }
+    .remove-skill-btn {
+        display: none;
+    }
+
+    /* Screen Variations Styling */
+    .screen-variations {
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-xl);
+        border-top: 2px dashed var(--color-neutral-400);
+    }
+
+    .variation-group {
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .variation-group h3 {
+        margin-bottom: var(--spacing-md);
+        font-size: 24px;
+        font-weight: 600;
+    }
+    .variation-group normal {
+        display: block;
+        margin-bottom: var(--spacing-lg);
+        color: var(--color-neutral-700);
+        font-style: italic;
+    }
+  </style>
+</head>
+<body>
+    <div class="screen-container">
+        <header class="screen-header">
+            <h1>Component Showcase: ProfileSection</h1>
+        </header>
+
+        <main class="screen-content">
+            <div class="screen-variations">
+
+                <!-- EXPERIENCE VARIANT -->
+                <div class="variation-group">
+                    <h3>Variant: Work Experience, State: View</h3>
+                    <normal>Default read-only view of a user's work history. Action buttons are minimal (e.g., just an edit pencil).</normal>
+                    <section class="card profile-section">
+                        <header class="profile-section__header">
+                            <h2>Work Experience</h2>
+                            <div class="profile-section__actions">
+                                <button class="btn btn--icon" aria-label="Add new work experience"><i class="icon icon--plus"></i></button>
+                                <button class="btn btn--icon" aria-label="Edit work experience section"><i class="icon icon--pencil"></i></button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                            <ul class="item-list">
+                                <li class="item-list__item">
+                                    <div class="item-list__icon"><i class="icon icon--work"></i></div>
+                                    <div class="item-list__content">
+                                        <h4>Senior Frontend Engineer</h4>
+                                        <p class="subtitle">Innovate Corp</p>
+                                        <p class="dates">Jan 2022 - Present · 2 yrs 1 mo</p>
+                                        <p class="description">Led the development of the new design system and component library, improving developer velocity by 30%.</p>
+                                    </div>
+                                    <div class="item-list__actions"></div>
+                                </li>
+                                <li class="item-list__item">
+                                    <div class="item-list__icon"><i class="icon icon--work"></i></div>
+                                    <div class="item-list__content">
+                                        <h4>Software Engineer</h4>
+                                        <p class="subtitle">Tech Solutions Inc.</p>
+                                        <p class="dates">Jun 2019 - Dec 2021 · 2 yrs 7 mos</p>
+                                        <p class="description">Developed and maintained features for a large-scale SaaS application using React and Node.js.</p>
+                                    </div>
+                                    <div class="item-list__actions"></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="variation-group">
+                    <h3>Variant: Work Experience, State: Edit</h3>
+                    <normal>When the user is actively managing this section, showing controls for each item.</normal>
+                    <section class="card profile-section profile-section--edit">
+                        <header class="profile-section__header">
+                            <h2>Work Experience</h2>
+                            <div class="profile-section__actions">
+                                <button class="btn btn--icon" aria-label="Add new work experience"><i class="icon icon--plus"></i></button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                            <ul class="item-list">
+                                <li class="item-list__item">
+                                    <div class="item-list__icon"><i class="icon icon--work"></i></div>
+                                    <div class="item-list__content">
+                                        <h4>Senior Frontend Engineer</h4>
+                                        <p class="subtitle">Innovate Corp</p>
+                                        <p class="dates">Jan 2022 - Present · 2 yrs 1 mo</p>
+                                    </div>
+                                    <div class="item-list__actions">
+                                        <button class="btn btn--icon" aria-label="Edit work experience at Innovate Corp"><i class="icon icon--pencil"></i></button>
+                                        <button class="btn btn--icon" aria-label="Delete work experience at Innovate Corp"><i class="icon icon--trash"></i></button>
+                                    </div>
+                                </li>
+                                <li class="item-list__item">
+                                    <div class="item-list__icon"><i class="icon icon--work"></i></div>
+                                    <div class="item-list__content">
+                                        <h4>Software Engineer</h4>
+                                        <p class="subtitle">Tech Solutions Inc.</p>
+                                        <p class="dates">Jun 2019 - Dec 2021 · 2 yrs 7 mos</p>
+                                    </div>
+                                    <div class="item-list__actions">
+                                        <button class="btn btn--icon" aria-label="Edit work experience at Tech Solutions Inc."><i class="icon icon--pencil"></i></button>
+                                        <button class="btn btn--icon" aria-label="Delete work experience at Tech Solutions Inc."><i class="icon icon--trash"></i></button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="variation-group">
+                    <h3>Variant: Work Experience, State: Empty</h3>
+                    <normal>The initial state for a new user, with a clear call to action.</normal>
+                     <section class="card profile-section profile-section--empty">
+                        <header class="profile-section__header">
+                            <h2>Work Experience</h2>
+                            <div class="profile-section__actions">
+                                 <button class="btn btn--icon" aria-label="Add new work experience"><i class="icon icon--plus"></i></button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                           <div class="empty-state">
+                               <p class="empty-state__title">No work experience added</p>
+                               <p>Showcase your professional history by adding your past and current roles.</p>
+                           </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- EDUCATION VARIANT -->
+                 <div class="variation-group">
+                    <h3>Variant: Education, State: View</h3>
+                    <normal>A read-only view of a user's academic history.</normal>
+                    <section class="card profile-section">
+                        <header class="profile-section__header">
+                            <h2>Education</h2>
+                            <div class="profile-section__actions">
+                                <button class="btn btn--icon" aria-label="Add new education entry"><i class="icon icon--plus"></i></button>
+                                <button class="btn btn--icon" aria-label="Edit education section"><i class="icon icon--pencil"></i></button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                            <ul class="item-list">
+                                <li class="item-list__item">
+                                    <div class="item-list__icon"><i class="icon icon--education"></i></div>
+                                    <div class="item-list__content">
+                                        <h4>State University</h4>
+                                        <p class="subtitle">Master of Science - MS, Computer Science</p>
+                                        <p class="dates">2017 - 2019</p>
+                                    </div>
+                                    <div class="item-list__actions"></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- SKILLS VARIANT -->
+                <div class="variation-group">
+                    <h3>Variant: Skills, State: View</h3>
+                    <normal>Displays skills as tags, with endorsement counts and actions.</normal>
+                     <section class="card profile-section">
+                        <header class="profile-section__header">
+                            <h2>Skills</h2>
+                            <div class="profile-section__actions">
+                                <button class="btn btn--icon" aria-label="Edit skills"><i class="icon icon--pencil"></i></button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                           <div class="skill-list">
+                               <div class="skill-item">
+                                   <div class="skill-item__name">React</div>
+                                   <div class="skill-item__endorsements">
+                                        <div class="skill-item__count">12</div>
+                                   </div>
+                                   <div class="skill-item__action">
+                                        <button class="btn btn--icon" aria-label="Endorse React"><i class="icon icon--plus"></i></button>
+                                   </div>
+                               </div>
+                               <div class="skill-item">
+                                   <div class="skill-item__name">Node.js</div>
+                                   <div class="skill-item__endorsements">
+                                        <div class="skill-item__count">8</div>
+                                   </div>
+                                    <div class="skill-item__action">
+                                        <button class="btn btn--icon" aria-label="Endorse Node.js"><i class="icon icon--plus"></i></button>
+                                   </div>
+                               </div>
+                               <div class="skill-item">
+                                   <div class="skill-item__name">TypeScript</div>
+                                   <div class="skill-item__endorsements">
+                                        <div class="skill-item__count">5</div>
+                                   </div>
+                                   <div class="skill-item__action">
+                                        <button class="btn btn--icon" aria-label="Endorse TypeScript"><i class="icon icon--plus"></i></button>
+                                   </div>
+                               </div>
+                           </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="variation-group">
+                    <h3>Variant: Skills, State: Edit</h3>
+                    <normal>Allows adding new skills and removing existing ones.</normal>
+                     <section class="card profile-section profile-section--edit">
+                        <header class="profile-section__header">
+                            <h2>Skills</h2>
+                            <div class="profile-section__actions">
+                                <button class="btn btn--secondary">Done</button>
+                            </div>
+                        </header>
+                        <div class="profile-section__content">
+                           <div class="skills-edit-form">
+                                <input type="text" class="text-input" placeholder="Add a new skill...">
+                                <button class="btn btn--primary">Add</button>
+                           </div>
+                           <div class="skill-list">
+                               <div class="skill-item skill-item--edit">
+                                   <div class="skill-item__name">React</div>
+                                   <div class="skill-item__endorsements">
+                                        <div class="skill-item__count">12 Endorsements</div>
+                                   </div>
+                                   <button class="btn btn--icon remove-skill-btn" aria-label="Remove skill: React"><i class="icon icon--x"></i></button>
+                               </div>
+                               <div class="skill-item skill-item--edit">
+                                   <div class="skill-item__name">Node.js</div>
+                                   <div class="skill-item__endorsements">
+                                        <div class="skill-item__count">8 Endorsements</div>
+                                   </div>
+                                   <button class="btn btn--icon remove-skill-btn" aria-label="Remove skill: Node.js"><i class="icon icon--x"></i></button>
+                               </div>
+                           </div>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostCard Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    img, picture, video, canvas, svg {
+      display: block;
+      max-width: 100%;
+    }
+    input, button, textarea, select {
+      font: inherit;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    ul, ol {
+        list-style: none;
+    }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-primary-500: #2196F3;
+      --color-primary-100: #BBDEFB;
+      --color-primary-50: #E3F2FD;
+      --color-neutral-white: #FFFFFF;
+      --color-neutral-gray-50: #F8F9FA;
+      --color-neutral-gray-100: #F1F3F5;
+      --color-neutral-gray-500: #ADB5BD;
+      --color-neutral-gray-600: #6C757D;
+      --color-neutral-gray-900: #212529;
+      --color-semantic-success: #2E7D32;
+      --color-semantic-error: #D32F2F;
+
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-h4: 20px;
+      --font-weight-h4: 600;
+      --font-size-body: 16px;
+      --font-weight-body: 400;
+      --font-size-caption: 14px;
+      --font-weight-caption: 400;
+      --font-size-small: 12px;
+      --line-height-body: 1.5;
+      --line-height-caption: 1.4;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    /* Base Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-gray-100);
+      color: var(--color-neutral-gray-900);
+      line-height: var(--line-height-body);
+      font-size: var(--font-size-body);
+      padding: var(--spacing-lg);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Main Container for demonstration */
+    .screen-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .variant-group {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .variant-group h3 {
+        margin-bottom: var(--spacing-md);
+        font-size: var(--font-size-h4);
+        font-weight: var(--font-weight-h4);
+        color: var(--color-neutral-gray-900);
+        border-bottom: 1px solid var(--color-neutral-gray-500);
+        padding-bottom: var(--spacing-sm);
+    }
+
+    /* PostCard Component Styles */
+    .post-card {
+      background-color: var(--color-neutral-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
+    }
+
+    /* Header */
+    .post-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .user-badge {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .user-badge__info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-badge__name {
+      font-weight: 600;
+      color: var(--color-neutral-gray-900);
+    }
+
+    .user-badge__headline,
+    .user-badge__timestamp {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-600);
+      line-height: var(--line-height-caption);
+    }
+
+    /* Action Menu Button */
+    .action-menu-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-neutral-gray-600);
+      padding: var(--spacing-sm);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
+    }
+    .action-menu-button:hover,
+    .action-menu-button:focus-visible {
+      background-color: var(--color-neutral-gray-100);
+    }
+    .action-menu-button svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Content */
+    .post-card__content {
+      /* Add styles for text, truncation, etc. */
+    }
+
+    /* Images */
+    .post-card__images {
+      display: grid;
+      gap: var(--spacing-xs);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+    .post-card__images[data-count="1"] {
+      grid-template-columns: 1fr;
+    }
+    .post-card__images[data-count="2"] {
+      grid-template-columns: 1fr 1fr;
+    }
+    .post-card__images[data-count="3"] {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    .post-card__images[data-count="3"] .image-wrapper:first-child {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+    }
+    .post-card__images[data-count="4"] {
+      grid-template-columns: 1fr 1fr;
+    }
+    .image-wrapper {
+      position: relative;
+      padding-top: 100%; /* Default for square aspect ratio */
+      background-color: var(--color-neutral-gray-100);
+    }
+     .post-card__images[data-count="3"] .image-wrapper:first-child {
+      padding-top: 200%;
+    }
+    .image-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Link Preview */
+    .post-card__link-preview {
+      border: 1px solid var(--color-neutral-gray-100);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      transition: background-color 0.2s ease;
+    }
+    .post-card__link-preview:hover {
+      background-color: var(--color-neutral-gray-50);
+    }
+    .link-preview__image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background-color: var(--color-neutral-gray-100);
+    }
+    .link-preview__content {
+      padding: var(--spacing-md);
+    }
+    .link-preview__title {
+      font-weight: 600;
+      font-size: var(--font-size-body);
+      margin-bottom: var(--spacing-xs);
+    }
+    .link-preview__description {
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-600);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;  
+      overflow: hidden;
+    }
+
+    /* Footer */
+    .post-card__footer {
+      border-top: 1px solid var(--color-neutral-gray-100);
+      padding-top: var(--spacing-md);
+    }
+    .post-card__stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--font-size-caption);
+      color: var(--color-neutral-gray-600);
+      padding-bottom: var(--spacing-sm);
+    }
+    .reaction-summary {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    .reaction-summary svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--color-primary-500);
+    }
+
+    .post-card__actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-sm);
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: none;
+      border: none;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--color-neutral-gray-600);
+      transition: background-color 0.2s ease;
+    }
+    .action-button:hover,
+    .action-button:focus-visible {
+      background-color: var(--color-neutral-gray-100);
+    }
+    .action-button svg {
+      width: 20px;
+      height: 20px;
+    }
+    .action-button[aria-pressed="true"] {
+        color: var(--color-primary-700);
+    }
+    .action-button[aria-pressed="true"] svg {
+        fill: var(--color-primary-700);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      body {
+        padding: var(--spacing-md);
+      }
+      .post-card {
+        padding: var(--spacing-md);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="screen-container">
+    <div id="variants">
+      
+      <!-- Text Only Variant -->
+      <div class="variant-group">
+        <h3>Variant Name: "Text Only"</h3>
+        <p>This shows a standard post with only text content. It includes the author's information, the post body, and engagement actions.</p>
+        <br>
+        <article class="post-card" aria-labelledby="post-author-1">
+          <header class="post-card__header">
+            <div class="user-badge">
+              <img src="https://i.pravatar.cc/48?u=user1" alt="Profile picture of Eleanor Vance" class="avatar">
+              <div class="user-badge__info">
+                <a href="#" class="user-badge__name" id="post-author-1">Eleanor Vance</a>
+                <span class="user-badge__headline">Principal UX Designer at Innovate Corp</span>
+                <span class="user-badge__timestamp">2h ago</span>
+              </div>
+            </div>
+            <button class="action-menu-button" aria-label="More options">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+          </header>
+          <section class="post-card__content">
+            <p>Excited to share my thoughts on the future of design systems. It's not just about components anymore; it's about building a shared language and workflow that accelerates collaboration between design and engineering. What are your key takeaways from recent projects?</p>
+          </section>
+          <footer class="post-card__footer">
+            <div class="post-card__stats">
+              <a href="#" class="reaction-summary" aria-label="15 reactions">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                <span>15</span>
+              </a>
+              <a href="#" aria-label="4 comments">4 Comments</a>
+            </div>
+            <div class="post-card__actions">
+              <button class="action-button" aria-pressed="false" aria-label="Like post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                <span>Like</span>
+              </button>
+              <button class="action-button" aria-label="Comment on post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Comment</span>
+              </button>
+              <button class="action-button" aria-label="Share post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"></path></svg>
+                <span>Share</span>
+              </button>
+            </div>
+          </footer>
+        </article>
+      </div>
+
+      <!-- With Images Variant -->
+      <div class="variant-group">
+        <h3>Variant Name: "With Images"</h3>
+        <p>Demonstrates how the post card adapts to display one, two, three, or four images in a responsive grid.</p>
+        <br>
+        
+        <!-- Post with 2 Images -->
+        <article class="post-card" aria-labelledby="post-author-2" style="margin-bottom: 1rem;">
+          <header class="post-card__header">
+            <div class="user-badge">
+              <img src="https://i.pravatar.cc/48?u=user2" alt="Profile picture of Marcus Chen" class="avatar">
+              <div class="user-badge__info">
+                <a href="#" class="user-badge__name" id="post-author-2">Marcus Chen</a>
+                <span class="user-badge__headline">Lead Data Scientist at QuantumLeap AI</span>
+                <span class="user-badge__timestamp">8h ago</span>
+              </div>
+            </div>
+            <button class="action-menu-button" aria-label="More options">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+          </header>
+          <section class="post-card__content">
+            <p>Just wrapped up our team offsite. Incredible brainstorming sessions and some beautiful views. Here are a couple of shots from the retreat.</p>
+            <div class="post-card__images" data-count="2">
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post2a/400/400" alt="Team members collaborating around a whiteboard."></div>
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post2b/400/400" alt="Scenic view of mountains from the retreat location."></div>
+            </div>
+          </section>
+          <footer class="post-card__footer">
+            <div class="post-card__stats">
+              <a href="#" class="reaction-summary" aria-label="42 reactions">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                <span>42</span>
+              </a>
+              <a href="#" aria-label="9 comments">9 Comments</a>
+            </div>
+            <div class="post-card__actions">
+              <button class="action-button" aria-pressed="true" aria-label="Unlike post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                <span>Like</span>
+              </button>
+              <button class="action-button" aria-label="Comment on post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Comment</span>
+              </button>
+              <button class="action-button" aria-label="Share post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"></path></svg>
+                <span>Share</span>
+              </button>
+            </div>
+          </footer>
+        </article>
+
+        <!-- Post with 4 Images -->
+        <article class="post-card" aria-labelledby="post-author-4">
+          <header class="post-card__header">
+            <div class="user-badge">
+              <img src="https://i.pravatar.cc/48?u=user4" alt="Profile picture of Sofia Rossi" class="avatar">
+              <div class="user-badge__info">
+                <a href="#" class="user-badge__name" id="post-author-4">Sofia Rossi</a>
+                <span class="user-badge__headline">Product Marketing Manager</span>
+                <span class="user-badge__timestamp">1d ago</span>
+              </div>
+            </div>
+            <button class="action-menu-button" aria-label="More options">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+          </header>
+          <section class="post-card__content">
+            <p>Highlights from the annual tech conference this week. So many inspiring talks and great new connections made!</p>
+            <div class="post-card__images" data-count="4">
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post4a/400/400" alt="Keynote speaker on a large stage."></div>
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post4b/400/400" alt="Group of people networking in a conference hall."></div>
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post4c/400/400" alt="Close-up of a new product demo."></div>
+              <div class="image-wrapper"><img src="https://picsum.photos/seed/post4d/400/400" alt="City skyline view from the conference venue."></div>
+            </div>
+          </section>
+          <!-- Footer omitted for brevity -->
+        </article>
+      </div>
+      
+      <!-- With Link Preview Variant -->
+      <div class="variant-group">
+        <h3>Variant Name: "With Link Preview"</h3>
+        <p>This post contains a URL that has been automatically converted into a rich link preview card, including an image, title, and description.</p>
+        <br>
+        <article class="post-card" aria-labelledby="post-author-3">
+          <header class="post-card__header">
+            <div class="user-badge">
+              <img src="https://i.pravatar.cc/48?u=user3" alt="Profile picture of Ben Carter" class="avatar">
+              <div class="user-badge__info">
+                <a href="#" class="user-badge__name" id="post-author-3">Ben Carter</a>
+                <span class="user-badge__headline">Senior Software Engineer at NextGen Solutions</span>
+                <span class="user-badge__timestamp">12h ago</span>
+              </div>
+            </div>
+            <button class="action-menu-button" aria-label="More options">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
+          </header>
+          <section class="post-card__content">
+            <p>This is a fascinating read on the evolution of front-end frameworks over the last decade. Highly recommend for anyone in the web development space. https://www.example.com/article-on-frameworks</p>
+            <a href="#" class="post-card__link-preview" aria-label="Read article: The State of JS Frameworks 2025">
+              <img src="https://picsum.photos/seed/linkpreview/600/300" alt="" class="link-preview__image" role="presentation">
+              <div class="link-preview__content">
+                <div class="link-preview__title">The State of JS Frameworks 2025: A Deep Dive</div>
+                <div class="link-preview__description">An in-depth analysis of the trends, performance benchmarks, and community adoption rates of leading JavaScript frameworks like React, Vue, Svelte, and SolidJS.</div>
+              </div>
+            </a>
+          </section>
+          <footer class="post-card__footer">
+            <div class="post-card__stats">
+              <a href="#" class="reaction-summary" aria-label="88 reactions">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                <span>88</span>
+              </a>
+              <a href="#" aria-label="17 comments">17 Comments</a>
+            </div>
+            <div class="post-card__actions">
+              <button class="action-button" aria-pressed="false" aria-label="Like post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                <span>Like</span>
+              </button>
+              <button class="action-button" aria-label="Comment on post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Comment</span>
+              </button>
+              <button class="action-button" aria-label="Share post">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"></path></svg>
+                <span>Share</span>
+              </button>
+            </div>
+          </footer>
+        </article>
+      </div>
+
+    </div>
+  </main>
+  
+</body>
+</html>

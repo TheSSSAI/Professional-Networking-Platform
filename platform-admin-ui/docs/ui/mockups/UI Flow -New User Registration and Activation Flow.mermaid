@@ -1,0 +1,57 @@
+flowchart TD
+    subgraph User Interaction on Frontend
+        A[User Fills & Submits Registration Form] --> B{Client-Side Validation OK?}
+        B -->|No| C[Display Inline Validation Errors]
+        C --> A
+    end
+
+    B -->|Yes| D[POST /api/auth/register]
+
+    subgraph Backend Processing
+        D --> E{Server-Side Validation OK?}
+        E -->|No| F[Return 400 Error]
+        E -->|Yes| G{Email Already Exists?}
+        G -->|Yes| H[Return 409 Error]
+        
+        G -->|No| I[1. Create User in DB (status: 'inactive')]
+        I --> J[2. Securely Hash Password]
+        J --> K[3. Generate Unique Verification Token]
+        K --> L[4. Dispatch 'UserRegistered' Event]
+        L --> M[Return 201 Created]
+    end
+
+    subgraph Asynchronous Email Dispatch
+        L -.-> N((Email Service))
+        N --> O[Send Verification Email w/ Link]
+    end
+
+    subgraph User Confirmation
+        F --> P[Display Form with Server Errors]
+        P --> A
+        H --> P
+        M --> Q[Display Success Page: 'Check Your Email']
+        Q --> R[User Clicks Verification Link in Email]
+    end
+
+    R --> S[GET /auth/verify?token=...]
+
+    subgraph Token Validation & Activation
+        S --> T{Token Valid & Not Expired?}
+        T -->|No| U[Display Error Page: 'Invalid/Expired Link']
+        T -->|Yes| V[1. Update User in DB (status: 'active')]
+        V --> W[2. Invalidate Verification Token]
+        W --> X[Redirect to Login with Success Message]
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#c62828,color:#c62828
+    classDef successNode fill:#e8f5e9,stroke:#2e7d32,color:#2e7d32
+    classDef processNode fill:#e3f2fd,stroke:#1565c0,color:#000
+    classDef decisionNode fill:#fff8e1,stroke:#f9a825,color:#000
+    classDef asyncNode stroke-dasharray: 5 5,stroke:#757575
+
+    class C,F,H,U errorNode
+    class Q,X successNode
+    class A,D,S,I,J,K,L,M,V,W processNode
+    class B,E,G,T decisionNode
+    class L,N,O asyncNode

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation Dialog Component</title>
+    <style>
+        /* CSS Reset */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: var(--color-neutral-50); color: var(--color-neutral-900); line-height: 1.5; }
+        button { font-family: inherit; font-size: 100%; border: none; background: none; cursor: pointer; }
+
+        /* Design System Tokens */
+        :root {
+            /* Colors */
+            --color-primary-500: #2196F3;
+            --color-primary-600: #1E88E5;
+            --color-primary-700: #1976D2;
+            --color-primary-800: #1565C0;
+            --color-primary-900: #0D47A1;
+            --color-primary-50: #E3F2FD;
+            --color-primary-100: #BBDEFB;
+
+            --color-neutral-50: #F8F9FA;
+            --color-neutral-100: #F1F3F5;
+            --color-neutral-500: #ADB5BD;
+            --color-neutral-600: #6C757D;
+            --color-neutral-900: #212529;
+            --color-neutral-white: #FFFFFF;
+
+            --color-error-500: #D32F2F;
+            --color-error-600: #C62828;
+            --color-error-700: #B71C1C;
+            --color-error-50: #FFEBEE;
+
+            /* Typography */
+            --font-family-primary: 'Inter', sans-serif;
+            --font-size-h3: 24px;
+            --font-size-body: 16px;
+            --font-weight-semibold: 600;
+            --font-weight-regular: 400;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+
+            /* Borders & Shadows */
+            --border-radius-lg: 12px;
+            --border-radius-md: 8px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Screen Layout Styles */
+        .screen-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: var(--spacing-xl);
+            text-align: center;
+        }
+        .screen-header {
+            margin-bottom: var(--spacing-xl);
+        }
+        .screen-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-neutral-900);
+        }
+        .screen-header p {
+            font-size: 18px;
+            color: var(--color-neutral-600);
+            margin-top: var(--spacing-sm);
+        }
+        .trigger-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+        .screen-variations {
+            margin-top: 64px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .variation-group {
+            background-color: var(--color-neutral-white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        .variation-group h3 {
+            font-size: 20px;
+            margin-bottom: var(--spacing-sm);
+            text-align: left;
+        }
+        .variation-group .description {
+            color: var(--color-neutral-600);
+            text-align: left;
+            margin-bottom: var(--spacing-md);
+        }
+        .variation-group .button-container {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* Button Component Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 22px;
+            border-radius: var(--border-radius-md);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-body);
+            transition: all 150ms ease-out;
+            outline: none;
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary-500);
+            outline-offset: 2px;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Primary Button Variant */
+        .btn--primary {
+            background-color: var(--color-primary-700);
+            color: var(--color-neutral-white);
+        }
+        .btn--primary:hover {
+            background-color: var(--color-primary-800);
+            box-shadow: var(--shadow-md);
+        }
+        .btn--primary:active {
+            background-color: var(--color-primary-900);
+        }
+
+        /* Secondary Button Variant */
+        .btn--secondary {
+            background-color: transparent;
+            color: var(--color-primary-700);
+            border: 1px solid var(--color-primary-700);
+        }
+        .btn--secondary:hover {
+            background-color: var(--color-primary-50);
+        }
+        .btn--secondary:active {
+            background-color: var(--color-primary-100);
+        }
+
+        /* Destructive Button Variant */
+        .btn--destructive {
+            background-color: var(--color-error-500);
+            color: var(--color-neutral-white);
+        }
+        .btn--destructive:hover {
+            background-color: var(--color-error-600);
+            box-shadow: var(--shadow-md);
+        }
+        .btn--destructive:active {
+            background-color: var(--color-error-700);
+        }
+
+        /* Dialog/Modal Component Styles */
+        .dialog {
+            width: 100%;
+            max-width: 440px;
+            padding: 0;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 200ms ease-out, scaleUp 200ms ease-out;
+        }
+        .dialog[open] {
+            display: flex;
+            flex-direction: column;
+        }
+        .dialog::backdrop {
+            background: rgba(33, 37, 41, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 200ms ease-out;
+        }
+        .dialog__container {
+            padding: var(--spacing-lg);
+            text-align: left;
+        }
+        .dialog__header {
+            margin-bottom: var(--spacing-sm);
+        }
+        .dialog__header h3 {
+            font-size: var(--font-size-h3);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-neutral-900);
+        }
+        .dialog__content p {
+            font-size: var(--font-size-body);
+            color: var(--color-neutral-600);
+            line-height: 1.6;
+        }
+        .dialog__footer {
+            margin-top: var(--spacing-lg);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+        }
+
+        /* Keyframe Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.95); }
+            to { transform: scale(1); }
+        }
+        
+        /* Responsive Adaptations */
+        @media (max-width: 767px) {
+            .dialog {
+                max-width: 90vw;
+            }
+            .screen-header h1 {
+                font-size: 28px;
+            }
+            .screen-header p {
+                font-size: 16px;
+            }
+            .trigger-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-container">
+        <header class="screen-header">
+            <h1>Confirmation Dialog</h1>
+            <p>This component requires user confirmation for an action.</p>
+        </header>
+        
+        <main class="screen-content">
+             <div class="screen-variations">
+                <div class="variation-group">
+                    <h3>Variant: "Standard"</h3>
+                    <p class="description">Used for non-destructive confirmations, like saving changes or proceeding with a standard workflow.</p>
+                    <div class="button-container">
+                        <button class="btn btn--primary" id="openStandardDialog">Open Standard Dialog</button>
+                    </div>
+                </div>
+
+                <div class="variation-group">
+                    <h3>Variant: "Destructive"</h3>
+                    <p class="description">Used to confirm irreversible actions, such as deleting data or removing a connection. The primary action button is styled to indicate danger.</p>
+                    <div class="button-container">
+                        <button class="btn btn--secondary" id="openDestructiveDialog">Open Destructive Dialog</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Standard Confirmation Dialog -->
+    <dialog id="standardDialog" class="dialog">
+        <div class="dialog__container">
+            <header class="dialog__header">
+                <h3 id="standardDialogLabel">Save Changes?</h3>
+            </header>
+            <main class="dialog__content">
+                <p id="standardDialogDesc">You have unsaved changes. Are you sure you want to save and continue?</p>
+            </main>
+            <footer class="dialog__footer">
+                <button class="btn btn--secondary" id="cancelStandard">Cancel</button>
+                <button class="btn btn--primary" id="confirmStandard">Save Changes</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <!-- Destructive Confirmation Dialog -->
+    <dialog id="destructiveDialog" class="dialog">
+        <div class="dialog__container">
+            <header class="dialog__header">
+                <h3 id="destructiveDialogLabel">Delete Account?</h3>
+            </header>
+            <main class="dialog__content">
+                <p id="destructiveDialogDesc">This action is permanent and cannot be undone. All your data, including your profile and posts, will be permanently erased.</p>
+            </main>
+            <footer class="dialog__footer">
+                <button class="btn btn--secondary" id="cancelDestructive">Cancel</button>
+                <button class="btn btn--destructive" id="confirmDestructive">Delete Account</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <script>
+        // Standard Dialog Logic
+        const standardDialog = document.getElementById('standardDialog');
+        const openStandardDialogBtn = document.getElementById('openStandardDialog');
+        const cancelStandardBtn = document.getElementById('cancelStandard');
+        const confirmStandardBtn = document.getElementById('confirmStandard');
+
+        openStandardDialogBtn.addEventListener('click', () => {
+            standardDialog.showModal();
+        });
+        cancelStandardBtn.addEventListener('click', () => {
+            standardDialog.close();
+        });
+        confirmStandardBtn.addEventListener('click', () => {
+            console.log('Standard action confirmed.');
+            standardDialog.close();
+        });
+        standardDialog.addEventListener('click', (event) => {
+            if (event.target === standardDialog) {
+                standardDialog.close();
+            }
+        });
+
+        // Destructive Dialog Logic
+        const destructiveDialog = document.getElementById('destructiveDialog');
+        const openDestructiveDialogBtn = document.getElementById('openDestructiveDialog');
+        const cancelDestructiveBtn = document.getElementById('cancelDestructive');
+        const confirmDestructiveBtn = document.getElementById('confirmDestructive');
+
+        openDestructiveDialogBtn.addEventListener('click', () => {
+            destructiveDialog.showModal();
+        });
+        cancelDestructiveBtn.addEventListener('click', () => {
+            destructiveDialog.close();
+        });
+        confirmDestructiveBtn.addEventListener('click', () => {
+            console.log('Destructive action confirmed.');
+            destructiveDialog.close();
+        });
+        destructiveDialog.addEventListener('click', (event) => {
+            if (event.target === destructiveDialog) {
+                destructiveDialog.close();
+            }
+        });
+
+    </script>
+</body>
+</html>

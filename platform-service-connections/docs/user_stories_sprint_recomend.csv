@@ -1,0 +1,8 @@
+"sprint_number","story_ids","total_points","sprint_goal","dependencies_resolved"
+"1","[""US-001"",""US-004"",""US-005"",""US-002""]","13","Establish the core user registration flow, including secure password policies, duplicate email prevention, and email verification dispatch.",""
+"2","[""US-003"",""US-006"",""US-007"",""US-008"",""US-009""]","14","Complete the core user access lifecycle by implementing account activation, secure login, session invalidation on logout, and clear error handling.","true"
+"3","[""US-010"",""US-012""]","8","Implement a complete and secure self-service password recovery flow, allowing users to regain access to their accounts.","true"
+"4","[""US-018"",""US-019"",""US-020""]","18","Enhance account security by implementing the full Multi-Factor Authentication (MFA) lifecycle and providing users with a security audit trail.","true"
+"5","[""US-013"",""US-014""]","13","Implement the account deactivation and reactivation lifecycle, providing users with a temporary way to leave the platform.","true"
+"6","[""US-015""]","13","Implement the complex, multi-system workflow for requesting permanent, GDPR-compliant account deletion.","true"
+"7","[""US-016"",""US-082""]","11","Finalize the account deletion lifecycle by implementing the cancellation flow and enhance platform security with mandatory MFA for administrators.","true"

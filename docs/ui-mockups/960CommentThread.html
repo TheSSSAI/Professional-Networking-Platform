@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comment Thread Component</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+    }
+    body {
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    img, picture, video, canvas, svg {
+      display: block;
+      max-width: 100%;
+    }
+    input, button, textarea, select {
+      font: inherit;
+    }
+    p, h1, h2, h3, h4, h5, h6 {
+      overflow-wrap: break-word;
+    }
+    
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-700: #1976D2;
+      --color-primary-100: #BBDEFB;
+      --color-primary-50: #E3F2FD;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-600: #6C757D;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-300: #DEE2E6;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F1F3F5;
+      --color-neutral-50: #F8F9FA;
+      --color-white: #FFFFFF;
+      --color-error: #D32F2F;
+
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 16px;
+      --font-size-caption: 14px;
+      --font-size-small: 12px;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+
+      /* Borders */
+      --border-radius-sm: 4px;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+    }
+    
+    /* Base Body Styles */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      padding: var(--spacing-lg);
+    }
+    
+    /* Screen Wrapper for Demo */
+    .screen-container {
+      max-width: 720px;
+      margin: 0 auto;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: var(--spacing-lg);
+    }
+    
+    /* Comment Thread Component Styles */
+    .comment-thread {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .comment-thread__header {
+      font-size: 20px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+
+    /* Comment Input Component */
+    .comment-input {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-start;
+    }
+
+    .comment-input__form {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .comment-input__textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-neutral-300);
+      resize: vertical;
+      font-size: var(--font-size-body);
+    }
+
+    .comment-input__textarea:focus {
+      outline: none;
+      border-color: var(--color-primary-700);
+      box-shadow: 0 0 0 2px var(--color-primary-50);
+    }
+
+    .comment-input__actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Comment List & Item Component */
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+    
+    .comment-item {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .comment-item__content {
+      flex-grow: 1;
+    }
+    
+    .comment-item__body {
+      background-color: var(--color-neutral-50);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .comment-item__text {
+      font-size: var(--font-size-body);
+      color: var(--color-neutral-900);
+    }
+    
+    .comment-item__actions {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-xs);
+      padding-left: var(--spacing-md);
+    }
+
+    .comment-item__action-link {
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-600);
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .comment-item__action-link:hover,
+    .comment-item__action-link:focus {
+      color: var(--color-primary-700);
+      text-decoration: underline;
+    }
+
+    .comment-item__timestamp {
+        font-size: var(--font-size-small);
+        color: var(--color-neutral-600);
+    }
+
+    /* User Badge Component */
+    .user-badge {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .user-badge__name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      font-size: var(--font-size-caption);
+    }
+
+    .user-badge__headline {
+      font-size: var(--font-size-small);
+      color: var(--color-neutral-600);
+    }
+
+    /* Atomic Components used in this mockup */
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    
+    .btn {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border: none;
+      font-weight: var(--font-weight-semibold);
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .btn--primary {
+      background-color: var(--color-primary-700);
+      color: var(--color-white);
+    }
+
+    .btn--primary:hover {
+      background-color: #1565C0;
+    }
+
+    .btn:disabled {
+      background-color: var(--color-neutral-200);
+      color: var(--color-neutral-500);
+      cursor: not-allowed;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-xl);
+        color: var(--color-neutral-600);
+        font-style: italic;
+    }
+
+    /* Skeleton Loader Styles */
+    .skeleton {
+      background-color: var(--color-neutral-200);
+      border-radius: var(--border-radius-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.4) 50%, 
+        rgba(255,255,255,0) 100%);
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    .skeleton--avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .skeleton--line {
+      height: 16px;
+      margin-bottom: var(--spacing-sm);
+    }
+    .skeleton--line-short {
+        height: 12px;
+        width: 60%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Variations Styling */
+    .screen-variations {
+      margin-top: var(--spacing-xl);
+      padding-top: var(--spacing-xl);
+      border-top: 2px dashed var(--color-neutral-300);
+    }
+    .variation-group {
+      margin-bottom: var(--spacing-xl);
+    }
+    .variation-group h2 {
+      margin-bottom: var(--spacing-md);
+    }
+    .variation-group h3 {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: var(--spacing-xs);
+    }
+    .variation-group normal {
+        font-style: italic;
+        color: var(--color-neutral-600);
+        display: block;
+        margin-bottom: var(--spacing-md);
+    }
+    .variation-group > .screen-container {
+        border: 1px solid var(--color-neutral-200);
+    }
+
+  </style>
+</head>
+<body>
+  
+  <div class="screen-container">
+    <section class="comment-thread" aria-label="Comment Thread">
+      <h3 class="comment-thread__header">Comments (3)</h3>
+
+      <!-- Comment Input Area -->
+      <div class="comment-input">
+        <img src="https://i.pravatar.cc/40?u=current_user" alt="Your profile picture" class="avatar">
+        <div class="comment-input__form">
+          <textarea class="comment-input__textarea" placeholder="Add a comment..."></textarea>
+          <div class="comment-input__actions">
+            <button class="btn btn--primary" disabled>Post</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- List of Comments -->
+      <div class="comment-list">
+        <!-- Comment 1 -->
+        <article class="comment-item" aria-label="Comment by Brenda Smith">
+          <img src="https://i.pravatar.cc/40?u=brenda_smith" alt="Brenda Smith's profile picture" class="avatar">
+          <div class="comment-item__content">
+            <div class="comment-item__body">
+              <div class="user-badge">
+                <span class="user-badge__name">Brenda Smith</span>
+                <span class="user-badge__headline">Lead UX Designer at Innovate Corp</span>
+              </div>
+              <p class="comment-item__text">This is a really insightful take on the current state of the market. I especially agree with your points on sustainable growth. Have you considered the impact of recent regulatory changes?</p>
+            </div>
+            <div class="comment-item__actions">
+              <button class="comment-item__action-link">Like</button>
+              <button class="comment-item__action-link">Reply</button>
+              <span class="comment-item__timestamp">2h ago</span>
+            </div>
+          </div>
+        </article>
+        
+        <!-- Comment 2 -->
+        <article class="comment-item" aria-label="Comment by Johnathan Doe">
+          <img src="https://i.pravatar.cc/40?u=john_doe" alt="Johnathan Doe's profile picture" class="avatar">
+          <div class="comment-item__content">
+            <div class="comment-item__body">
+              <div class="user-badge">
+                <span class="user-badge__name">Johnathan Doe</span>
+                <span class="user-badge__headline">VP of Engineering at Tech Solutions</span>
+              </div>
+              <p class="comment-item__text">Great post!</p>
+            </div>
+            <div class="comment-item__actions">
+              <button class="comment-item__action-link">Like</button>
+              <button class="comment-item__action-link">Reply</button>
+              <span class="comment-item__timestamp">1h ago</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Comment 3 (Own Comment with Edit/Delete) -->
+        <article class="comment-item" aria-label="Your Comment">
+          <img src="https://i.pravatar.cc/40?u=current_user" alt="Your profile picture" class="avatar">
+          <div class="comment-item__content">
+            <div class="comment-item__body">
+              <div class="user-badge">
+                <span class="user-badge__name">You</span>
+                <span class="user-badge__headline">Senior Frontend Developer</span>
+              </div>
+              <p class="comment-item__text">Thanks for the feedback, Brenda! That's a great point about the regulatory changes. I'll have to look into that further.</p>
+            </div>
+            <div class="comment-item__actions">
+              <button class="comment-item__action-link">Like</button>
+              <button class="comment-item__action-link">Reply</button>
+              <button class="comment-item__action-link">Edit</button>
+              <button class="comment-item__action-link">Delete</button>
+              <span class="comment-item__timestamp">30m ago</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+  
+  <!-- Screen Variations Section -->
+  <div class="screen-variations">
+    <h2>Component Variations</h2>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Loading State"</h3>
+      <normal>Shows skeleton loaders while the comment data is being fetched.</normal>
+      <div class="screen-container">
+        <section class="comment-thread" aria-busy="true" aria-label="Loading comments...">
+          <h3 class="comment-thread__header">Comments</h3>
+          <div class="comment-input">
+            <div class="skeleton skeleton--avatar"></div>
+            <div class="comment-input__form">
+              <div class="skeleton skeleton--line" style="height: 80px; margin-bottom: 0;"></div>
+            </div>
+          </div>
+          <div class="comment-list">
+            <!-- Skeleton Comment 1 -->
+            <div class="comment-item">
+              <div class="skeleton skeleton--avatar"></div>
+              <div class="comment-item__content">
+                <div class="comment-item__body" style="background-color: transparent; padding: 0;">
+                    <div class="skeleton skeleton--line-short"></div>
+                    <div class="skeleton skeleton--line"></div>
+                    <div class="skeleton skeleton--line" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Skeleton Comment 2 -->
+            <div class="comment-item">
+              <div class="skeleton skeleton--avatar"></div>
+              <div class="comment-item__content">
+                <div class="comment-item__body" style="background-color: transparent; padding: 0;">
+                    <div class="skeleton skeleton--line-short"></div>
+                    <div class="skeleton skeleton--line" style="width: 30%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    
+    <div class="variation-group">
+      <h3>Variant Name: "Empty State"</h3>
+      <normal>Shown when a post has no comments yet, prompting the user to be the first to comment.</normal>
+      <div class="screen-container">
+        <section class="comment-thread">
+          <h3 class="comment-thread__header">Comments (0)</h3>
+          <div class="comment-input">
+            <img src="https://i.pravatar.cc/40?u=current_user" alt="Your profile picture" class="avatar">
+            <div class="comment-input__form">
+              <textarea class="comment-input__textarea" placeholder="Add a comment..."></textarea>
+              <div class="comment-input__actions">
+                <button class="btn btn--primary" disabled>Post</button>
+              </div>
+            </div>
+          </div>
+          <div class="comment-list">
+              <div class="empty-state">
+                  <p>Be the first to comment.</p>
+              </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="variation-group">
+      <h3>Variant Name: "Input Focused/Active"</h3>
+      <normal>Demonstrates the state of the comment input form while the user is actively typing.</normal>
+      <div class="screen-container">
+        <section class="comment-thread">
+          <h3 class="comment-thread__header">Comments</h3>
+          <div class="comment-input">
+            <img src="https://i.pravatar.cc/40?u=current_user" alt="Your profile picture" class="avatar">
+            <div class="comment-input__form">
+              <textarea class="comment-input__textarea" placeholder="Add a comment..." style="border-color: var(--color-primary-700); box-shadow: 0 0 0 2px var(--color-primary-50);">This is great!</textarea>
+              <div class="comment-input__actions">
+                <button class="btn btn--primary">Post</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

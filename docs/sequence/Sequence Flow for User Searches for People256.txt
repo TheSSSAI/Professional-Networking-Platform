@@ -1,0 +1,653 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-UJ-004
+
+## 1.2 Name
+
+User Searches for People
+
+## 1.3 Description
+
+A user enters a search query into the search bar. The system queries the dedicated search engine and returns a ranked list of user profiles, respecting privacy settings.
+
+## 1.4 Type
+
+🔹 UserJourney
+
+## 1.5 Purpose
+
+To enable users to find other professionals on the platform, as required by SRS-001-F6.
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🔴 High
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-SEARCH
+- REPO-SVC-CONNECTIONS
+
+## 1.10 Key Interactions
+
+- User types a query (e.g., name, skill) into the search bar.
+- Client sends the query to the API Gateway.
+- API Gateway routes the request to the Search Service.
+- Search Service constructs a query for OpenSearch, applying filters and boosting scores for first-degree connections.
+- Search Service may call Connections Service to get the current user's network for ranking purposes.
+- OpenSearch returns a list of matching user IDs.
+- Search Service returns the results, which the client then displays.
+
+## 1.11 Triggers
+
+- User submits a query from the search bar.
+
+## 1.12 Outcomes
+
+- A relevant, ranked list of users is displayed to the user.
+
+## 1.13 Business Rules
+
+- Search results must respect the privacy settings of profiles (1.6.2).
+- Search results should be ranked by relevance, prioritizing connections (1.6.2).
+
+## 1.14 Error Scenarios
+
+- The OpenSearch cluster is unavailable.
+- The search query is malformed.
+
+## 1.15 Integration Points
+
+- AWS OpenSearch Service.
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-UJ-004
+
+## 2.2 Name
+
+User Journey: Perform User Search
+
+## 2.3 Description
+
+A detailed technical breakdown of the user search journey, from client-side input to the display of ranked results from the search microservice. This sequence covers the GraphQL request, internal gRPC communication for connection data, and the OpenSearch query execution, ensuring privacy settings and connection-based relevance boosting are applied as per SRS-001-F6.
+
+## 2.4 Participants
+
+### 2.4.1 Frontend Application
+
+#### 2.4.1.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.1.2 Display Name
+
+Client: Web SPA
+
+#### 2.4.1.3 Type
+
+🔹 Frontend Application
+
+#### 2.4.1.4 Technology
+
+Next.js, React, Apollo Client
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #1E90FF |
+| Stereotype | <<User Agent>> |
+
+### 2.4.2.0 Gateway
+
+#### 2.4.2.1 Repository Id
+
+REPO-GW-API
+
+#### 2.4.2.2 Display Name
+
+API Gateway
+
+#### 2.4.2.3 Type
+
+🔹 Gateway
+
+#### 2.4.2.4 Technology
+
+AWS API Gateway
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #FFD700 |
+| Stereotype | <<GraphQL>> |
+
+### 2.4.3.0 Microservice
+
+#### 2.4.3.1 Repository Id
+
+REPO-SVC-SEARCH
+
+#### 2.4.3.2 Display Name
+
+Search Service
+
+#### 2.4.3.3 Type
+
+🔹 Microservice
+
+#### 2.4.3.4 Technology
+
+NestJS, gRPC, OpenSearch Client
+
+#### 2.4.3.5 Order
+
+3
+
+#### 2.4.3.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #32CD32 |
+| Stereotype | <<Service>> |
+
+### 2.4.4.0 Microservice
+
+#### 2.4.4.1 Repository Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.4.4.2 Display Name
+
+Connections Service
+
+#### 2.4.4.3 Type
+
+🔹 Microservice
+
+#### 2.4.4.4 Technology
+
+NestJS, gRPC
+
+#### 2.4.4.5 Order
+
+4
+
+#### 2.4.4.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #32CD32 |
+| Stereotype | <<Service>> |
+
+### 2.4.5.0 Search Engine
+
+#### 2.4.5.1 Repository Id
+
+opensearch-cluster
+
+#### 2.4.5.2 Display Name
+
+OpenSearch Cluster
+
+#### 2.4.5.3 Type
+
+🔹 Search Engine
+
+#### 2.4.5.4 Technology
+
+AWS OpenSearch Service
+
+#### 2.4.5.5 Order
+
+5
+
+#### 2.4.5.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | database |
+| Color | #FFA07A |
+| Stereotype | <<Database>> |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 User Interaction
+
+#### 2.5.1.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.2 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.3 Message
+
+User types search query into SearchBar component and submits.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 User Interaction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+❌ No
+
+#### 2.5.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | UI Event |
+| Method | onSubmit |
+| Parameters | Event object containing form data (query string, f... |
+| Authentication | N/A |
+| Error Handling | Client-side validation prevents submission if quer... |
+| Performance | Input debounce of 300ms to avoid excessive request... |
+
+### 2.5.2.0 API Call
+
+#### 2.5.2.1 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2 Target Id
+
+REPO-GW-API
+
+#### 2.5.2.3 Message
+
+Executes GraphQL query: SearchUsers(query, filters)
+
+#### 2.5.2.4 Sequence Number
+
+2
+
+#### 2.5.2.5 Type
+
+🔹 API Call
+
+#### 2.5.2.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7 Return Message
+
+Returns SearchUsersPayload or GraphQL error.
+
+#### 2.5.2.8 Has Return
+
+✅ Yes
+
+#### 2.5.2.9 Is Activation
+
+✅ Yes
+
+#### 2.5.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS/POST |
+| Method | POST /graphql |
+| Parameters | GraphQL query payload with variables for query str... |
+| Authentication | Authorization: Bearer <access_token> |
+| Error Handling | Apollo Client handles network errors and HTTP stat... |
+| Performance | Request timeout set to 10 seconds. |
+
+### 2.5.3.0 RPC Call
+
+#### 2.5.3.1 Source Id
+
+REPO-GW-API
+
+#### 2.5.3.2 Target Id
+
+REPO-SVC-SEARCH
+
+#### 2.5.3.3 Message
+
+Forwards request to Search Service via gRPC call: searchUsers(request)
+
+#### 2.5.3.4 Sequence Number
+
+3
+
+#### 2.5.3.5 Type
+
+🔹 RPC Call
+
+#### 2.5.3.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7 Return Message
+
+Returns SearchUsersResponse or gRPC error status.
+
+#### 2.5.3.8 Has Return
+
+✅ Yes
+
+#### 2.5.3.9 Is Activation
+
+✅ Yes
+
+#### 2.5.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | SearchService.searchUsers |
+| Parameters | { query: string, filters: object, requestingUserId... |
+| Authentication | Internal auth token/mTLS for service-to-service co... |
+| Error Handling | GraphQL resolver catches gRPC exceptions and maps ... |
+| Performance | gRPC call timeout of 5 seconds. |
+
+#### 2.5.3.11 Nested Interactions
+
+##### 2.5.3.11.1 RPC Call
+
+###### 2.5.3.11.1.1 Source Id
+
+REPO-SVC-SEARCH
+
+###### 2.5.3.11.1.2 Target Id
+
+REPO-SVC-CONNECTIONS
+
+###### 2.5.3.11.1.3 Message
+
+Requests user's 1st-degree connections for relevance boosting via gRPC: getConnections(userId)
+
+###### 2.5.3.11.1.4 Sequence Number
+
+4
+
+###### 2.5.3.11.1.5 Type
+
+🔹 RPC Call
+
+###### 2.5.3.11.1.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.1.7 Return Message
+
+Returns list of connection user IDs.
+
+###### 2.5.3.11.1.8 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.1.9 Is Activation
+
+✅ Yes
+
+###### 2.5.3.11.1.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | gRPC |
+| Method | ConnectionsService.getConnections |
+| Parameters | { userId: string, degree: 1 } |
+| Authentication | Internal auth token/mTLS. |
+| Error Handling | If call fails or times out, log a warning and proc... |
+| Performance | P99 latency target < 50ms. Response should be cach... |
+
+##### 2.5.3.11.2.0 Database Query
+
+###### 2.5.3.11.2.1 Source Id
+
+REPO-SVC-SEARCH
+
+###### 2.5.3.11.2.2 Target Id
+
+opensearch-cluster
+
+###### 2.5.3.11.2.3 Message
+
+Builds and executes complex OpenSearch query.
+
+###### 2.5.3.11.2.4 Sequence Number
+
+5
+
+###### 2.5.3.11.2.5 Type
+
+🔹 Database Query
+
+###### 2.5.3.11.2.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.2.7 Return Message
+
+Returns ranked list of matching user documents.
+
+###### 2.5.3.11.2.8 Has Return
+
+✅ Yes
+
+###### 2.5.3.11.2.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.2.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Method | POST /user_profiles/_search |
+| Parameters | JSON query body including: multi_match for query s... |
+| Authentication | IAM role-based authentication. |
+| Error Handling | Catch exceptions from the OpenSearch client. If cl... |
+| Performance | P99 query latency target < 200ms. |
+
+##### 2.5.3.11.3.0 Internal Processing
+
+###### 2.5.3.11.3.1 Source Id
+
+REPO-SVC-SEARCH
+
+###### 2.5.3.11.3.2 Target Id
+
+REPO-SVC-SEARCH
+
+###### 2.5.3.11.3.3 Message
+
+Formats OpenSearch results into gRPC response DTO.
+
+###### 2.5.3.11.3.4 Sequence Number
+
+6
+
+###### 2.5.3.11.3.5 Type
+
+🔹 Internal Processing
+
+###### 2.5.3.11.3.6 Is Synchronous
+
+✅ Yes
+
+###### 2.5.3.11.3.7 Return Message
+
+
+
+###### 2.5.3.11.3.8 Has Return
+
+❌ No
+
+###### 2.5.3.11.3.9 Is Activation
+
+❌ No
+
+###### 2.5.3.11.3.10 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | N/A |
+| Method | mapResultsToDto |
+| Parameters | OpenSearch search response |
+| Authentication | N/A |
+| Error Handling | N/A |
+| Performance | Should be negligible (<5ms). |
+
+### 2.5.4.0.0.0 State Update
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.3.0.0 Message
+
+Receives data or error. Updates UI state to render SearchResults component or an error message.
+
+#### 2.5.4.4.0.0 Sequence Number
+
+7
+
+#### 2.5.4.5.0.0 Type
+
+🔹 State Update
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+| Property | Value |
+|----------|-------|
+| Protocol | React State |
+| Method | React.useState update / Apollo Client cache update |
+| Parameters | GraphQL response data or error object |
+| Authentication | N/A |
+| Error Handling | Conditional rendering based on loading, error, and... |
+| Performance | Component rendering should be optimized to prevent... |
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Privacy Enforcement: The OpenSearch query in step 5 is critical for security. It MUST be constructed on the server-side to include filters that respect the profile visibility settings of potential results, as defined in SRS-001-F6 (1.6.2).
+
+#### 2.6.1.2.0.0 Position
+
+bottom
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-SVC-SEARCH
+
+#### 2.6.1.4.0.0 Sequence Number
+
+5
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+UI State Management: The client must manage at least four states: idle, loading (e.g., show a spinner), success (show results), empty (show 'No results found'), and error (show 'Something went wrong').
+
+#### 2.6.2.2.0.0 Position
+
+top
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+1
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Connection Data Caching: The call to the Connections Service should be heavily cached (e.g., in Redis) to minimize latency, as this data changes infrequently compared to search frequency.
+
+#### 2.6.3.2.0.0 Position
+
+bottom
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-SVC-CONNECTIONS
+
+#### 2.6.3.4.0.0 Sequence Number
+
+4
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Client must sanitize the search query string to pr... |
+| Performance Targets | End-to-end P95 latency for the SearchUsers GraphQL... |
+| Error Handling Strategy | The client will display generic, user-friendly err... |
+| Testing Considerations | E2E tests (Cypress) should cover various search qu... |
+| Monitoring Requirements | A Grafana dashboard must monitor the P50/P95/P99 l... |
+| Deployment Considerations | The OpenSearch index schema must be managed via ve... |
+

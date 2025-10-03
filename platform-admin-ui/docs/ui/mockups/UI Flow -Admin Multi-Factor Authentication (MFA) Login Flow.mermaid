@@ -1,0 +1,53 @@
+flowchart TD
+    A[Admin navigates to /admin URL] --> C[Show Admin Login Page]
+    C --> D[User enters email & password]
+    D --> E[Submits credentials to server]
+
+    subgraph Server-Side: Phase 1 (Password)
+        E --> F{Credentials valid?}
+        F -->|No| G[Return 401: Invalid Credentials]
+        F -->|Yes| H{Role is 'Administrator'?}
+        H -->|No| I[Return 403: Forbidden]
+        H -->|Yes| J{MFA enabled for admin?}
+        J -->|No| K[Redirect to Mandatory MFA Setup]
+        J -->|Yes| L[Show MFA Code Entry Page]
+    end
+
+    subgraph Frontend State
+        G --> C
+        I --> C
+        K --> K_UI[Render MFA Setup Component]
+        L --> M_UI[Render MFA Code Entry Form]
+    end
+
+    M_UI --> N[User enters 6-digit code]
+    N --> O[Submits code to server]
+
+    subgraph Server-Side: Phase 2 (MFA)
+        O --> P{MFA code valid?}
+        P -->|No| Q{Failed attempts < 5?}
+        Q -->|Yes| R[Increment failure count]
+        R --> S[Return 401: Invalid Code]
+        Q -->|No| T[Lock account for 15 mins]
+        T --> U[Return 429: Too Many Attempts]
+        P -->|Yes| V[Reset failure count]
+        V --> W[Issue Admin Session Tokens]
+        W --> X[Redirect to Admin Dashboard]
+    end
+
+    subgraph Final Frontend State
+        S --> M_UI
+        U --> C
+        X --> Y[Render Admin Dashboard]
+    end
+
+    %% Styling
+    classDef errorNode fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef successNode fill:#e8f5e8,stroke:#4caf50,color:#000
+    classDef processNode fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,color:#000
+
+    class G,I,S,U errorNode
+    class W,X,Y successNode
+    class E,O,T,R,V processNode
+    class F,H,J,P,Q decision

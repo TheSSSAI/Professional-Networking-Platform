@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  feed-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: platform-service-feed
+    env_file:
+      - .env
+    ports:
+      - '50052:50052' # Expose gRPC port
+      - '9230:9229' # Expose debug port
+    depends_on:
+      - redis
+    networks:
+      - platform-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-feed
+    ports:
+      - '6380:6379' # Map to a different host port to avoid conflicts
+    networks:
+      - platform-network
+    volumes:
+      - redis-data:/data
+
+networks:
+  platform-network:
+    driver: bridge
+
+volumes:
+  redis-data:

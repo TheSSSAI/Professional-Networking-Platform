@@ -1,0 +1,766 @@
+# 1 Overview
+
+## 1.1 Diagram Id
+
+SEQ-UJ-003
+
+## 1.2 Name
+
+User Sends and Accepts a Connection Request
+
+## 1.3 Description
+
+User A sends a connection request to User B. User B receives a notification and accepts the request, establishing a mutual connection.
+
+## 1.4 Type
+
+🔹 UserJourney
+
+## 1.5 Purpose
+
+To allow users to build their professional network, fulfilling SRS-001-F3 (1.3.1, 1.3.2).
+
+## 1.6 Complexity
+
+Medium
+
+## 1.7 Priority
+
+🚨 Critical
+
+## 1.8 Frequency
+
+OnDemand
+
+## 1.9 Participants
+
+- REPO-APP-CLIENT
+- REPO-GW-API
+- REPO-SVC-CONNECTIONS
+- REPO-EVENT-BUS
+- REPO-SVC-NOTIFICATIONS
+
+## 1.10 Key Interactions
+
+- User A sends a connection request to User B from User B's profile.
+- Connections Service creates a 'pending' connection record and publishes a 'ConnectionRequestSent' event.
+- Notifications Service consumes the event and sends a real-time notification to User B.
+- User B views their pending requests and clicks 'Accept'.
+- Connections Service updates the record to 'accepted' and publishes 'ConnectionRequestAccepted'.
+- Notifications Service notifies User A that their request was accepted.
+
+## 1.11 Triggers
+
+- User clicks 'Connect' on another user's profile.
+
+## 1.12 Outcomes
+
+- User A and User B are now first-degree connections.
+
+## 1.13 Business Rules
+
+- A connection is only established upon mutual acceptance (5.1.1).
+- A user cannot send a request if one is already pending (5.1.1).
+
+## 1.14 Error Scenarios
+
+- The recipient user does not exist.
+- The users are already connected.
+
+## 1.15 Integration Points
+
+*No items available*
+
+# 2.0 Details
+
+## 2.1 Diagram Id
+
+SEQ-UJ-100
+
+## 2.2 Name
+
+User Accesses and Interacts with the Help Center
+
+## 2.3 Description
+
+This sequence details the end-to-end user journey for accessing the self-service Help Center. The process is initiated by a user click on a static link in the application footer and involves a purely client-side navigation and rendering flow within the Next.js application. The Help Center content is treated as static and does not require any backend API calls, emphasizing performance and accessibility.
+
+## 2.4 Participants
+
+### 2.4.1 Actor
+
+#### 2.4.1.1 Repository Id
+
+USER_BROWSER
+
+#### 2.4.1.2 Display Name
+
+User (Browser)
+
+#### 2.4.1.3 Type
+
+🔹 Actor
+
+#### 2.4.1.4 Technology
+
+Web Browser (Chrome, Firefox, etc.)
+
+#### 2.4.1.5 Order
+
+1
+
+#### 2.4.1.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | actor |
+| Color | #999999 |
+| Stereotype | User |
+
+### 2.4.2.0 Client SPA
+
+#### 2.4.2.1 Repository Id
+
+REPO-APP-CLIENT
+
+#### 2.4.2.2 Display Name
+
+platform-web
+
+#### 2.4.2.3 Type
+
+🔹 Client SPA
+
+#### 2.4.2.4 Technology
+
+Next.js, React, TypeScript, MUI
+
+#### 2.4.2.5 Order
+
+2
+
+#### 2.4.2.6 Style
+
+| Property | Value |
+|----------|-------|
+| Shape | rectangle |
+| Color | #1E90FF |
+| Stereotype | Next.js SPA |
+
+## 2.5.0.0 Interactions
+
+### 2.5.1.0 User Interaction
+
+#### 2.5.1.1 Source Id
+
+USER_BROWSER
+
+#### 2.5.1.2 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.1.3 Message
+
+1. Clicks 'Help' link in application footer.
+
+#### 2.5.1.4 Sequence Number
+
+1
+
+#### 2.5.1.5 Type
+
+🔹 User Interaction
+
+#### 2.5.1.6 Is Synchronous
+
+✅ Yes
+
+#### 2.5.1.7 Return Message
+
+
+
+#### 2.5.1.8 Has Return
+
+❌ No
+
+#### 2.5.1.9 Is Activation
+
+✅ Yes
+
+#### 2.5.1.10 Technical Details
+
+##### 2.5.1.10.1 Protocol
+
+DOM Event
+
+##### 2.5.1.10.2 Method
+
+onClick
+
+##### 2.5.1.10.3 Parameters
+
+- {'name': 'event', 'type': 'MouseEvent', 'description': 'Standard browser click event.'}
+
+##### 2.5.1.10.4 Authentication
+
+Not Required (Public Action)
+
+##### 2.5.1.10.5 Error Handling
+
+N/A. Handled by the browser.
+
+##### 2.5.1.10.6 Performance
+
+###### 2.5.1.10.6.1 Latency
+
+<50ms
+
+###### 2.5.1.10.6.2 Notes
+
+Standard user input response time.
+
+### 2.5.2.0.0.0 Internal Processing
+
+#### 2.5.2.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.2.3.0.0 Message
+
+2. Intercepts navigation event and invokes router.
+
+#### 2.5.2.4.0.0 Sequence Number
+
+2
+
+#### 2.5.2.5.0.0 Type
+
+🔹 Internal Processing
+
+#### 2.5.2.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.2.7.0.0 Return Message
+
+
+
+#### 2.5.2.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.2.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.2.10.0.0 Technical Details
+
+##### 2.5.2.10.1.0 Protocol
+
+Client-side Routing
+
+##### 2.5.2.10.2.0 Method
+
+Next.js Router: router.push('/help')
+
+##### 2.5.2.10.3.0 Parameters
+
+- {'name': 'targetPath', 'type': 'String', 'value': "'/help'", 'description': 'The destination route for the Help Center page.'}
+
+##### 2.5.2.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.2.10.5.0 Error Handling
+
+If the route does not exist, Next.js router will render the default 404 page.
+
+##### 2.5.2.10.6.0 Performance
+
+###### 2.5.2.10.6.1 Latency
+
+<100ms
+
+###### 2.5.2.10.6.2 Notes
+
+Client-side routing should be near-instantaneous.
+
+### 2.5.3.0.0.0 Component Lifecycle
+
+#### 2.5.3.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.3.3.0.0 Message
+
+3. Loads and renders the `HelpCenterPage` component.
+
+#### 2.5.3.4.0.0 Sequence Number
+
+3
+
+#### 2.5.3.5.0.0 Type
+
+🔹 Component Lifecycle
+
+#### 2.5.3.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.3.7.0.0 Return Message
+
+
+
+#### 2.5.3.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.3.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.3.10.0.0 Technical Details
+
+##### 2.5.3.10.1.0 Protocol
+
+React Rendering
+
+##### 2.5.3.10.2.0 Method
+
+React.render()
+
+##### 2.5.3.10.3.0 Parameters
+
+- {'name': 'props', 'type': 'Object', 'description': "Page props, if any. For this static page, it's likely empty."}
+
+##### 2.5.3.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.3.10.5.0 Error Handling
+
+React's Error Boundary component should catch any rendering errors and display a fallback UI.
+
+##### 2.5.3.10.6.0 Performance
+
+###### 2.5.3.10.6.1 Notes
+
+Component renders statically defined content or content from a local JSON file. This page should be a candidate for Static Site Generation (SSG) to maximize performance.
+
+#### 2.5.3.11.0.0 Nested Interactions
+
+- {'sourceId': 'REPO-APP-CLIENT', 'targetId': 'REPO-APP-CLIENT', 'message': '3.1. Renders layout with categories and accordion items (e.g., using MUI Accordion).', 'sequenceNumber': 3.1, 'type': 'UI Rendering', 'isSynchronous': True, 'returnMessage': '', 'hasReturn': False, 'isActivation': False, 'technicalDetails': {'protocol': 'UI Component Logic', 'method': 'map(faqData, item => <Accordion />)', 'parameters': [], 'authentication': 'Not Required', 'errorHandling': 'N/A', 'performance': {'notes': 'Ensure efficient rendering of the list. Content is static, so performance impact is minimal.'}}}
+
+### 2.5.4.0.0.0 UI Update
+
+#### 2.5.4.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.4.2.0.0 Target Id
+
+USER_BROWSER
+
+#### 2.5.4.3.0.0 Message
+
+4. Displays the fully rendered Help Center page.
+
+#### 2.5.4.4.0.0 Sequence Number
+
+4
+
+#### 2.5.4.5.0.0 Type
+
+🔹 UI Update
+
+#### 2.5.4.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.4.7.0.0 Return Message
+
+
+
+#### 2.5.4.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.4.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.4.10.0.0 Technical Details
+
+##### 2.5.4.10.1.0 Protocol
+
+HTML/CSS/JS
+
+##### 2.5.4.10.2.0 Method
+
+Browser Paint
+
+##### 2.5.4.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.4.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.4.10.5.0 Error Handling
+
+Browser handles rendering failures.
+
+##### 2.5.4.10.6.0 Performance
+
+###### 2.5.4.10.6.1 Latency
+
+LCP < 2.5s
+
+###### 2.5.4.10.6.2 Notes
+
+As per SRS-001-NFR 2.1.1. Should be easily met with SSG or SSR.
+
+### 2.5.5.0.0.0 User Interaction
+
+#### 2.5.5.1.0.0 Source Id
+
+USER_BROWSER
+
+#### 2.5.5.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.5.3.0.0 Message
+
+5. Clicks on a specific question (accordion header).
+
+#### 2.5.5.4.0.0 Sequence Number
+
+5
+
+#### 2.5.5.5.0.0 Type
+
+🔹 User Interaction
+
+#### 2.5.5.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.5.7.0.0 Return Message
+
+
+
+#### 2.5.5.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.5.9.0.0 Is Activation
+
+✅ Yes
+
+#### 2.5.5.10.0.0 Technical Details
+
+##### 2.5.5.10.1.0 Protocol
+
+DOM Event
+
+##### 2.5.5.10.2.0 Method
+
+onClick
+
+##### 2.5.5.10.3.0 Parameters
+
+- {'name': 'event', 'type': 'MouseEvent', 'description': 'Click event on the accordion summary element.'}
+
+##### 2.5.5.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.5.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.5.10.6.0 Performance
+
+###### 2.5.5.10.6.1 Latency
+
+<50ms
+
+### 2.5.6.0.0.0 State Management
+
+#### 2.5.6.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.6.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.6.3.0.0 Message
+
+6. Handles click event and updates component state to toggle answer visibility.
+
+#### 2.5.6.4.0.0 Sequence Number
+
+6
+
+#### 2.5.6.5.0.0 Type
+
+🔹 State Management
+
+#### 2.5.6.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.6.7.0.0 Return Message
+
+
+
+#### 2.5.6.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.6.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.6.10.0.0 Technical Details
+
+##### 2.5.6.10.1.0 Protocol
+
+React State Hook
+
+##### 2.5.6.10.2.0 Method
+
+setExpandedPanel('panelId')
+
+##### 2.5.6.10.3.0 Parameters
+
+- {'name': 'panelId', 'type': 'String', 'description': 'The ID of the accordion panel to expand or collapse.'}
+
+##### 2.5.6.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.6.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.6.10.6.0 Performance
+
+###### 2.5.6.10.6.1 Latency
+
+<16ms
+
+###### 2.5.6.10.6.2 Notes
+
+State update should be fast enough to not drop frames.
+
+### 2.5.7.0.0.0 Component Lifecycle
+
+#### 2.5.7.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.7.2.0.0 Target Id
+
+REPO-APP-CLIENT
+
+#### 2.5.7.3.0.0 Message
+
+7. Re-renders the accordion component with the answer now visible.
+
+#### 2.5.7.4.0.0 Sequence Number
+
+7
+
+#### 2.5.7.5.0.0 Type
+
+🔹 Component Lifecycle
+
+#### 2.5.7.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.7.7.0.0 Return Message
+
+
+
+#### 2.5.7.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.7.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.7.10.0.0 Technical Details
+
+##### 2.5.7.10.1.0 Protocol
+
+React Rendering
+
+##### 2.5.7.10.2.0 Method
+
+React.render()
+
+##### 2.5.7.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.7.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.7.10.5.0 Error Handling
+
+Handled by React Error Boundary.
+
+##### 2.5.7.10.6.0 Performance
+
+###### 2.5.7.10.6.1 Notes
+
+Virtual DOM diffing ensures only the changed part of the component is re-rendered in the actual DOM.
+
+### 2.5.8.0.0.0 UI Update
+
+#### 2.5.8.1.0.0 Source Id
+
+REPO-APP-CLIENT
+
+#### 2.5.8.2.0.0 Target Id
+
+USER_BROWSER
+
+#### 2.5.8.3.0.0 Message
+
+8. Displays updated page with the expanded answer.
+
+#### 2.5.8.4.0.0 Sequence Number
+
+8
+
+#### 2.5.8.5.0.0 Type
+
+🔹 UI Update
+
+#### 2.5.8.6.0.0 Is Synchronous
+
+✅ Yes
+
+#### 2.5.8.7.0.0 Return Message
+
+
+
+#### 2.5.8.8.0.0 Has Return
+
+❌ No
+
+#### 2.5.8.9.0.0 Is Activation
+
+❌ No
+
+#### 2.5.8.10.0.0 Technical Details
+
+##### 2.5.8.10.1.0 Protocol
+
+DOM Manipulation
+
+##### 2.5.8.10.2.0 Method
+
+Browser Paint
+
+##### 2.5.8.10.3.0 Parameters
+
+*No items available*
+
+##### 2.5.8.10.4.0 Authentication
+
+Not Required
+
+##### 2.5.8.10.5.0 Error Handling
+
+N/A
+
+##### 2.5.8.10.6.0 Performance
+
+###### 2.5.8.10.6.1 Notes
+
+Animation of accordion expand/collapse should be smooth (CSS transitions).
+
+## 2.6.0.0.0.0 Notes
+
+### 2.6.1.0.0.0 Content
+
+#### 2.6.1.1.0.0 Content
+
+Accessibility (AC-007): The accordion component must be fully keyboard-navigable. Use the 'Tab' key to focus and 'Enter' or 'Space' to toggle. Semantic HTML (`<details>`/`<summary>`) or appropriate ARIA attributes must be used.
+
+#### 2.6.1.2.0.0 Position
+
+bottom
+
+#### 2.6.1.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.1.4.0.0 Sequence Number
+
+6
+
+### 2.6.2.0.0.0 Content
+
+#### 2.6.2.1.0.0 Content
+
+Responsiveness (AC-006): The layout must adapt to mobile, tablet, and desktop viewports without horizontal scrolling, ensuring readability and functionality on all devices.
+
+#### 2.6.2.2.0.0 Position
+
+bottom
+
+#### 2.6.2.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.2.4.0.0 Sequence Number
+
+4
+
+### 2.6.3.0.0.0 Content
+
+#### 2.6.3.1.0.0 Content
+
+Content Management: For this initial implementation, the FAQ content can be managed in a simple JSON file imported by the `HelpCenterPage` component. This avoids backend complexity while allowing for easy updates via code commits.
+
+#### 2.6.3.2.0.0 Position
+
+bottom
+
+#### 2.6.3.3.0.0 Participant Id
+
+REPO-APP-CLIENT
+
+#### 2.6.3.4.0.0 Sequence Number
+
+3
+
+## 2.7.0.0.0.0 Implementation Guidance
+
+| Property | Value |
+|----------|-------|
+| Security Requirements | Since this page renders static content, the primar... |
+| Performance Targets | The page must meet the LCP target of < 2.5 seconds... |
+| Error Handling Strategy | Primary error scenario is a navigation error. The ... |
+| Testing Considerations | 1. **Unit Tests (Jest/RTL):** Test the accordion c... |
+| Monitoring Requirements | Integrate Real User Monitoring (RUM) via OpenTelem... |
+| Deployment Considerations | This page is deployed as part of the `platform-web... |
+

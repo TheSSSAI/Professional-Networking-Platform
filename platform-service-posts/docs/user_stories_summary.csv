@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"8","45","6","2","0","[""Core Identity & Access Management (IAM)"",""User Profile Management""]","4","[""AWS Infrastructure (VPC, EKS, RDS)"",""CI/CD Pipeline setup""]"

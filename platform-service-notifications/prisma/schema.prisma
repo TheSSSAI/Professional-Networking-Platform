@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enum for message status as required by REQ-1-027 and code design spec
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+// Enum for notification types as required by REQ-1-036
+enum NotificationType {
+  CONNECTION_REQUEST
+  CONNECTION_ACCEPTED
+  POST_REACTION
+  POST_COMMENT
+}
+
+// Placeholder User model to establish relations.
+// In a real microservice architecture, this might be a partial representation
+// or managed differently, but is necessary for Prisma relations.
+model User {
+  id                    String          @id @default(uuid())
+  // Many-to-many relation for conversation participants
+  conversations         Conversation[]
+  // One-to-many relation for messages authored by the user
+  sentMessages          Message[]       @relation("SentMessages")
+  // One-to-many relation for notifications received by the user
+  receivedNotifications Notification[]  @relation("ReceivedNotifications")
+  // One-to-many relation for notifications where the user is the actor
+  actedNotifications    Notification[]  @relation("ActedNotifications")
+}
+
+// Model for a conversation between two or more users, as per REQ-1-026
+model Conversation {
+  id           String    @id @default(uuid())
+  // Many-to-many relation for participants. Prisma creates a join table.
+  participants User[]
+  // One-to-many relation to messages within this conversation
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Model for a single message, as per REQ-1-028
+model Message {
+  id             String        @id @default(uuid())
+  content        String        @db.Text
+  status         MessageStatus @default(SENT)
+  authorId       String
+  conversationId String
+
+  author       User         @relation("SentMessages", fields: [authorId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Index to optimize history queries, as per REQ-1-028 and code design spec
+  @@index([conversationId, createdAt])
+}
+
+// Model for notifications, as per platform-service-notifications repository definition
+model Notification {
+  id          String           @id @default(uuid())
+  recipientId String
+  actorId     String? // Actor can be null for system notifications
+  type        NotificationType
+  entityId    String? // e.g., Post ID, Comment ID, or User ID for connection requests
+  content     Json // Supports aggregated content like "User A and 3 others..."
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  recipient User @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User? @relation("ActedNotifications", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, createdAt])
+  @@index([recipientId, isRead])
+}

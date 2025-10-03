@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"7","40","7","0","0","[""Core User Authentication & Registration"",""Service Foundation & DevOps""]","3","[""AWS ECR and EKS infrastructure must be provisioned."",""Database and Redis instances must be available.""]"

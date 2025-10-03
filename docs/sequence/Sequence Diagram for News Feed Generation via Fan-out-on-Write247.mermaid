@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant "Posts Service" as PostsService
+    participant "Event Bus" as EventBus
+    participant "Feed Service" as FeedService
+    participant "Connections Service" as ConnectionsService
+    participant "Cache Store" as CacheStore
+
+    activate EventBus
+    PostsService->>EventBus: 1. Publish PostCreated Event (v1.0)
+    activate FeedService
+    EventBus->>FeedService: 2. Deliver event from SQS queue 'feed-generation-queue'
+    activate ConnectionsService
+    FeedService->>ConnectionsService: 3. gRPC: ConnectionsService.GetFirstDegreeConnectionIds(request)
+    ConnectionsService-->>FeedService: response: { connectionIds: ['uuid', 'uuid', ...] }
+    FeedService->>CacheStore: 4. Execute Redis pipeline for each connection
+    CacheStore-->>FeedService: Pipeline execution status
+    FeedService->>EventBus: 5. Acknowledge and delete message from SQS
+
+    note over FeedService: Idempotency is CRITICAL. The Feed Service event handler must ensure that processing the same 'Pos...
+    note over FeedService: Super-Node Optimization: For users with a very large number of connections (>5000), the fan-out p...
+
+    deactivate ConnectionsService
+    deactivate FeedService
+    deactivate EventBus

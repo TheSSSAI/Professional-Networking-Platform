@@ -1,0 +1,50 @@
+PUT /user_profile_index
+{
+  "mappings": {
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      },
+      "fullName": {
+        "type": "text"
+      },
+      "headline": {
+        "type": "text"
+      },
+      "location": {
+        "type": "text"
+      },
+      "profilePictureUrl": {
+        "type": "keyword",
+        "index": false
+      },
+      "customUrlSlug": {
+        "type": "keyword"
+      },
+      "visibility": {
+        "type": "keyword"
+      },
+      "skills": {
+        "type": "text"
+      },
+      "workExperience": {
+        "type": "nested",
+        "properties": {
+          "title": { "type": "text" },
+          "companyName": { "type": "text" }
+        }
+      },
+      "education": {
+        "type": "nested",
+        "properties": {
+          "institutionName": { "type": "text" },
+          "degree": { "type": "text" },
+          "fieldOfStudy": { "type": "text" }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  }
+}

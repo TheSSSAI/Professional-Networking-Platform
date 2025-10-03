@@ -1,0 +1,1 @@
+This diagram illustrates the core entities responsible for user authentication, authorization, and account security. It shows how the User entity is central, linked to roles, security tokens for actions like password resets, account deletion requests, and an audit log for security-sensitive events.

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: NotificationItem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- CSS Reset --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- Design System Tokens --- */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-300: #64B5F6;
+      --color-primary-700: #1976D2;
+      --color-primary-800: #1565C0;
+
+      --color-neutrals-white: #FFFFFF;
+      --color-neutrals-gray-50: #F8F9FA;
+      --color-neutrals-gray-100: #F1F3F5;
+      --color-neutrals-gray-200: #E9ECEF;
+      --color-neutrals-gray-400: #CED4DA;
+      --color-neutrals-gray-500: #ADB5BD;
+      --color-neutrals-gray-600: #6C757D;
+      --color-neutrals-gray-900: #212529;
+
+      /* Typography */
+      --font-family-primary: 'Inter', sans-serif;
+      --font-size-body: 1rem;
+      --font-size-caption: 0.875rem;
+      --font-weight-regular: 400;
+      --font-weight-semibold: 600;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+
+      /* Borders & Shadows */
+      --border-radius-md: 8px;
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* --- Base & Showcase Styles --- */
+    body {
+      font-family: var(--font-family-primary);
+      background-color: var(--color-neutrals-gray-200);
+      padding: var(--space-4);
+    }
+
+    .showcase {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: var(--color-neutrals-white);
+      padding: var(--space-4);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+    }
+
+    .showcase h1 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-2);
+    }
+    .showcase h2 {
+      font-size: 1.1rem;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutrals-gray-600);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-neutrals-gray-200);
+    }
+    
+    .notification-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid var(--color-neutrals-gray-200);
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+    }
+
+    .notification-list > li + li {
+        border-top: 1px solid var(--color-neutrals-gray-200);
+    }
+
+
+    /* --- Atomic Dependency: Avatar --- */
+    .avatar {
+      display: inline-block;
+      flex-shrink: 0;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: var(--color-neutrals-gray-200);
+    }
+
+    .avatar--md {
+      width: 48px;
+      height: 48px;
+    }
+    
+    /* --- Atomic Dependency: Button (for connection request variant) --- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); border-radius: var(--border-radius-md); font-weight: var(--font-weight-semibold); text-decoration: none; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+    .btn:focus-visible { outline: 2px solid var(--color-primary-300); outline-offset: 2px; }
+    .btn--primary { background-color: var(--color-primary-700); color: var(--color-neutrals-white); }
+    .btn--primary:hover { background-color: var(--color-primary-800); }
+    .btn--secondary { background-color: transparent; color: var(--color-primary-700); border-color: var(--color-primary-700); }
+    .btn--secondary:hover { background-color: var(--color-primary-50); }
+
+    /* --- NotificationItem Component CSS --- */
+    .notification-item {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      padding: var(--space-3);
+      position: relative;
+      transition: background-color 0.2s ease;
+    }
+
+    .notification-item:hover {
+      background-color: var(--color-neutrals-gray-100);
+    }
+
+    .notification-item:focus-visible {
+      outline: 2px solid var(--color-primary-300);
+      outline-offset: -2px;
+      background-color: var(--color-primary-50);
+    }
+
+    .notification-item__wrapper {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .notification-item__avatar {
+      flex-shrink: 0;
+    }
+
+    .notification-item__content {
+      flex-grow: 1;
+      /* For text truncation */
+      min-width: 0;
+    }
+
+    .notification-item__text {
+      font-size: var(--font-size-body);
+      line-height: 1.5;
+      color: var(--color-neutrals-gray-900);
+    }
+
+    .notification-item__text strong {
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .notification-item__timestamp {
+      display: block;
+      font-size: var(--font-size-caption);
+      color: var(--color-neutrals-gray-600);
+      margin-top: var(--space-1);
+    }
+    
+    .notification-item__actions {
+        margin-top: var(--space-3);
+        display: flex;
+        gap: var(--space-2);
+    }
+
+    .notification-item__unread-dot {
+      position: absolute;
+      top: 50%;
+      right: var(--space-3);
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--color-primary-700);
+      display: none;
+    }
+
+    /* States */
+    .notification-item--unread {
+      background-color: var(--color-primary-50);
+    }
+
+    .notification-item--unread .notification-item__unread-dot {
+      display: block;
+    }
+    
+    .notification-item--unread:hover {
+        background-color: #dbeeff; /* A slightly darker shade of primary-50 */
+    }
+
+    /* Variants (Styling for embedded buttons in request variant) */
+    .notification-item__actions .btn--sm {
+        padding: 6px 12px;
+        font-size: var(--font-size-caption);
+        min-height: 32px;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase">
+    <h1>Notification Item</h1>
+    <p>A single item within a notification list. It can display different types of content and has a distinct 'unread' state.</p>
+
+    <h2>Unread Notifications</h2>
+    <ul class="notification-list">
+      <!-- Variant: Connection Request -->
+      <li class="notification-item notification-item--unread">
+        <a href="#link-to-request" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=john.doe" alt="Profile picture of John Doe">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <span class="sr-only">(Unread)</span>
+                <strong>John Doe</strong> sent you a connection request.
+              </p>
+              <span class="notification-item__timestamp">2m ago</span>
+              <div class="notification-item__actions">
+                <button type="button" class="btn btn--primary btn--sm">Accept</button>
+                <button type="button" class="btn btn--secondary btn--sm">Decline</button>
+              </div>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>
+      
+      <!-- Variant: Reaction -->
+      <li class="notification-item notification-item--unread">
+        <a href="#link-to-post-reaction" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=jane.smith" alt="Profile picture of Jane Smith">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <span class="sr-only">(Unread)</span>
+                <strong>Jane Smith and 3 others</strong> liked your post.
+              </p>
+              <span class="notification-item__timestamp">15m ago</span>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>
+    </ul>
+
+    <h2 style="margin-top: 24px;">Read Notifications</h2>
+    <ul class="notification-list">
+      <!-- Variant: Comment -->
+      <li class="notification-item">
+        <a href="#link-to-comment" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=samuel.green" alt="Profile picture of Samuel Green">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <strong>Samuel Green</strong> commented on your post: "This is a great insight, thanks for sharing!"
+              </p>
+              <span class="notification-item__timestamp">1h ago</span>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>
+      <!-- Variant: Connection Accepted -->
+      <li class="notification-item">
+        <a href="#link-to-profile" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=emily.white" alt="Profile picture of Emily White">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <strong>Emily White</strong> accepted your connection request.
+              </p>
+              <span class="notification-item__timestamp">Yesterday</span>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>
+    </ul>
+  </div>
+
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : "connection_request"<h3>
+		<!--description--><normal> Displays a new connection request with primary actions to 'Accept' or 'Decline'. </normal>
+		<!-- vrient 1 html -->
+        <li class="notification-item notification-item--unread">
+        <a href="#link-to-request" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=john.doe" alt="Profile picture of John Doe">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <span class="sr-only">(Unread)</span>
+                <strong>John Doe</strong> sent you a connection request.
+              </p>
+              <span class="notification-item__timestamp">2m ago</span>
+              <div class="notification-item__actions">
+                <button type="button" class="btn btn--primary btn--sm">Accept</button>
+                <button type="button" class="btn btn--secondary btn--sm">Decline</button>
+              </div>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>"     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "reaction"<h3>
+		<!--description--><normal> Notifies the user about reactions to their content. It can be batched to aggregate multiple reactions. </normal>
+		<!-- vrient 1 html -->
+        <li class="notification-item notification-item--unread">
+        <a href="#link-to-post-reaction" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=jane.smith" alt="Profile picture of Jane Smith">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <span class="sr-only">(Unread)</span>
+                <strong>Jane Smith and 3 others</strong> liked your post.
+              </p>
+              <span class="notification-item__timestamp">15m ago</span>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>"     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : "comment"<h3>
+		<!--description--><normal> Notifies the user about a new comment on their content, often including a preview of the comment text. </normal>
+		<!-- vrient 1 html -->
+        <li class="notification-item">
+        <a href="#link-to-comment" class="notification-item__link">
+          <div class="notification-item__wrapper">
+            <div class="notification-item__avatar">
+              <img class="avatar avatar--md" src="https://i.pravatar.cc/48?u=samuel.green" alt="Profile picture of Samuel Green">
+            </div>
+            <div class="notification-item__content">
+              <p class="notification-item__text">
+                <strong>Samuel Green</strong> commented on your post: "This is a great insight, thanks for sharing!"
+              </p>
+              <span class="notification-item__timestamp">1h ago</span>
+            </div>
+          </div>
+        </a>
+        <div class="notification-item__unread-dot"></div>
+      </li>"     
+		
+      <div>
+	 </div>    
+	
+	</body>
+</html>

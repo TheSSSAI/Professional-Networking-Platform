@@ -1,0 +1,41 @@
+# prometheus/rules/database.rules.yml
+#
+# Alerting rules for the primary PostgreSQL database (AWS RDS).
+# These rules monitor the health of the core data store.
+# Assumes metrics are available from an exporter (e.g., pg_exporter or CloudWatch exporter).
+
+groups:
+  - name: database-alerts
+    rules:
+      - alert: PostgresHighCpuUtilization
+        # This alert fires if the database CPU utilization is consistently high.
+        # Assumes a metric like 'aws_rds_cpuutilization_average'.
+        expr: avg by (dbinstance_identifier) (aws_rds_cpuutilization_average) > 90
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High CPU utilization on PostgreSQL instance {{ $labels.dbinstance_identifier }}"
+          description: "The database instance {{ $labels.dbinstance_identifier }} has had over 90% CPU utilization for 15 minutes. Current value is {{ $value | printf \"%.2f\" }}%."
+
+      - alert: PostgresLowFreeStorage
+        # This alert fires when the database is running out of storage space.
+        # Assumes a metric like 'aws_rds_free_storage_space_average'.
+        expr: aws_rds_free_storage_space_average / 1024 / 1024 / 1024 < 10
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low free storage on PostgreSQL instance {{ $labels.dbinstance_identifier }}"
+          description: "The database instance {{ $labels.dbinstance_identifier }} has less than 10GB of free storage space. Current value is {{ $value | printf \"%.2f\" }} GB."
+
+      - alert: PostgresHighReplicationLag
+        # This alert fires if the read replica lag is too high, indicating issues with replication.
+        # Assumes a metric like 'aws_rds_replica_lag_average'.
+        expr: aws_rds_replica_lag_average > 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High replication lag on PostgreSQL instance {{ $labels.dbinstance_identifier }}"
+          description: "The database read replica for {{ $labels.dbinstance_identifier }} is lagging by more than 5 minutes. Current lag is {{ $value | printf \"%.2f\" }} seconds."

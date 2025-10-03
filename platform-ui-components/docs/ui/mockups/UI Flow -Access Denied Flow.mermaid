@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor User
+    participant FrontendSPA as "Frontend (SPA)"
+    participant APIGateway as "API Gateway"
+    participant BackendService as "Backend Service"
+
+    User->>FrontendSPA: 1. Navigates to protected route (e.g., /admin)
+
+    activate FrontendSPA
+    FrontendSPA->>APIGateway: 2. Requests page data (GET /api/admin/data) with JWT
+    deactivate FrontendSPA
+
+    activate APIGateway
+    APIGateway->>APIGateway: 2a. Validates JWT signature & expiry (Authentication SUCCESS)
+    APIGateway->>BackendService: 3. Forwards request with user claims (e.g., role: 'user')
+    deactivate APIGateway
+
+    activate BackendService
+    BackendService->>BackendService: 4. Checks user claims for required 'Administrator' role
+    note over BackendService: Authorization Fails: User lacks required role.
+    BackendService-->>APIGateway: 5. Returns 403 Forbidden error
+    deactivate BackendService
+
+    activate APIGateway
+    APIGateway-->>FrontendSPA: 6. Relays 403 Forbidden response
+    deactivate APIGateway
+
+    activate FrontendSPA
+    FrontendSPA->>FrontendSPA: 7. Intercepts 403 error, triggers redirect to /access-denied
+    FrontendSPA-->>User: 8. Displays 'Access Denied' page
+    deactivate FrontendSPA

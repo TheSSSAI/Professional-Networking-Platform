@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Component: UserMenu</title>
+  <style>
+    /* CSS Reset & Basic Setup */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background-color: var(--color-neutral-100); color: var(--color-neutral-900); }
+    h1, h2, h3, h4, p { margin: 0; }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-500: #2196F3;
+      --color-primary-700: #1976D2;
+      --color-danger-100: #FFEBEE;
+      --color-danger-500: #D32F2F;
+      --color-danger-600: #C62828;
+      --color-neutral-900: #212529;
+      --color-neutral-700: #495057;
+      --color-neutral-500: #ADB5BD;
+      --color-neutral-200: #E9ECEF;
+      --color-neutral-100: #F8F9FA;
+      --color-white: #FFFFFF;
+      
+      /* Spacing */
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+
+      /* Typography */
+      --font-size-sm: 14px;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+
+      /* Borders & Shadows */
+      --border-radius-lg: 8px;
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+
+    /* Showcase Layout */
+    .showcase { padding: 40px; background-color: var(--color-neutral-100); }
+    .showcase-header { text-align: center; margin-bottom: 40px; }
+    .showcase-header h1 { font-size: 2.5rem; color: var(--color-neutral-900); }
+    .showcase-header p { font-size: 1.1rem; color: var(--color-neutral-700); }
+    .component-display { display: flex; justify-content: center; align-items: flex-start; gap: 80px; padding: 60px 20px; background-color: #e3f2fd; border-radius: var(--border-radius-lg); min-height: 350px; }
+    .state-container { text-align: center; }
+    .state-container h3 { font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); margin-bottom: 24px; }
+
+    /* Generic Icon Style */
+    .icon {
+      width: 1.25em;
+      height: 1.25em;
+      stroke-width: 1.5;
+      stroke: currentColor;
+      fill: none;
+      vertical-align: middle;
+    }
+
+    /* Component: UserMenu */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-menu__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+      padding: 0;
+      border: 2px solid transparent;
+      background-color: transparent;
+      transition: border-color 0.2s ease;
+    }
+
+    .user-menu__trigger::-webkit-details-marker {
+      display: none;
+    }
+
+    .user-menu__trigger:focus-visible {
+      outline: none;
+      border-color: var(--color-primary-500);
+      box-shadow: var(--focus-ring);
+    }
+
+    .user-menu__avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--color-primary-700);
+      color: var(--color-white);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .user-menu__dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 280px;
+      background-color: var(--color-white);
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--color-neutral-200);
+      overflow: hidden;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+        .user-menu__dropdown {
+            transition: none;
+        }
+    }
+
+    details[open] > .user-menu__dropdown {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .user-menu__header {
+      padding: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+
+    .user-menu__header .user-menu__avatar {
+      width: 48px;
+      height: 48px;
+    }
+
+    .user-menu__info {
+      overflow: hidden;
+    }
+
+    .user-menu__name {
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-menu__email {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-500);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-menu__nav {
+      padding: var(--spacing-sm) 0;
+    }
+
+    .user-menu__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .user-menu__link {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      text-decoration: none;
+      color: var(--color-neutral-700);
+      font-weight: var(--font-weight-medium);
+      transition: background-color 0.2s ease;
+    }
+
+    .user-menu__link .icon {
+      color: var(--color-neutral-500);
+      width: 20px;
+      height: 20px;
+    }
+
+    .user-menu__link:hover,
+    .user-menu__link:focus-visible {
+      background-color: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+      outline: none;
+    }
+
+    .user-menu__separator {
+      border: none;
+      border-top: 1px solid var(--color-neutral-200);
+      margin: var(--spacing-sm) 0;
+    }
+
+    .user-menu__link--danger:hover,
+    .user-menu__link--danger:focus-visible {
+      background-color: var(--color-danger-100);
+      color: var(--color-danger-600);
+    }
+
+    .user-menu__link--danger .icon {
+        color: var(--color-danger-500);
+    }
+    
+    .user-menu__link--danger:hover .icon,
+    .user-menu__link--danger:focus-visible .icon {
+        color: var(--color-danger-600);
+    }
+  </style>
+</head>
+<body>
+  <div class="showcase">
+    <div class="showcase-header">
+      <h1>User Menu</h1>
+      <p>A molecular component for user-specific navigation and actions.</p>
+    </div>
+    <div class="component-display">
+      <div class="state-container">
+        <h3>Closed State (Default)</h3>
+        <!-- UserMenu Component Implementation: Closed -->
+        <details class="user-menu">
+          <summary class="user-menu__trigger" aria-label="Open user menu">
+            <img class="user-menu__avatar" src="https://i.pravatar.cc/80?u=jane_doe" alt="Jane Doe's profile picture">
+          </summary>
+          <div class="user-menu__dropdown">
+            <div class="user-menu__header">
+              <img class="user-menu__avatar" src="https://i.pravatar.cc/96?u=jane_doe" alt="">
+              <div class="user-menu__info">
+                <div class="user-menu__name">Jane Doe</div>
+                <div class="user-menu__email">jane.doe@example.com</div>
+              </div>
+            </div>
+            <nav class="user-menu__nav">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                    <span>View Profile</span>
+                  </a>
+                </li>
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                    <span>Settings</span>
+                  </a>
+                </li>
+              </ul>
+              <hr class="user-menu__separator">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link user-menu__link--danger">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                    <span>Log Out</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </details>
+      </div>
+
+      <div class="state-container">
+        <h3>Open State</h3>
+        <!-- UserMenu Component Implementation: Open -->
+        <details class="user-menu" open>
+          <summary class="user-menu__trigger" aria-label="Close user menu">
+            <img class="user-menu__avatar" src="https://i.pravatar.cc/80?u=jane_doe" alt="Jane Doe's profile picture">
+          </summary>
+          <div class="user-menu__dropdown">
+            <div class="user-menu__header">
+              <img class="user-menu__avatar" src="https://i.pravatar.cc/96?u=jane_doe" alt="">
+              <div class="user-menu__info">
+                <div class="user-menu__name">Jane Doe</div>
+                <div class="user-menu__email">jane.doe.very.long.email@example.com</div>
+              </div>
+            </div>
+            <nav class="user-menu__nav">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                    <span>View Profile</span>
+                  </a>
+                </li>
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                    <span>Settings</span>
+                  </a>
+                </li>
+              </ul>
+              <hr class="user-menu__separator">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link user-menu__link--danger">
+                    <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                    <span>Log Out</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : default<h3>
+		<normal> Standard UserMenu component implementation. </normal>
+		        <details class="user-menu">
+          <summary class="user-menu__trigger" aria-label="Open user menu">
+            <img class="user-menu__avatar" src="https://i.pravatar.cc/80?u=jane_doe" alt="Jane Doe's profile picture">
+          </summary>
+          <div class="user-menu__dropdown">
+            <div class="user-menu__header">
+              <img class="user-menu__avatar" src="https://i.pravatar.cc/96?u=jane_doe" alt="">
+              <div class="user-menu__info">
+                <div class="user-menu__name">Jane Doe</div>
+                <div class="user-menu__email">jane.doe@example.com</div>
+              </div>
+            </div>
+            <nav class="user-menu__nav">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                    <span>View Profile</span>
+                  </a>
+                </li>
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+                    <span>Settings</span>
+                  </a>
+                </li>
+              </ul>
+              <hr class="user-menu__separator">
+              <ul class="user-menu__list">
+                <li class="user-menu__item">
+                  <a href="#" class="user-menu__link user-menu__link--danger">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+                    <span>Log Out</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </details>     
+		
+      <div>
+	 </div></body>
+</html>

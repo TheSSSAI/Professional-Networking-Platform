@@ -1,0 +1,2 @@
+"total_stories","total_story_points","must_have_stories","should_have_stories","could_have_stories","epics_identified","estimated_sprints","key_dependencies"
+"7","34","4","2","0","[""Core Authentication & User Lifecycle"",""Account Recovery & Security"",""Infrastructure, CI/CD, and Observability""]","5","[""AWS SES Integration"",""Redis Infrastructure"",""Event Bus Infrastructure""]"

@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph Phase 1: Password Validation
+        A[User submits Email + Password] --> B(API: Identity Service Receives Credentials)
+        B --> C{Password Valid?}
+        C -->|No| D[Return 401: Invalid Credentials]
+        C -->|Yes| E{MFA Enabled for User?}
+    end
+
+    subgraph Phase 2: MFA Code Validation
+        E -->|No| F[Issue Access & Refresh Tokens]
+        E -->|Yes| G(Generate & Return temp 'mfaSessionToken')
+        G --> H[Client prompts for 6-digit MFA Code]
+        H --> I[User submits MFA Code]
+        I --> J(API: Identity Service receives Code + 'mfaSessionToken')
+        J --> K{MFA Code Valid?}
+    end
+
+    subgraph Outcomes
+        F --> Z[Redirect to Dashboard]
+        K -->|Yes| F
+        K -->|No| L[Increment Failure Count]
+        L --> M{Attempts > 5?}
+        M -->|No| N[Return Error: Invalid Code]
+        M -->|Yes| O[Lock Account for 15 mins]
+        O --> P[Return Error: Account Locked]
+        N --> H
+    end
+
+    D -.-> X(END)
+    P -.-> X
+    Z -.-> X
+
+    %% Styling
+    classDef process fill:#e3f2fd,stroke:#2196f3,color:#000
+    classDef decision fill:#fff9c4,stroke:#fbc02d,color:#000
+    classDef error fill:#ffebee,stroke:#d32f2f,color:#000
+    classDef success fill:#e8f5e9,stroke:#388e3c,color:#000
+
+    class A,B,G,H,I,J,L,O process
+    class C,E,K,M decision
+    class D,N,P error
+    class F,Z success

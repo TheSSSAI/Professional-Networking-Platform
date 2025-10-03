@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organism Component: DataTable</title>
+  <style>
+    /* CSS Reset & Basic Setup */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background-color: #F8F9FA; color: #212529; }
+    h1, h2, h3, h4, p { margin: 0; }
+
+    /* Design System Tokens */
+    :root {
+      /* Colors */
+      --color-primary-50: #E3F2FD;
+      --color-primary-100": "#BBDEFB";
+      --color-primary-500": "#2196F3";
+      --color-primary-700": "#1976D2";
+      --color-success-500": "#2E7D32";
+      --color-warning-500": "#ED6C02";
+      --color-error-500": "#D32F2F";
+      --color-info-500": "#0288D1";
+      --color-white": "#FFFFFF";
+      --color-neutral-50": "#F8F9FA";
+      --color-neutral-100": "#F1F3F5";
+      --color-neutral-200": "#E9ECEF";
+      --color-neutral-300": "#DEE2E6";
+      --color-neutral-500": "#ADB5BD";
+      --color-neutral-600": "#6C757D";
+      --color-neutral-700": "#495057";
+      --color-neutral-900": "#212529";
+      --color-danger-100": "#FFEBEE";
+      --color-danger-500": "#D32F2F";
+      --color-danger-600": "#C62828";
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-2xl: 48px;
+
+      /* Typography */
+      --font-size-sm: 12px;
+      --font-size-body": 14px;
+      --font-size-lg": 16px;
+      --font-size-xl": 24px;
+      --font-weight-medium": 500;
+      --font-weight-semibold": 600;
+
+      /* Borders & Shadows */
+      --border-radius-sm: 4px;
+      --border-radius-md: 6px;
+      --border-radius-lg: 8px;
+      --focus-ring: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+    
+    /* Showcase Layout */
+    .showcase { max-width: 1200px; margin: 0 auto; padding: var(--spacing-2xl) var(--spacing-lg); }
+    .showcase-section { margin-bottom: var(--spacing-2xl); }
+    .showcase-section h2 { font-size: 28px; font-weight: 700; color: var(--color-neutral-900); margin-bottom: var(--spacing-lg); }
+
+    /* Dependent Atomic/Molecular Component Styles */
+
+    /* PageHeader */
+    .page-header { display: flex; flex-direction: column; gap: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--color-neutral-200); margin-bottom: var(--spacing-lg); }
+    .page-header__title { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); color: var(--color-neutral-900); }
+    @media (min-width: 768px) { .page-header { flex-direction: row; align-items: center; justify-content: space-between; } }
+    
+    /* Badge */
+    .badge { display: inline-block; padding: var(--spacing-xs) var(--spacing-sm); font-size: 12px; font-weight: var(--font-weight-medium); border-radius: 12px; white-space: nowrap; }
+    .badge--warning { background-color: #FFFBEB; color: #B45309; }
+    .badge--neutral { background-color: var(--color-neutral-100); color: var(--color-neutral-600); }
+
+    /* ModerationActionMenu (Simplified) */
+    .action-menu-trigger { background: none; border: none; cursor: pointer; padding: var(--spacing-sm); border-radius: 50%; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-neutral-500); }
+    .action-menu-trigger:hover { background-color: var(--color-neutral-200); }
+    .action-menu-trigger:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    /* PaginationControls (Simplified) */
+    .pagination { display: flex; align-items: center; justify-content: center; }
+    .pagination__list { list-style: none; display: flex; margin: 0; padding: 0; gap: var(--spacing-xs); }
+    .pagination__item a, .pagination__item span { display: flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 var(--spacing-sm); border: 1px solid var(--color-neutral-300); background-color: var(--color-white); color: var(--color-neutral-700); border-radius: var(--border-radius-md); text-decoration: none; font-weight: var(--font-weight-medium); }
+    .pagination__item a:hover { background-color: var(--color-neutral-100); }
+    .pagination__item--active span { background-color: var(--color-primary-50); border-color: var(--color-primary-500); color: var(--color-primary-700); }
+    .pagination__item--disabled span { background-color: var(--color-neutral-100); color: var(--color-neutral-500); cursor: not-allowed; }
+    
+    /* Alert */
+    .alert { display: flex; align-items: flex-start; padding: var(--spacing-md); border-radius: var(--border-radius-md); border: 1px solid var(--color-danger-500); background-color: var(--color-danger-100); }
+    .alert__icon { flex-shrink: 0; margin-right: var(--spacing-md); color: var(--color-danger-500); }
+    .alert__title { font-weight: var(--font-weight-semibold); color: var(--color-danger-600); }
+    
+    /* SkeletonLoader */
+    .skeleton { background-color: var(--color-neutral-200); position: relative; overflow: hidden; }
+    .skeleton::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; transform: translateX(-100%); background-image: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.4) 50%, transparent 100%); animation: shimmer 1.5s infinite; }
+    .skeleton--text { height: 1em; border-radius: var(--border-radius-sm); }
+    .skeleton--circle { border-radius: 50%; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    /* DataTable Organism CSS */
+    .data-table-container { background-color: var(--color-white); border: 1px solid var(--color-neutral-200); border-radius: var(--border-radius-lg); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .data-table__scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: left; }
+    .data-table thead th { background-color: var(--color-neutral-50); color: var(--color-neutral-600); padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--color-neutral-200); white-space: nowrap; }
+    .data-table tbody tr { border-bottom: 1px solid var(--color-neutral-200); transition: background-color 0.15s ease-in-out; }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background-color: var(--color-primary-50); }
+    .data-table tbody td { padding: var(--spacing-md); font-size: var(--font-size-body); color: var(--color-neutral-700); vertical-align: middle; }
+    .data-table .user-cell { display: flex; align-items: center; gap: var(--spacing-sm); }
+    .data-table .user-cell img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .data-table .user-cell__name { font-weight: var(--font-weight-medium); color: var(--color-neutral-900); }
+    .data-table .user-cell__subtext { font-size: var(--font-size-sm); color: var(--color-neutral-500); }
+    .data-table__footer { padding: var(--spacing-md); border-top: 1px solid var(--color-neutral-200); background-color: var(--color-neutral-50); }
+    .data-table__empty-state { text-align: center; padding: var(--spacing-xl) var(--spacing-md); color: var(--color-neutral-500); }
+    .data-table__empty-state .icon { width: 48px; height: 48px; margin-bottom: var(--spacing-md); color: var(--color-neutral-300); }
+    .data-table__empty-state h3 { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-neutral-700); margin-bottom: var(--spacing-xs); }
+    .data-table__error-state { padding: var(--spacing-xl) var(--spacing-md); }
+    .data-table tbody tr.skeleton-row td { padding: var(--spacing-md); }
+  </style>
+</head>
+<body>
+
+<main class="showcase">
+  <!-- LOADED STATE - MODERATION QUEUE VARIANT -->
+  <section class="showcase-section">
+    <h2>Loaded State - Moderation Queue</h2>
+    <div class="data-table-container">
+      <div class="page-header" style="margin: 0; padding: 16px; border: none;">
+        <h1 class="page-header__title" style="font-size: 20px;">Reported Content</h1>
+      </div>
+      <div class="data-table__scroll-wrapper">
+        <table class="data-table" aria-label="Content Moderation Queue">
+          <thead>
+            <tr>
+              <th scope="col">Content Preview</th>
+              <th scope="col">Author</th>
+              <th scope="col">Reporter</th>
+              <th scope="col">Reason</th>
+              <th scope="col">Date</th>
+              <th scope="col" style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"This is a major breakthrough in AI ethics that..."</td>
+              <td>
+                <div class="user-cell">
+                  <img src="https://i.pravatar.cc/36?u=author1" alt="">
+                  <div>
+                    <div class="user-cell__name">John Doe</div>
+                    <div class="user-cell__subtext">john.doe@example.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="user-cell">
+                  <img src="https://i.pravatar.cc/36?u=reporter1" alt="">
+                  <div class="user-cell__name">Jane Smith</div>
+                </div>
+              </td>
+              <td><span class="badge badge--warning">Spam</span></td>
+              <td>2025-01-20 14:30 UTC</td>
+              <td style="text-align: right;">
+                <button class="action-menu-trigger" aria-label="Actions for post by John Doe">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                </button>
+              </td>
+            </tr>
+            <!-- More rows -->
+            <tr>
+              <td>"Excited to announce our Series B funding round..."</td>
+              <td>
+                <div class="user-cell">
+                  <img src="https://i.pravatar.cc/36?u=author2" alt="">
+                  <div>
+                    <div class="user-cell__name">Alice Johnson</div>
+                    <div class="user-cell__subtext">alice.j@example.com</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="user-cell">
+                  <img src="https://i.pravatar.cc/36?u=reporter2" alt="">
+                  <div class="user-cell__name">Bob Williams</div>
+                </div>
+              </td>
+              <td><span class="badge badge--warning">Misinformation</span></td>
+              <td>2025-01-20 11:15 UTC</td>
+              <td style="text-align: right;">
+                 <button class="action-menu-trigger" aria-label="Actions for post by Alice Johnson">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                 </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="data-table__footer">
+        <nav class="pagination" aria-label="Pagination">
+          <ul class="pagination__list">
+              <li class="pagination__item pagination__item--disabled"><span>&laquo;</span></li>
+              <li class="pagination__item pagination__item--active"><span>1</span></li>
+              <li class="pagination__item"><a href="#">2</a></li>
+              <li class="pagination__item"><a href="#">&raquo;</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADING STATE -->
+  <section class="showcase-section">
+    <h2>Loading State</h2>
+    <div class="data-table-container">
+      <div class="page-header" style="margin: 0; padding: 16px; border: none;">
+        <h1 class="page-header__title" style="font-size: 20px;">Reported Content</h1>
+      </div>
+      <div class="data-table__scroll-wrapper">
+        <table class="data-table" aria-label="Loading content moderation queue">
+          <thead>
+            <tr>
+              <th scope="col">Content Preview</th>
+              <th scope="col">Author</th>
+              <th scope="col">Reporter</th>
+              <th scope="col">Reason</th>
+              <th scope="col">Date</th>
+              <th scope="col" style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody aria-busy="true">
+            <tr class="skeleton-row" v-for="i in 3">
+              <td><div class="skeleton skeleton--text" style="width: 80%;"></div></td>
+              <td>
+                <div class="user-cell">
+                  <div class="skeleton skeleton--circle" style="width: 36px; height: 36px;"></div>
+                  <div style="flex: 1">
+                    <div class="skeleton skeleton--text" style="width: 70%; margin-bottom: 4px;"></div>
+                    <div class="skeleton skeleton--text" style="width: 100%;"></div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="skeleton skeleton--text" style="width: 60%;"></div></td>
+              <td><div class="skeleton skeleton--text" style="width: 40px;"></div></td>
+              <td><div class="skeleton skeleton--text" style="width: 100px;"></div></td>
+              <td style="text-align: right;"><div class="skeleton skeleton--circle" style="width: 36px; height: 36px; display: inline-block;"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><div class="skeleton skeleton--text" style="width: 70%;"></div></td>
+              <td>
+                <div class="user-cell">
+                  <div class="skeleton skeleton--circle" style="width: 36px; height: 36px;"></div>
+                  <div style="flex: 1">
+                    <div class="skeleton skeleton--text" style="width: 80%; margin-bottom: 4px;"></div>
+                    <div class="skeleton skeleton--text" style="width: 90%;"></div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="skeleton skeleton--text" style="width: 50%;"></div></td>
+              <td><div class="skeleton skeleton--text" style="width: 50px;"></div></td>
+              <td><div class="skeleton skeleton--text" style="width: 110px;"></div></td>
+              <td style="text-align: right;"><div class="skeleton skeleton--circle" style="width: 36px; height: 36px; display: inline-block;"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="data-table__footer">
+        <nav class="pagination" aria-label="Pagination is loading">
+          <ul class="pagination__list">
+            <li class="pagination__item pagination__item--disabled"><span>&laquo;</span></li>
+            <li class="pagination__item pagination__item--active"><span>1</span></li>
+            <li class="pagination__item pagination__item--disabled"><span>&raquo;</span></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </section>
+  
+  <!-- EMPTY STATE -->
+  <section class="showcase-section">
+    <h2>Empty State</h2>
+    <div class="data-table-container">
+      <div class="page-header" style="margin: 0; padding: 16px; border: none;">
+        <h1 class="page-header__title" style="font-size: 20px;">User List</h1>
+      </div>
+      <div class="data-table__empty-state">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.5 4.5 0 0 0 18 12.75a4.5 4.5 0 0 0-2.818-4.062M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75c0-.414.168-.75.375-.75S9.75 9.336 9.75 9.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75c0-.414.168-.75.375-.75s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" /></svg>
+        <h3>No Users Found</h3>
+        <p>There are no users matching your current criteria.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ERROR STATE -->
+  <section class="showcase-section">
+    <h2>Error State</h2>
+    <div class="data-table-container">
+      <div class="page-header" style="margin: 0; padding: 16px; border: none;">
+        <h1 class="page-header__title" style="font-size: 20px;">Audit Log</h1>
+      </div>
+      <div class="data-table__error-state">
+        <div class="alert alert--error" role="alert">
+          <span class="alert__icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></span>
+          <div>
+            <p class="alert__title">Failed to load data</p>
+            <p>There was an error retrieving the audit log. Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+	
+	<div> <h2> Component Variations</h2>
+      <div>
+        <h3>Variant Name : moderation_queue<h3>
+		<!--description--><normal> Displays a list of user-reported content for review by administrators. </normal>
+		<!-- vrient 1 html -->
+        <div class="data-table-container">
+            <div class="data-table__scroll-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Content Preview</th>
+                            <th scope="col">Author</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"This is a major breakthrough..."</td>
+                            <td>John Doe</td>
+                            <td><span class="badge badge--warning">Spam</span></td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : user_list<h3>
+		<!--description--><normal> Displays a filterable, sortable list of all users on the platform for administrative purposes. </normal>
+		<!-- vrient 1 html -->
+        <div class="data-table-container">
+            <div class="data-table__scroll-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>jane.s@example.com</td>
+                            <td><span class="badge badge--neutral">Active</span></td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+      <div>
+        <h3>Variant Name : audit_log<h3>
+		<!--description--><normal> Displays a chronological, immutable log of all actions performed by administrators for compliance and security review. </normal>
+		<!-- vrient 1 html -->
+        <div class="data-table-container">
+            <div class="data-table__scroll-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">Administrator</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025-01-20 14:30 UTC</td>
+                            <td>admin@platform.com</td>
+                            <td>BANNED_USER</td>
+                            <td>User ID: 12345</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>     
+		
+      <div>
+	 </div>
+</body>
+</html>

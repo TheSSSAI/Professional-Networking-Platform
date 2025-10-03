@@ -1,0 +1,56 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Model for storing comments on posts, as per REQ-1-022 and REQ-1-025.
+// This entity is owned by the Engagement Service.
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.VarChar(1500) // Enforces character limit from REQ-1-022
+  authorId  String   @db.Uuid // Foreign key to a User in the Identity service
+  postId    String   @db.Uuid // Foreign key to a Post in the Posts service
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Index for efficiently fetching comments for a post, sorted by creation date.
+  @@index([postId, createdAt(sort: Desc)])
+  // Index for fetching all comments by a user.
+  @@index([authorId])
+}
+
+// Model for storing reactions (e.g., 'Like') on posts, as per REQ-1-021.
+// This entity is owned by the Engagement Service to handle high-volume interactions.
+model PostReaction {
+  id           String   @id @default(uuid())
+  reactionType String   @db.VarChar(50) // e.g., "LIKE", allows for future reaction types
+  userId       String   @db.Uuid // Foreign key to a User in the Identity service
+  postId       String   @db.Uuid // Foreign key to a Post in the Posts service
+  createdAt    DateTime @default(now())
+
+  // Ensures a user can only have one reaction per post, a key business rule from REQ-1-021.
+  @@unique([userId, postId])
+  // Index for efficiently counting or fetching all reactions for a given post.
+  @@index([postId])
+}
+
+// Model for storing skill endorsements, as per REQ-1-011.
+// This entity is owned by the Engagement Service.
+model SkillEndorsement {
+  id             String   @id @default(uuid())
+  endorserId     String   @db.Uuid // The user giving the endorsement
+  endorsedUserId String   @db.Uuid // The user whose skill is being endorsed
+  skillId        String   @db.Uuid // The specific skill being endorsed
+  createdAt      DateTime @default(now())
+
+  // Ensures a user can only endorse a specific skill for another user once.
+  @@unique([endorserId, endorsedUserId, skillId])
+  // Index for efficiently fetching all endorsements for a user's skill.
+  @@index([endorsedUserId, skillId])
+  // Index for fetching all endorsements given by a user.
+  @@index([endorserId])
+}
