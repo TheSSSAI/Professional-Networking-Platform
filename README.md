@@ -22,60 +22,41 @@
 
 # REPOSITORY DOCUMENTS
 
-[ ## Repository : platform-admin-ui](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-admin-ui/docs)
+[## Repository : platform-admin-ui](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-admin-ui/docs)
 
+[## Repository : platform-api-gateway](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-api-gateway/docs)
 
-,[ ## Repository : platform-api-gateway](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-api-gateway/docs)
+[## Repository : platform-contracts](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-contracts/docs)
 
+[## Repository : platform-core-libs](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-core-libs/docs)
 
-,[ ## Repository : platform-contracts](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-contracts/docs)
+[## Repository : platform-infra](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-infra/docs)
 
+[## Repository : platform-observability](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-observability/docs)
 
-,[ ## Repository : platform-core-libs](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-core-libs/docs)
+[## Repository : platform-service-admin](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-admin/docs)
 
+[## Repository : platform-service-connections](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-connections/docs)
 
-,[ ## Repository : platform-infra](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-infra/docs)
+[## Repository : platform-service-engagement](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-engagement/docs)
 
+[## Repository : platform-service-feed](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-feed/docs)
 
-,[ ## Repository : platform-observability](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-observability/docs)
+[## Repository : platform-service-identity](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-identity/docs)
 
+[## Repository : platform-service-messaging](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-messaging/docs)
 
-,[ ## Repository : platform-service-admin](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-admin/docs)
+[## Repository : platform-service-notifications](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-notifications/docs)
 
+[## Repository : platform-service-posts](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-posts/docs)
 
-,[ ## Repository : platform-service-connections](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-connections/docs)
+[## Repository : platform-service-profile](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-profile/docs)
 
+[## Repository : platform-service-search](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-search/docs)
 
-,[ ## Repository : platform-service-engagement](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-engagement/docs)
+[## Repository : platform-ui-components](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-ui-components/docs)
 
-
-,[ ## Repository : platform-service-feed](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-feed/docs)
-
-
-,[ ## Repository : platform-service-identity](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-identity/docs)
-
-
-,[ ## Repository : platform-service-messaging](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-messaging/docs)
-
-
-,[ ## Repository : platform-service-notifications](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-notifications/docs)
-
-
-,[ ## Repository : platform-service-posts](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-posts/docs)
-
-
-,[ ## Repository : platform-service-profile](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-profile/docs)
-
-
-,[ ## Repository : platform-service-search](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-service-search/docs)
-
-
-,[ ## Repository : platform-ui-components](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-ui-components/docs)
-
-
-,[ ## Repository : platform-web-app](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-web-app/docs)
-
-
+[## Repository : platform-web-app](https://github.com/TheSSSAI/Professional-Networking-Platform/tree/main/platform-web-app/docs)
 
 ---
 
